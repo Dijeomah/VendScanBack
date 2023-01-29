@@ -33,7 +33,8 @@ function success($message, $data, $code = null) {
         'message' => $message,
         'data' => $data
     ];
-
+//    return response('Hello World', 200)
+//        ->header();
     return response()->json($d);
 }
 

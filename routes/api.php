@@ -1,5 +1,14 @@
 <?php
 
+    use App\Http\Controllers\Admin\Base\AdminController;
+    use App\Http\Controllers\Admin\Base\AdminProfileController;
+    use App\Http\Controllers\Admin\Business\BusinessController;
+    use App\Http\Controllers\Admin\Category\CategoryController;
+    use App\Http\Controllers\Auth\AuthController;
+    use App\Http\Controllers\HomeController;
+    use App\Http\Controllers\Vendor\FoodController;
+    use App\Http\Controllers\Vendor\VendorController;
+    use \App\Http\Controllers\Admin\Vendor\VendorController as AdminVendorController;
     use Illuminate\Support\Facades\Route;
 
     /*
@@ -13,18 +22,14 @@
     |
     */
 
-//Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-//    return $request->user();
-//});
-
     Route::group(['middleware' => 'api',], function ($router) {
         Route::group([
             'prefix' => 'auth'
-        ], function ($auth_router) {
-            Route::post('/register', [\App\Http\Controllers\Auth\AuthController::class, 'register']);
-            Route::post('/login', [\App\Http\Controllers\Auth\AuthController::class, 'login']);
-            Route::post('/logout', [\App\Http\Controllers\Auth\AuthController::class, 'logout']);
-            Route::post('/refresh', [\App\Http\Controllers\Auth\AuthController::class, 'refresh']);
+        ], function () {
+            Route::post('/register', [AuthController::class, 'register']);
+            Route::post('/login', [AuthController::class, 'login']);
+            Route::post('/logout', [AuthController::class, 'logout']);
+            Route::post('/refresh', [AuthController::class, 'refresh']);
         });
 //    creating the Admin routes
         /*
@@ -35,60 +40,58 @@
         Route::group([
             'middleware' => 'authCheck',
             'prefix' => 'admin'
-        ], function ($auth_router) {
-            Route::get('/dashboard', [\App\Http\Controllers\Admin\Base\AdminController::class, 'adminDashboard']);
+        ], function () {
+            Route::get('/dashboard', [AdminController::class, 'adminDashboard']);
+
 //          Profile Section
-            Route::get('/profile', [\App\Http\Controllers\Admin\Base\AdminProfileController::class, 'adminProfile']);
-            Route::get('/profile/edit', [\App\Http\Controllers\Admin\Base\AdminProfileController::class, 'editAdminProfile']);
+            Route::get('/profile', [AdminProfileController::class, 'adminProfile']);
+            Route::get('/profile/edit', [AdminProfileController::class, 'editAdminProfile']);
 
-
-            Route::apiResource('/vendor',\App\Http\Controllers\Admin\Vendor\VendorController::class);
+//            Vendors
+            Route::apiResource('/vendor',AdminVendorController::class);
 
 //            Business & Links
-            Route::get('/business', [\App\Http\Controllers\Admin\Business\BusinessController::class, 'getBusinesses']);
-            Route::get('/business/links', [\App\Http\Controllers\Admin\Business\BusinessController::class, 'getBusinessLinks']);
+            Route::get('/business', [BusinessController::class, 'getBusinesses']);
+            Route::get('/business/links', [BusinessController::class, 'getBusinessLinks']);
 
 //            Food
-            Route::get('/food',[\App\Http\Controllers\Admin\Food\FoodController::class, 'food']);
-            Route::post('/food/create',[\App\Http\Controllers\Admin\Food\FoodController::class,'addFood']);
-            Route::get('/food/{id}', [\App\Http\Controllers\Admin\Food\FoodController::class,'showFood']);
-            Route::get('/food/edit/{id}', [\App\Http\Controllers\Admin\Food\FoodController::class,'editFood']);
-            Route::put('/food/update/{id}', [\App\Http\Controllers\Admin\Food\FoodController::class,'updateFood']);
-            Route::delete('/food/delete/{id}', [\App\Http\Controllers\Admin\Food\FoodController::class,'deleteFood']);
-
-
+            Route::get('/food',[FoodController::class, 'food']);
+            Route::post('/food/create',[FoodController::class,'addFood']);
+            Route::get('/food/{id}', [FoodController::class,'showFood']);
+            Route::get('/food/edit/{id}', [FoodController::class,'editFood']);
+            Route::put('/food/update/{id}', [FoodController::class,'updateFood']);
+            Route::delete('/food/delete/{id}', [FoodController::class,'deleteFood']);
 
 //          Category Section
-            Route::get('/categories', [\App\Http\Controllers\Admin\Category\CategoryController::class, 'categories']);
-            Route::post('/category/create', [\App\Http\Controllers\Admin\Category\CategoryController::class, 'addCategory']);
-            Route::get('/category/show/{id}', [\App\Http\Controllers\Admin\Category\CategoryController::class, 'showCategory']);
-            Route::get('/category/edit/{id}', [\App\Http\Controllers\Admin\Category\CategoryController::class, 'editCategory']);
-            Route::put('/category/update', [\App\Http\Controllers\Admin\Category\CategoryController::class, 'updateCategory']);
-            Route::delete('/category/delete/{id}', [\App\Http\Controllers\Admin\Category\CategoryController::class, 'deleteCategory']);
-
+            Route::get('/categories', [CategoryController::class, 'categories']);
+            Route::post('/category/create', [CategoryController::class, 'addCategory']);
+            Route::get('/category/show/{id}', [CategoryController::class, 'showCategory']);
+            Route::get('/category/edit/{id}', [CategoryController::class, 'editCategory']);
+            Route::put('/category/update', [CategoryController::class, 'updateCategory']);
+            Route::delete('/category/delete/{id}', [CategoryController::class, 'deleteCategory']);
 
         });
 
         Route::group([
             'middleware' => 'vendorCheck',
             'prefix' => 'vendor'
-        ], function ($auth_router) {
-            Route::get('/dashboard', [\App\Http\Controllers\Vendor\VendorController::class, 'index']);
-            Route::get('/profile/edit', [\App\Http\Controllers\Vendor\VendorController::class, 'editProfile']);
-            Route::get('/profile/update', [\App\Http\Controllers\Vendor\VendorController::class, 'updateProfile']);
+        ], function () {
+            Route::get('/dashboard', [VendorController::class, 'index']);
+            Route::get('/profile/edit', [VendorController::class, 'editProfile']);
+            Route::put('/profile/update', [VendorController::class, 'updateProfile']);
 
-            Route::post('/business-info', [\App\Http\Controllers\Vendor\VendorController::class, 'setBusinessInfo']);
-            Route::post('/business-link', [\App\Http\Controllers\Vendor\VendorController::class, 'setBusinessLink']);
+            Route::post('/create/business-info', [VendorController::class, 'setBusinessInfo']);
+            Route::post('/create/business-link', [VendorController::class, 'setBusinessLink']);
 
             //
-            Route::get('/food', [\App\Http\Controllers\Vendor\FoodController::class, 'food']);
-            Route::post('/food/create', [\App\Http\Controllers\Vendor\FoodController::class, 'addFood']);
-            Route::get('/food/show/{id}', [\App\Http\Controllers\Vendor\FoodController::class, 'showFood']);
-            Route::get('/food/edit/{id}', [\App\Http\Controllers\Vendor\FoodController::class, 'editFood']);
-            Route::put('/food/update/{id}', [\App\Http\Controllers\Vendor\FoodController::class, 'updateFood']);
-            Route::delete('/food/delete/{id}', [\App\Http\Controllers\Vendor\FoodController::class, 'deleteFood']);
+            Route::get('/food', [FoodController::class, 'food']);
+            Route::post('/food/create', [FoodController::class, 'addFood']);
+            Route::get('/food/show/{id}', [FoodController::class, 'showFood']);
+            Route::get('/food/edit/{id}', [FoodController::class, 'editFood']);
+            Route::put('/food/update/{id}', [FoodController::class, 'updateFood']);
+            Route::delete('/food/delete/{id}', [FoodController::class, 'deleteFood']);
 
         });
-        Route::get('/qr/{vendor_link}', [\App\Http\Controllers\HomeController::class, 'vendor_site']);
+        Route::get('/qr/{vendor_link}', [HomeController::class, 'vendor_site']);
 
     });
