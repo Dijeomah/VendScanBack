@@ -8,13 +8,16 @@
     use App\Models\User;
     use App\Models\UserData;
     use App\Models\VendorMedia;
+    use Illuminate\Http\JsonResponse;
     use Illuminate\Http\Request;
     use Illuminate\Http\Response;
     use Illuminate\Support\Facades\Hash;
 
     use Illuminate\Support\Facades\Log;
     use Illuminate\Support\Str;
+    use Psy\Util\Json;
     use SimpleSoftwareIO\QrCode\Facades\QrCode;
+    use function PHPUnit\Framework\isEmpty;
 
     class VendorController extends Controller
     {
@@ -30,23 +33,24 @@
         }
 
 
-        public function profile()
+        public function profile(): JsonResponse
         {
             try {
-                $user = User::where('userid', authUser()->userid)->get();
+                $user = User::where('userid', authUser()->userid)->with('vendor_media')->get();
                 return success('Vendor Information ', $user, Response::HTTP_OK);
             } catch (\Exception $exception) {
                 Log::debug('Profile fetch exception: ' . $exception->getMessage() . 'on line: ' . $exception->getLine());
             }
+            return error('Error fetching Profile, please try again. ', [], 400);
         }
 
         /**
          * Edit the Authenticated User profile.
          *
+         * @param Request $request
          * @return \Illuminate\Http\JsonResponse
-         * @throws \Illuminate\Validation\ValidationException
          */
-        public function editProfile(Request $request)
+        public function editProfile(Request $request): JsonResponse
         {
             try {
                 $profile = User::find(authUser()->id);
@@ -54,15 +58,16 @@
             } catch (\Exception $exception) {
                 Log::debug('Edit profile fetch exception: ' . $exception->getMessage() . 'on line: ' . $exception->getLine());
             }
+            return error('Error getting profile, please try again. ', [], Response::HTTP_BAD_REQUEST);
         }
 
         /**
          * Update the Authenticated User profile.
          *
+         * @param Request $request
          * @return \Illuminate\Http\JsonResponse
-         * @throws \Illuminate\Validation\ValidationException
          */
-        public function updateProfile(Request $request)
+        public function updateProfile(Request $request): JsonResponse
         {
             try {
                 $profile = User::find(authUser()->id);
@@ -76,15 +81,16 @@
             } catch (\Exception $exception) {
                 Log::debug('Profile update exception: ' . $exception->getMessage() . 'on line: ' . $exception->getLine());
             }
+            return error('Error updating profile, Please  try again. ', [], Response::HTTP_BAD_REQUEST);
         }
-
 
         /**
          * Update the Authenticated User profile.
          *
+         * @param Request $request
          * @return \Illuminate\Http\JsonResponse
          */
-        public function setBusinessInfo(Request $request)
+        public function setBusinessInfo(Request $request): JsonResponse
         {
             try {
 
@@ -116,9 +122,15 @@
             } catch (\Exception $exception) {
                 Log::debug('Set Business Name exception: ' . $exception->getMessage() . 'on line: ' . $exception->getLine());
             }
+            return error('Error creating Business Data. ', [], Response::HTTP_BAD_REQUEST);
         }
 
-        public function setBusinessLink(Request $request)
+        /**
+         * Update the Authenticated User profile.
+         *
+         * @return \Illuminate\Http\JsonResponse
+         */
+        public function setBusinessLink(Request $request): JsonResponse
         {
             try {
                 $this->validate($request, config('validator.set_business_name'));
@@ -138,55 +150,63 @@
             } catch (\Exception $exception) {
                 Log::debug('Set Business Link exception: ' . $exception->getMessage() . 'on line: ' . $exception->getLine());
             }
+            return error('Error creating Business link, try again. ', [], Response::HTTP_BAD_REQUEST);
         }
 
-        public function setMedia(Request $request)
+        public function setMedia(Request $request): JsonResponse
         {
             $logo_file = $request->file('logo_file');
             $hero_file = $request->file('hero_file');
             try {
-                switch (true) {
-                    case isset($logo_file) && isset($hero_file):
-                        $logo_data = CloudinaryStorage::upload($logo_file->getRealPath(), $logo_file->getClientOriginalName());
-                        $hero_data = CloudinaryStorage::upload($hero_file->getRealPath(), $hero_file->getClientOriginalName());
 
-                        // Store file reference in database
+                if (!empty([$logo_file || $hero_file])) {
+                    switch ($logo_file || $hero_file) {
+                        case isset($logo_file) && isset($hero_file):
+                            $logo_data = CloudinaryStorage::upload($logo_file->getRealPath(), $logo_file->getClientOriginalName());
+                            $hero_data = CloudinaryStorage::upload($hero_file->getRealPath(), $hero_file->getClientOriginalName());
 
-                        $data = VendorMedia::updateOrCreate(
-                            ['vendor_id' => authUser()->id],
-                            ['logo' => $logo_data, 'hero' => $hero_data]
-                        );
-                        success('Business logo and hero created successful. ', $data, Response::HTTP_CREATED);
-                        break;
+                            // Store file reference in database
 
-                    case isset($logo_file):
-                        $logo_data = CloudinaryStorage::upload($logo_file->getRealPath(), $logo_file->getClientOriginalName());
+                            $data = VendorMedia::updateOrCreate(
+                                ['vendor_id' => authUser()->id],
+                                ['logo' => $logo_data, 'hero' => $hero_data]
+                            );
+                            return success('Business logo and hero created successful. ', $data, Response::HTTP_CREATED);
+                            break;
 
-                        // Store file reference in database
-                        $data = VendorMedia::updateOrCreate(
-                            ['vendor_id' => authUser()->id],
-                            ['logo' => $logo_data]
-                        );
-                        success('Business logo created successful. ', $data, Response::HTTP_CREATED);
-                        break;
+                        case isset($logo_file):
+                            $logo_data = CloudinaryStorage::upload($logo_file->getRealPath(), $logo_file->getClientOriginalName());
 
-                    case isset($hero_file):
-                        $hero_data = CloudinaryStorage::upload($hero_file->getRealPath(), $hero_file->getClientOriginalName());
-                        
-                        // Store file reference in database
-                        $data = VendorMedia::updateOrCreate(
-                            ['vendor_id' => authUser()->id],
-                            ['hero' => $hero_data]
-                        );
-                        success('Business hero created successful. ', $data, Response::HTTP_CREATED);
-                        break;
+                            Log::debug($logo_data);
 
-                    default:
-                        return error('Something went wrong. ', [], Response::HTTP_BAD_REQUEST);
+                            // Store file reference in database
+                            $data = VendorMedia::updateOrCreate(
+                                ['vendor_id' => authUser()->id],
+                                ['logo' => $logo_data]
+                            );
+                            return success('Business logo created successful. ', $data, Response::HTTP_CREATED);
+                            break;
+
+                        case isset($hero_file):
+                            $hero_data = CloudinaryStorage::upload($hero_file->getRealPath(), $hero_file->getClientOriginalName());
+
+                            // Store file reference in database
+                            $data = VendorMedia::updateOrCreate(
+                                ['vendor_id' => authUser()->id],
+                                ['hero' => $hero_data]
+                            );
+                            return success('Business hero created successful. ', $data, Response::HTTP_CREATED);
+                            break;
+
+                        default:
+                            return error('Something went wrong while uploading. ', [], Response::HTTP_BAD_REQUEST);
+                    }
                 }
+
             } catch (\Exception $exception) {
                 Log::debug('Set Business Media exception: ' . $exception->getMessage() . 'on line: ' . $exception->getLine());
             }
-
+            return error('Files are empty or not supported. ', [], Response::HTTP_BAD_REQUEST);
         }
+
     }

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -79,6 +80,11 @@ class User extends Authenticatable implements JWTSubject
     public function food():HasMany
     {
         return $this->hasMany(Food::class, 'category_id');
+    }
+
+    public function vendor_media():HasOne
+    {
+        return $this->hasOne(VendorMedia::class, 'vendor_id');
     }
 
 }

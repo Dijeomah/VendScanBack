@@ -48,19 +48,19 @@
             Route::get('/profile/edit', [AdminProfileController::class, 'editAdminProfile']);
 
 //            Vendors
-            Route::apiResource('/vendor',AdminVendorController::class);
+            Route::apiResource('/vendor', AdminVendorController::class);
 
 //            Business & Links
             Route::get('/business', [BusinessController::class, 'getBusinesses']);
             Route::get('/business/links', [BusinessController::class, 'getBusinessLinks']);
 
 //            Food
-            Route::get('/food',[FoodController::class, 'food']);
-            Route::post('/food/create',[FoodController::class,'addFood']);
-            Route::get('/food/{id}', [FoodController::class,'showFood']);
-            Route::get('/food/edit/{id}', [FoodController::class,'editFood']);
-            Route::put('/food/update/{id}', [FoodController::class,'updateFood']);
-            Route::delete('/food/delete/{id}', [FoodController::class,'deleteFood']);
+            Route::get('/food', [FoodController::class, 'food']);
+            Route::post('/food/create', [FoodController::class, 'addFood']);
+            Route::get('/food/{id}', [FoodController::class, 'showFood']);
+            Route::get('/food/edit/{id}', [FoodController::class, 'editFood']);
+            Route::put('/food/update/{id}', [FoodController::class, 'updateFood']);
+            Route::delete('/food/delete/{id}', [FoodController::class, 'deleteFood']);
 
 //          Category Section
             Route::get('/categories', [CategoryController::class, 'categories']);
@@ -77,13 +77,15 @@
             'prefix' => 'vendor'
         ], function () {
             Route::get('/dashboard', [VendorController::class, 'index']);
+            Route::get('/profile', [VendorController::class, 'profile']);
             Route::get('/profile/edit', [VendorController::class, 'editProfile']);
             Route::put('/profile/update', [VendorController::class, 'updateProfile']);
 
+            // Business Information Section
             Route::post('/create/business-info', [VendorController::class, 'setBusinessInfo']);
             Route::post('/create/business-link', [VendorController::class, 'setBusinessLink']);
 
-            //
+            //Food Section
             Route::get('/food', [FoodController::class, 'food']);
             Route::post('/food/create', [FoodController::class, 'addFood']);
             Route::get('/food/show/{id}', [FoodController::class, 'showFood']);
@@ -91,7 +93,10 @@
             Route::put('/food/update/{id}', [FoodController::class, 'updateFood']);
             Route::delete('/food/delete/{id}', [FoodController::class, 'deleteFood']);
 
+            //Business Media Section
+            Route::post('/media/upload', [VendorController::class, 'setMedia']);
+
         });
-        Route::get('/qr/{vendor_link}', [HomeController::class, 'vendor_site']);
 
     });
+    Route::get('/qr/{vendor_link}', [HomeController::class, 'vendor_site']);

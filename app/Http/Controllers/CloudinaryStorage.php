@@ -9,7 +9,7 @@
     class CloudinaryStorage extends Controller
     {
         //
-        private const folder_path = 'awefun';
+        private const folder_path = 'vendscan';
         private const profile_folder_path = 'profile';
 
         public static function path($path)
@@ -21,11 +21,10 @@
         {
             $newFilename = str_replace(' ', '_', $filename);
             $public_id = date('Y-m-d_His') . '_' . $newFilename;
-            $result = cloudinary()->upload($image, [
+            return cloudinary()->upload($image, [
                 "public_id" => self::path($public_id),
                 "folder" => self::folder_path
             ])->getSecurePath();
-            return $result;
         }
 
         public static function uploadProfile($image, $filename)

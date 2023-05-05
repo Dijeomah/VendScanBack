@@ -6,6 +6,7 @@
     use App\Models\BusinessLink;
     use App\Models\Category;
     use App\Models\Food;
+    use Illuminate\Http\JsonResponse;
     use Illuminate\Http\Request;
 
     class FoodController extends Controller
@@ -28,7 +29,7 @@
          * @return \Illuminate\Http\JsonResponse
          * @throws \Illuminate\Validation\ValidationException
          */
-        public function addFood(Request $request)
+        public function addFood(Request $request) : JsonResponse
         {
             $this->validate($request, config('validation.add_food'));
 
