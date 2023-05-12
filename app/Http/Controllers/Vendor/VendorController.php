@@ -94,26 +94,26 @@
         {
             try {
 
-                $this->validate($request, config('validation.business_info'));
+                $validated_data = $this->validate($request, config('validation.business_info'));
 
-                $checkBusinessInfo = UserData::where('business_name', $request->query('business_name'))->exists();
+                $checkBusinessInfo = UserData::where('business_name', $validated_data['business_name'])->exists();
                 if (!$checkBusinessInfo) {
                     $userData = new UserData();
                     $userData->uid = authUser()->id;
                     $userData->userid = authUser()->userid;
-                    $userData->business_name = $request->query('business_name');
-                    $userData->business_address = $request->query('business_address');
-                    $userData->city_id = $request->query('city_id');
-                    $userData->state_id = $request->query('state_id');
-                    $userData->country_id = $request->query('country_id');
+                    $userData->business_name = $validated_data['business_name'];
+                    $userData->business_address = $validated_data['business_address'];
+                    $userData->city_id = $validated_data['city_id'];
+                    $userData->state_id = $validated_data['state_id'];
+                    $userData->country_id = $validated_data['country_id'];
                     $userData->save();
 
                     $userData = new BusinessLink();
                     $userData->uid = authUser()->id;
                     $userData->userid = authUser()->userid;
-                    $userData->business_name = $request->query('business_name');
-                    $userData->business_link = Str::slug($request->query('business_name'));
-                    $userData->business_qr = QrCode::generate(config('env.base_url.qr_url') . Str::slug($request->query('business_name')));
+                    $userData->business_name = $validated_data['business_name'];
+                    $userData->business_link = Str::slug($validated_data['business_name']);
+                    $userData->business_qr = QrCode::generate(config('env.base_url.qr_url') . Str::slug($validated_data['business_name']));
                     $userData->save();
 
                     return success('Business data created successfully. ', $userData, Response::HTTP_OK);
