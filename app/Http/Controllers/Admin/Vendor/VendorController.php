@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers\Admin\Vendor;
 
+use App\Http\Controllers\CloudinaryStorage;
 use App\Http\Controllers\Controller;
 use App\Models\BusinessLink;
 use App\Models\User;
+use App\Models\VendorMedia;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
@@ -90,5 +95,62 @@ class VendorController extends Controller
         $vendor= User::find($id);
         $vendor->delete();
         return success('Vendor information updated', $vendor, 200);
+    }
+
+    public function setVendorMedia(Request $request, $id): JsonResponse
+    {
+        $validated_data = $this->validate($request, config('validation.admin_set_vendor_media'));
+        $logo_file = $request->file($validated_data['logo_file']);
+        $hero_file = $request->file($validated_data['hero_file']);
+        try {
+
+            if (!empty([$logo_file || $hero_file])) {
+                switch ($logo_file || $hero_file) {
+                    case isset($logo_file) && isset($hero_file):
+                        $logo_data = CloudinaryStorage::upload($logo_file->getRealPath(), $logo_file->getClientOriginalName());
+                        $hero_data = CloudinaryStorage::upload($hero_file->getRealPath(), $hero_file->getClientOriginalName());
+
+                        // Store file reference in database
+
+                        $data = VendorMedia::updateOrCreate(
+                            ['vendor_id' => $id],
+                            ['logo' => $logo_data, 'hero' => $hero_data]
+                        );
+                        return success('Business logo and hero created successful. ', $data, Response::HTTP_CREATED);
+                        break;
+
+                    case isset($logo_file):
+                        $logo_data = CloudinaryStorage::upload($logo_file->getRealPath(), $logo_file->getClientOriginalName());
+
+                        Log::debug($logo_data);
+
+                        // Store file reference in database
+                        $data = VendorMedia::updateOrCreate(
+                            ['vendor_id' => $id],
+                            ['logo' => $logo_data]
+                        );
+                        return success('Business logo created successful. ', $data, Response::HTTP_CREATED);
+                        break;
+
+                    case isset($hero_file):
+                        $hero_data = CloudinaryStorage::upload($hero_file->getRealPath(), $hero_file->getClientOriginalName());
+
+                        // Store file reference in database
+                        $data = VendorMedia::updateOrCreate(
+                            ['vendor_id' => $id],
+                            ['hero' => $hero_data]
+                        );
+                        return success('Business hero created successful. ', $data, Response::HTTP_CREATED);
+                        break;
+
+                    default:
+                        return error('Something went wrong while uploading. ', [], Response::HTTP_BAD_REQUEST);
+                }
+            }
+
+        } catch (\Exception $exception) {
+            Log::debug('Set Business Media exception: ' . $exception->getMessage() . 'on line: ' . $exception->getLine());
+        }
+        return error('Files are empty or not supported. ', [], Response::HTTP_BAD_REQUEST);
     }
 }
