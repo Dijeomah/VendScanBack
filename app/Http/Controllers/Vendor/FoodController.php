@@ -31,18 +31,18 @@
          */
         public function addFood(Request $request) : JsonResponse
         {
-            $this->validate($request, config('validation.add_food'));
+            $validated_data = $this->validate($request, config('validation.add_food'));
 
             $user_business_link = BusinessLink::where(['userid' => authUser()->userid,])->first();
-//        $categoryCheck = Category::where('category_name',$request->query('category_name') )->exists();
+//        $categoryCheck = Category::where('category_name',$validated_data['category_name')])->exists();
             $food = new Food();
             $food->uid = authUser()->id;
             $food->userid = authUser()->userid;
             $food->business_link = $user_business_link->business_link;
-            $food->title = $request->query('title');
-            $food->category_id = $request->query('category_id');
-            $food->description = $request->query('description');
-            $food->price = $request->query('price');
+            $food->title = $validated_data['title'];
+            $food->category_id = $validated_data['category_id'];
+            $food->description = $validated_data['description'];
+            $food->price = $validated_data['price'];
             $food->status = true;
             $food->save();
             return success('Food Created Successfully. ', $food, 200);
@@ -89,10 +89,10 @@
             if (authUser()->role == 'vendor') {
                 $food->userid = authUser()->userid;
             }
-            $food->title = $request->query('title');
-            $food->category_id = $request->query('category_id');
-            $food->description = $request->query('description');
-            $food->price = $request->query('price');
+            $food->title = $validated_data['title'];
+            $food->category_id = $validated_data['category_id'];
+            $food->description = $validated_data['description'];
+            $food->price = $validated_data['price'];
             $food->status = true;
             $food->save();
             return success('Food information updated.', $food, 200);

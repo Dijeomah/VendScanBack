@@ -20,7 +20,6 @@ return [
         'business_name' => 'required|unique:business_links'
     ],
     'add_food' => [
-        'business_name' => 'required',
         'category_id' => 'required',
         'title' => 'required',
         'description' => 'required',
