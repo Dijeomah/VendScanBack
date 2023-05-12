@@ -28,7 +28,7 @@
 
         public function index()
         {
-            $user = User::where('userid', authUser()->userid)->with(['user_data.business_links', 'food.category'])->get();
+            $user = User::where('userid', authUser()->userid)->with(['user_data.business_links', 'food'])->get();
             return success('Vendor Information ', $user, Response::HTTP_OK);
         }
 
@@ -135,8 +135,8 @@
             try {
                 $validated_data = $this->validate($request, config('validation.set_business_name'));
 
-                $checkBusinessLink = BusinessLink::where('business_name', $validated_data['business_name'])->exists();
-                if (!$checkBusinessLink && $checkBusinessLink != $validated_data['business_name']) {
+                $checkBusinessLink = BusinessLink::where('business_name', $validated_data['business_name'])->first();
+                if (!$checkBusinessLink && $checkBusinessLink->business_name != $validated_data['business_name']) {
                     $userData = new BusinessLink();
                     $userData->uid = authUser()->id;
                     $userData->userid = authUser()->userid;
