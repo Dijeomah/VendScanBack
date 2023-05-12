@@ -94,7 +94,7 @@
         {
             try {
 
-                $this->validate($request, config('validator.business_info'));
+                $this->validate($request, config('validation.business_info'));
 
                 $checkBusinessInfo = UserData::where('business_name', $request->query('business_name'))->exists();
                 if (!$checkBusinessInfo) {
