@@ -133,16 +133,16 @@
         public function setBusinessLink(Request $request): JsonResponse
         {
             try {
-                $this->validate($request, config('validator.set_business_name'));
+                $validated_data = $this->validate($request, config('validation.set_business_name'));
 
-                $checkBusinessLink = BusinessLink::where('business_name', $request->business_name)->exists();
-                if (!$checkBusinessLink && $checkBusinessLink != $request->business_name) {
+                $checkBusinessLink = BusinessLink::where('business_name', $validated_data['business_name'])->exists();
+                if (!$checkBusinessLink && $checkBusinessLink != $validated_data['business_name']) {
                     $userData = new BusinessLink();
                     $userData->uid = authUser()->id;
                     $userData->userid = authUser()->userid;
-                    $userData->business_name = $checkBusinessLink;
-                    $userData->business_link = Str::slug($request->business_name);
-                    $userData->business_qr = QrCode::generate('http://localhost:8000/qr/' . Str::slug($request->business_name));
+                    $userData->business_name = $validated_data['business_name'];
+                    $userData->business_link = Str::slug($validated_data['business_name']);
+                    $userData->business_qr = QrCode::generate('http://localhost:8000/qr/' . Str::slug($validated_data['business_name']));
                     $userData->save();
                     return success('Business link created successful. ', $userData, Response::HTTP_OK);
                 }
