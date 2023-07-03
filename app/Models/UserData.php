@@ -32,9 +32,9 @@ class UserData extends Model
 //        return $this->belongsTo(BusinessLink::class, 'uid');
     }
 
-    public function food():BelongsTo
+    public function item():BelongsTo
     {
-        return $this->belongsTo(Food::class, 'uid');
+        return $this->belongsTo(Item::class, 'uid');
 //        return $this->belongsTo(BusinessLink::class, 'uid');
     }
 

@@ -6,8 +6,9 @@
     use App\Http\Controllers\Admin\Category\CategoryController;
     use App\Http\Controllers\Auth\AuthController;
     use App\Http\Controllers\HomeController;
-    use App\Http\Controllers\Vendor\FoodController;
+    use App\Http\Controllers\Vendor\ItemController;
     use App\Http\Controllers\Vendor\VendorController;
+    use App\Http\Controllers\Vendor\CategoryController as VendorCategoryController;
     use \App\Http\Controllers\Admin\Vendor\VendorController as AdminVendorController;
     use Illuminate\Support\Facades\Route;
 
@@ -54,13 +55,13 @@
             Route::get('/business', [BusinessController::class, 'getBusinesses']);
             Route::get('/business/links', [BusinessController::class, 'getBusinessLinks']);
 
-//            Food
-            Route::get('/food', [FoodController::class, 'food']);
-            Route::post('/food/create', [FoodController::class, 'addFood']);
-            Route::get('/food/{id}', [FoodController::class, 'showFood']);
-            Route::get('/food/edit/{id}', [FoodController::class, 'editFood']);
-            Route::put('/food/update/{id}', [FoodController::class, 'updateFood']);
-            Route::delete('/food/delete/{id}', [FoodController::class, 'deleteFood']);
+//            Item
+            Route::get('/item', [ItemController::class, 'item']);
+            Route::post('/item/create', [ItemController::class, 'addItem']);
+            Route::get('/item/{id}', [ItemController::class, 'showItem']);
+            Route::get('/item/edit/{id}', [ItemController::class, 'editItem']);
+            Route::put('/item/update/{id}', [ItemController::class, 'updateItem']);
+            Route::delete('/item/delete/{id}', [ItemController::class, 'deleteItem']);
 
 //          Category Section
             Route::get('/categories', [CategoryController::class, 'categories']);
@@ -85,13 +86,33 @@
             Route::post('/create/business-info', [VendorController::class, 'setBusinessInfo']);
             Route::post('/create/business-link', [VendorController::class, 'setBusinessLink']);
 
-            //Food Section
-            Route::get('/food', [FoodController::class, 'food']);
-            Route::post('/food/create', [FoodController::class, 'addFood']);
-            Route::get('/food/show/{id}', [FoodController::class, 'showFood']);
-            Route::get('/food/edit/{id}', [FoodController::class, 'editFood']);
-            Route::put('/food/update/{id}', [FoodController::class, 'updateFood']);
-            Route::delete('/food/delete/{id}', [FoodController::class, 'deleteFood']);
+            // Category Section
+            Route::group([
+                'prefix'=>'categories'
+            ], function (){
+                Route::get('/',[VendorCategoryController::class, 'index']);
+                Route::post('/create',[VendorCategoryController::class, 'store']);
+
+            });
+
+            Route::group([
+                'prefix'=>'sub-categories'
+            ], function (){
+               Route::post('/create', [VendorCategoryController::class, 'createSubCategory']);
+            });
+
+            //Item Section
+            Route::group([
+                'prefix'=>'item'
+            ], function (){
+                Route::get('/', [ItemController::class, 'item']);
+                Route::post('/create', [ItemController::class, 'addItem']);
+                Route::get('/show/{id}', [ItemController::class, 'showItem']);
+                Route::get('/edit/{id}', [ItemController::class, 'editItem']);
+                Route::put('/update/{id}', [ItemController::class, 'updateItem']);
+                Route::delete('/delete/{id}', [ItemController::class, 'deleteItem']);
+
+            });
 
             //Business Media Section
             Route::post('/media/upload', [VendorController::class, 'setMedia']);

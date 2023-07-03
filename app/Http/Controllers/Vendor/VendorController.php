@@ -28,7 +28,7 @@
 
         public function index()
         {
-            $user = User::where('userid', authUser()->userid)->with(['user_data.business_links', 'food'])->get();
+            $user = User::where('userid', authUser()->userid)->with(['user_data.business_links','item'])->get();
             return success('Vendor Information ', $user, Response::HTTP_OK);
         }
 

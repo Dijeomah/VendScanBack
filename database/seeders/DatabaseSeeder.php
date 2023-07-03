@@ -25,8 +25,8 @@ class DatabaseSeeder extends Seeder
                 CountriesTableSeeder::class,
                 StatesTableSeeder::class,
                 CitiesTableSeeder::class,
-                CategoriesSeeder::class,
-//                FoodSeeder::class
+//                CategoriesSeeder::class,
+//                ItemSeeder::class
             ]);
     }
 }

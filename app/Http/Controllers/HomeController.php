@@ -1,27 +1,29 @@
 <?php
 
-    namespace App\Http\Controllers;
+namespace App\Http\Controllers;
 
-    use App\Models\Category;
-    use App\Models\Food;
-    use Illuminate\Http\JsonResponse;
+use App\Models\Category;
+use App\Models\Item;
+use App\Models\SubCategory;
+use Exception;
+use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
-    class   HomeController extends Controller
+class   HomeController extends Controller
+{
+    //
+    public function vendor_site($vendor_link): JsonResponse
     {
-        //
-        public function vendor_site($vendor_link): JsonResponse
-        {
-            try {
-                $check = Food::where('business_link', $vendor_link)->exists();
+        try {
+            $check = Item::where('business_link', $vendor_link)->exists();
 
-                if ($check) {
-                    $data = Category::whereIn("id", Food::where('business_link', $vendor_link)->distinct()->get(["category_id"]))
-                        ->with("food")->get()->toArray();
-                    return success('Vendor site data: ', $data, 200);
-                }
-            } catch (\Exception $exception) {
-                return error('Site not found', null, 404);
+            if ($check) {
+                $data = Category::whereIn("id", Item::where('business_link', $vendor_link)->distinct()->get(["category_id"]))->with("item")->get()->toArray();
+                return success('Vendor site data: ', $data, Response::HTTP_OK);
             }
-            return error('Site not found', null, 404);
+        } catch (Exception $exception) {
+            return error('Site not found', null, Response::HTTP_NO_CONTENT);
         }
+        return error('Data|Site not found', null, Response::HTTP_NO_CONTENT);
     }
+}

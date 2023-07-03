@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Category;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CategoryCreateRequest;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
@@ -25,16 +26,18 @@ class CategoryController extends Controller
      * @return \Illuminate\Http\JsonResponse
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function addCategory(Request $request){
-        $this->validate($request, [
-            'category_name' => 'required|unique:categories|min:4',
-        ]);
+    public function addCategory(CategoryCreateRequest $categoryCreateRequest){
+//        $this->validate($categoryCreateRequest, [
+//            'category_name' => 'required|unique:categories|min:4',
+//        ]);
 
-        $categoryCheck = Category::where('category_name',$request->category_name )->exists();
+        $categoryCheck = Category::where('category_name',$categoryCreateRequest['category_name'] )->exists();
         if (!$categoryCheck)
         {
             $categoryData = new Category();
-            $categoryData->category_name = $request->category_name;
+            $categoryData->user_id = authUser()->id;
+            $categoryData->category_name = $categoryCreateRequest['category_name'];
+            $categoryData->category_code = authUser()->id.'-'.$categoryCreateRequest['category_name'];
             $categoryData->save();
             return success('Category Created Successfully. ',$categoryData, 200);
         }

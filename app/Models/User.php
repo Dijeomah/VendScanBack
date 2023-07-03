@@ -77,9 +77,9 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(BusinessLink::class, 'uid');
     }
 
-    public function food():HasMany
+    public function item():HasMany
     {
-        return $this->hasMany(Food::class, 'category_id');
+        return $this->hasMany(Item::class, 'category_id');
     }
 
     public function vendor_media():HasOne

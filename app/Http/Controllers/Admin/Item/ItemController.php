@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\Admin\Food;
+namespace App\Http\Controllers\Admin\Item;
 
 use App\Http\Controllers\Controller;
 use App\Models\BusinessLink;
-use App\Models\Food;
+use App\Models\Item;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 
-class FoodController extends Controller
+class ItemController extends Controller
 {
     /**
      * View aall categories.
@@ -20,8 +20,8 @@ class FoodController extends Controller
      */
     public function food()
     {
-        $food = Food::latest()->paginate();
-        return success('Food: ', $food, Response::HTTP_OK);
+        $food = Item::latest()->paginate();
+        return success('Item: ', $food, Response::HTTP_OK);
     }
 
     /**
@@ -36,7 +36,7 @@ class FoodController extends Controller
 
         $user_business_link = $validated_data ['business_link'];
 //        $categoryCheck = Category::where('category_name',$validated_data ['category_name'] )->exists();
-        $food = new Food();
+        $food = new Item();
         $food->uid = $validated_data ['id'];
         $food->userid = $validated_data ['userid'];
         $food->business_link = $user_business_link->business_link;
@@ -46,7 +46,7 @@ class FoodController extends Controller
         $food->price = $validated_data ['price'];
         $food->status = true;
         $food->save();
-        return success('Food Created Successfully. ', $food, Response::HTTP_OK);
+        return success('Item Created Successfully. ', $food, Response::HTTP_OK);
 
     }
 
@@ -58,8 +58,8 @@ class FoodController extends Controller
      */
     public function showFood(Request $request, $id)
     {
-        $food = Food::find($id);
-        return success('Food information: ', $food, Response::HTTP_OK);
+        $food = Item::find($id);
+        return success('Item information: ', $food, Response::HTTP_OK);
     }
 
     /**
@@ -70,8 +70,8 @@ class FoodController extends Controller
      */
     public function editFood(Request $request, $id)
     {
-        $food = Food::find($id);
-        return success('Food information: ', $food, Response::HTTP_OK);
+        $food = Item::find($id);
+        return success('Item information: ', $food, Response::HTTP_OK);
     }
 
     /**
@@ -82,14 +82,14 @@ class FoodController extends Controller
      */
     public function updateFood(Request $request, $id)
     {
-        $food = Food::find($id);
+        $food = Item::find($id);
         $food->title = $request->title;
         $food->category_id = $request->category_id;
         $food->description = $request->description;
         $food->price = $request->price;
         $food->status = true;
         $food->update();
-        return success('Food information updated.', $food, Response::HTTP_CREATED);
+        return success('Item information updated.', $food, Response::HTTP_CREATED);
     }
 
     /**
@@ -100,8 +100,8 @@ class FoodController extends Controller
      */
     public function deleteFood($id)
     {
-        $food = Food::find($id);
+        $food = Item::find($id);
         $food->delete();
-        return success('Food information deleted.', $food, Response::HTTP_OK);
+        return success('Item information deleted.', $food, Response::HTTP_OK);
     }
 }
