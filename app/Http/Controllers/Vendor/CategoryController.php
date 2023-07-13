@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\CategoryCreateRequest;
 use App\Models\Category;
 use App\Models\SubCategory;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -104,11 +105,27 @@ class CategoryController extends Controller
         //
     }
 
+    public function viewSubCategories(Request $request)
+    {
+        $category_id = $request->category_id;
+        try {
+            $check = SubCategory::where(['user_id' => authUser()->id, 'category_id' => $category_id])->exists();
+            if ($check) {
+                $data = Category::whereIn('id', SubCategory::where(['user_id' => authUser()->id, 'category_id' => $category_id])->distinct()->get(["category_id"]))->with("subCategories")->get()->toArray();
+//                dd($data);
+                return success('Sub Category', $data, Response::HTTP_OK);
+            }
+        } catch (Exception $exception) {
+            return error('Site not found', null, Response::HTTP_NO_CONTENT);
+        }
+        return error('Data not found', null, Response::HTTP_NO_CONTENT);
+    }
 
-    public function createSubCategory(Request $request, SubCategory $subCategoryM){
+    public function createSubCategory(Request $request, SubCategory $subCategoryM)
+    {
         $validated = $this->validate($request, [
             'category_id' => 'required',
-            'sub_category_name'=>'required'
+            'sub_category_name' => 'required'
         ]);
 
         $data = new SubCategory();

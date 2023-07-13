@@ -98,6 +98,7 @@
             Route::group([
                 'prefix'=>'sub-categories'
             ], function (){
+               Route::get('/view', [VendorCategoryController::class, 'viewSubCategories']);
                Route::post('/create', [VendorCategoryController::class, 'createSubCategory']);
             });
 
