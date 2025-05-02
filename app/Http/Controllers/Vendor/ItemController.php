@@ -8,6 +8,8 @@ use App\Http\Requests\ItemUpdateRequest;
 use App\Models\BusinessLink;
 use App\Models\Category;
 use App\Models\Item;
+use Exception;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -21,10 +23,10 @@ class ItemController extends Controller
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function item()
+    public function index()
     {
         $item = Item::where('userid', authUser()->userid)->get();
-        return success('Item: ', $item, 200);
+        return success('Item fetched successfully.', $item, 200);
     }
 
     /**
@@ -84,25 +86,28 @@ class ItemController extends Controller
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function updateItem(ItemUpdateRequest $itemUpdateRequest, $id): JsonResponse
+    public function updateItem(ItemUpdateRequest $request, $id): JsonResponse
     {
-        $validated_data = $itemUpdateRequest->validated();
+        try {
+            $item = Item::findOrFail($id);
+            $validated = $request->validated();
 
-        $item = Item::find($id);
-        $item->uid = authUser()->id;
-        if (authUser()->role == 'admin') {
-            $item->userid = 'ADMIN001';
+            $item->update([
+                'uid' => authUser()->id,
+                'userid' => authUser()->role === 'admin' ? 'ADMIN001' : authUser()->userid,
+                'category_id' => $validated['category_id'],
+                'title' => $validated['title'],
+                'description' => $validated['description'],
+                'price' => $validated['price'],
+                'status' => true
+            ]);
+
+            return success('Item updated', $item, Response::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return error('Item not found', null, Response::HTTP_NOT_FOUND);
+        } catch (Exception $e) {
+            return error('Update failed', null, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        if (authUser()->role == 'vendor') {
-            $item->userid = authUser()->userid;
-        }
-        $item->category_id = $validated_data['category_id'];
-        $item->title = $validated_data['title'];
-        $item->description = $validated_data['description'];
-        $item->price = $validated_data['price'];
-        $item->status = true;
-        $item->save();
-        return success('Item information updated.', $item, Response::HTTP_OK);
     }
 
     /**

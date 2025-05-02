@@ -13,11 +13,12 @@ class Controller extends BaseController
 {
     use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-    public function generateUserID(){
-        RUN:
-        $userid = strtoupper(Str::random(6));
-        if(User::where('userid',$userid)->exists())
-            GOTO RUN;
+    public function generateUserID(): string
+    {
+        do {
+            $userid = strtoupper(Str::random(6));
+        } while (User::where('userid', $userid)->exists());
+
         return $userid;
     }
 }

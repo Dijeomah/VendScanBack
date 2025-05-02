@@ -11,7 +11,7 @@ class AdminProfileController extends Controller
     //
     public function adminProfile(Request $request){
         $adminData = $request->user();
-        return success('Profile information fetched. ',$adminData, 200);
+        return success('Profile information fetched.',$adminData, 200);
     }
 
     public function editAdminProfile(Request $request){

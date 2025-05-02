@@ -10,6 +10,8 @@ class UserData extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     public function city():BelongsTo
     {
         return $this->belongsTo(City::class, 'city_id');

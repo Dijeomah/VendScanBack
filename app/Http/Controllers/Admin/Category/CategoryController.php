@@ -90,4 +90,34 @@ class CategoryController extends Controller
         return success('Category information updated', $category, 200);
     }
 
+    public function categoriesWithItems()
+    {
+        return Category::with(['subcategories', 'items' => function($query) {
+            $query->where('status', true);
+        }])
+            ->whereHas('items')
+            ->paginate(10);
+    }
+
+    public function addItemToCategory(Request $request, $categoryId)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'price' => 'required|numeric|min:0',
+            'description' => 'nullable|string'
+        ]);
+
+        $category = Category::findOrFail($categoryId);
+
+        $item = $category->items()->create([
+            'title' => $validated['title'],
+            'price' => $validated['price'],
+            'description' => $validated['description'],
+            'user_id' => auth()->id(),
+            'status' => true
+        ]);
+
+        return success('Item added', $item, 201);
+    }
+
 }

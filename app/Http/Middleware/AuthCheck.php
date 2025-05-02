@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
 class AuthCheck
 {
@@ -11,17 +13,17 @@ class AuthCheck
      * Handle an incoming request.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
-     * @return \Illuminate\Http\JsonResponse
+     * @param  \Closure  $next
+     * @param  string|null  ...$roles
+     * @return \Illuminate\Http\JsonResponse|\Illuminate\Http\Response
      */
     public function handle(Request $request, Closure $next)
     {
-        if (!authUser() ) {
-            return error('Session expired, Login', [], 400);
+        if (!auth()->check()) {
+            return response()->json([
+                'error' => 'Session expired, please login again'
+            ], Response::HTTP_UNAUTHORIZED);
         }
-        if (!empty(authUser()->role) && authUser()->role == 'admin') {
-            return $next($request);
-        }
-        return error('You are not allowed to view this route', [], 400);
+        return $next($request);
     }
 }

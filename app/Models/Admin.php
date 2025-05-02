@@ -11,7 +11,7 @@ use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class Vendor  extends Authenticatable implements JWTSubject
+class Admin  extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -67,29 +67,8 @@ class Vendor  extends Authenticatable implements JWTSubject
         return [];
     }
 
-    public function vendorData():HasMany
+    public function adminData(): HasOne
     {
-        return $this->hasMany(VendorData::class, 'v_id');
+        return $this->hasOne(AdminData::class, 'a_id');
     }
-
-    public function business_data():HasMany
-    {
-        return $this->hasMany(BusinessData::class, 'bd_id');
-    }
-
-    public function business_links():HasMany
-    {
-        return $this->hasMany(BusinessLink::class, 'uid');
-    }
-
-    public function item():HasMany
-    {
-        return $this->hasMany(Item::class, 'category_id');
-    }
-
-    public function vendor_media():HasOne
-    {
-        return $this->hasOne(VendorMedia::class, 'vendor_id');
-    }
-
 }

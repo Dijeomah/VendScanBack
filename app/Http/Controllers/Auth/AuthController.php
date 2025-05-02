@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class AuthController extends Controller
 {
@@ -46,35 +47,36 @@ class AuthController extends Controller
 
     public function me(): \Illuminate\Contracts\Auth\Authenticatable
     {
-        $user = auth()->user();
-        return $user;
+        return auth()->user();
     }
 
 
     /**
      * Get a JWT via given credentials.
      *
-     * @return array|array[]|\Illuminate\Contracts\Auth\Authenticatable[]
+     * @return JsonResponse
      */
-    public function login()
+    public function login(): JsonResponse
     {
         $credentials = request(['email', 'password']);
 
         if (!$token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Username/ Password incorrect'], 401);
+            return error('Unauthorized', null, Response::HTTP_UNAUTHORIZED);
         }
-//         array_merge(['user' => $this->me()], $this->formatToken($token));
-//        return  array_merge(['user' => $this->me(), $this->respondWithToken($token)]);
-        return array_merge(['result' => $this->formatToken($token), 'user' => $this->me()]);
+
+        return success('Login successful', [
+            'user' => $this->me(),
+            'token' => $this->formatToken($token)
+        ], Response::HTTP_OK);
     }
 
 
     /**
      * Log the user out (Invalidate the token).
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function logout()
+    public function logout(): JsonResponse
     {
         auth()->logout();
         return response()->json(['message' => 'Successfully logged out']);
@@ -98,7 +100,7 @@ class AuthController extends Controller
      *
      * @param string $token
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     protected function respondWithToken($token)
     {
