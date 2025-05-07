@@ -16,7 +16,7 @@ return new class extends Migration
     {
         Schema::create('items', function (Blueprint $table) {
             $table->id();
-            $table->integer('uid')->constrained('users');
+            $table->integer('user_id')->constrained('users');
             $table->integer('category_id')->constrained('categories');
             $table->integer('sub_category_id')->constrained('sub_categories');
             $table->string('business_link');

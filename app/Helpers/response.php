@@ -11,7 +11,7 @@ function error($message, $data, $code = null) {
         'data' => $data
     ];
 
-    return response()->json($d);
+    return response()->json($d, $d['code']);
 }
 
 
@@ -23,7 +23,7 @@ function failed($message, $data, $code = null) {
         'data' => $data
     ];
 
-    return response()->json($d);
+    return response()->json($d, $d['code']);
 }
 
 
@@ -36,7 +36,7 @@ function success($message, $data, $code = null) {
     ];
 //    return response('Hello World', 200)
 //        ->header();
-    return response()->json($d);
+    return response()->json($d, $d['code']);
 }
 
 
@@ -47,5 +47,5 @@ function expired($message, $data, $code = null) {
         'message' => $message,
         'data' => $data
     ];
-    return response()->json($d);
+    return response()->json($d, $d['code']);
 }

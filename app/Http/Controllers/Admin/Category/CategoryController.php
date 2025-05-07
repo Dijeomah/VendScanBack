@@ -117,12 +117,9 @@ class CategoryController extends Controller
 
     public function categoriesWithItems()
     {
-        return Category::with([
-            'subcategories',
-            'items' => function ($query) {
-                $query->where('status', true);
-            }
-        ])
+        return Category::with(['subcategories', 'items' => function($query) {
+            $query->where('status', true);
+        }])
             ->whereHas('items')
             ->paginate(10);
     }

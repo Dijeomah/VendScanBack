@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::group(['middleware' => 'api'], function ($router) {
     Route::group([
-        'prefix' => 'auth'
+        'prefix'=>'auth'
     ], function () {
         Route::post('/register', [AuthController::class, 'register']);
         Route::post('/login', [AuthController::class, 'login']);
@@ -60,12 +60,12 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::delete('/business-links/{id}', [BusinessController::class, 'deleteBusinessLink']);
 
         // Items
-        Route::apiResource('/items', controller: ItemController::class)->except(['store', 'update']);
+        Route::apiResource('/items', ItemController::class)->except(['store', 'update']);
         Route::post('/items/create', [ItemController::class, 'addItem']);
         Route::put('/items/update/{id}', [ItemController::class, 'updateItem']);
 
         // Categories
-        Route::get('/categories', [CategoryController::class, 'index']);
+        Route::get('/categories', [CategoryController::class, 'categories']);
         Route::get('/categories-with-items', [CategoryController::class, 'categoriesWithItems']);
         Route::post('/categories', [CategoryController::class, 'addCategory']);
         Route::apiResource('/categories', CategoryController::class)->except(['index', 'store']);
@@ -100,15 +100,14 @@ Route::group(['middleware' => 'api'], function ($router) {
         });
 
         // Subcategories
-        Route::group(['prefix' => 'sub-categories'], function () {
+        Route::group(['prefix' => 'subcategories'], function () {
             Route::get('/', [VendorCategoryController::class, 'viewSubCategories']);
             Route::post('/', [VendorCategoryController::class, 'createSubCategory']);
         });
 
         // Items
-        Route::apiResource('/item', ItemController::class);
-        Route::post('/item/create', [ItemController::class, 'addItem']);
-        Route::get('/item/by-category/{categoryId}', [ItemController::class, 'itemsByCategory']);
+        Route::apiResource('/items', ItemController::class);
+        Route::get('/items/by-category/{categoryId}', [ItemController::class, 'itemsByCategory']);
 
         // Media
         Route::post('/media', [VendorController::class, 'setMedia']);

@@ -87,7 +87,7 @@ class VendorController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function setBusinessInfo(Request $request): JsonResponse
+    public function setBusinessInfo(Request $request)
     {
         try {
 
@@ -124,11 +124,11 @@ class VendorController extends Controller
                 $userData = $this->vendorRepository->createVendorBusinessLink($validated_data);
                 return success('Business link created successful. ', $userData, Response::HTTP_OK);
             }
-            return error('Business link already exist, try another link. ', [], 400);
+            return error('Business link already exist, try another link. ', [], Response::HTTP_BAD_REQUEST);
         } catch (\Exception $exception) {
             Log::debug('Set Business Link exception: ' . $exception->getMessage() . 'on line: ' . $exception->getLine() . 'Full Error: ' . $exception);
         }
-        return error('Error creating Business link, try again. ', [], Response::HTTP_BAD_REQUEST);
+//        return error('Error creating Business link, try again. ', [], Response::HTTP_BAD_REQUEST);
     }
 
     public function setMedia(Request $request): JsonResponse
