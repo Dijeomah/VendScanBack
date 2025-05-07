@@ -105,20 +105,25 @@ class CategoryController extends Controller
         //
     }
 
-    public function viewSubCategories(Request $request)
+    public function viewSubCategories(Request $request): JsonResponse
     {
-        $category_id = $request->category_id;
         try {
-            $check = SubCategory::where(['user_id' => authUser()->id, 'category_id' => $category_id])->exists();
-            if ($check) {
-                $data = Category::whereIn('id', SubCategory::where(['user_id' => authUser()->id, 'category_id' => $category_id])->distinct()->get(["category_id"]))->with("subCategories")->get()->toArray();
-//                dd($data);
-                return success('Sub Category', $data, Response::HTTP_OK);
-            }
+            $validated = $request->validate([
+                'category_id' => 'required|exists:categories,id'
+            ]);
+
+            $subCategories = SubCategory::where([
+                'user_id' => authUser()->id,
+                'category_id' => $validated['category_id']
+            ])->paginate(10);
+
+            return $subCategories->isEmpty()
+                ? error('Data not found', null, Response::HTTP_NO_CONTENT)
+                : success('Sub Category', $subCategories, Response::HTTP_OK);
+
         } catch (Exception $exception) {
-            return error('Site not found', null, Response::HTTP_NO_CONTENT);
+            return error('Error fetching subcategories', null, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        return error('Data not found', null, Response::HTTP_NO_CONTENT);
     }
 
     public function createSubCategory(Request $request, SubCategory $subCategoryM)

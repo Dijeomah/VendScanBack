@@ -7,6 +7,7 @@ use App\Models\Item;
 use App\Models\SubCategory;
 use Exception;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class   HomeController extends Controller
@@ -15,15 +16,26 @@ class   HomeController extends Controller
     public function vendor_site($vendor_link): JsonResponse
     {
         try {
-            $check = Item::where('business_link', $vendor_link)->exists();
+            $validatedVendorLink = htmlspecialchars($vendor_link, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-            if ($check) {
-                $data = Category::whereIn("id", Item::where('business_link', $vendor_link)->distinct()->get(["category_id"]))->with("item")->get()->toArray();
-                return success('Vendor site data: ', $data, Response::HTTP_OK);
+            if (!Item::where('business_link', $validatedVendorLink)->exists()) {
+                return error('Site not found', null, Response::HTTP_NOT_FOUND);
             }
+
+            $data = Category::whereHas('items', function($query) use ($validatedVendorLink) {
+                $query->where('business_link', $validatedVendorLink);
+            })
+                ->with(['items' => function($query) use ($validatedVendorLink) {
+                    $query->where('business_link', $validatedVendorLink);
+                }])
+                ->get();
+
+            return success('Vendor site data', $data, Response::HTTP_OK);
+
         } catch (Exception $exception) {
-            return error('Site not found', null, Response::HTTP_NO_CONTENT);
+            Log::error('Error in vendor_site: '.$exception->getMessage(), ['trace' => $exception->getTrace()]);
+            return error('An error occurred', null, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        return error('Data|Site not found', null, Response::HTTP_NO_CONTENT);
     }
+
 }

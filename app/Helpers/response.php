@@ -1,10 +1,11 @@
 <?php
 
 use Illuminate\Http\Response;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 function error($message, $data, $code = null) {
     $d = [
-        'code' => $code?? Response::HTTP_BAD_REQUEST,
+        'code' => $code?? ResponseAlias::HTTP_BAD_REQUEST,
         'status' => 'error',
         'message' => $message,
         'data' => $data
@@ -16,7 +17,7 @@ function error($message, $data, $code = null) {
 
 function failed($message, $data, $code = null) {
     $d = [
-        'code' => $code?? Response::HTTP_UNPROCESSABLE_ENTITY,
+        'code' => $code?? ResponseAlias::HTTP_UNPROCESSABLE_ENTITY,
         'status' => 'failed',
         'message' => $message,
         'data' => $data
@@ -28,7 +29,7 @@ function failed($message, $data, $code = null) {
 
 function success($message, $data, $code = null) {
     $d = [
-        'code' => $code?? Response::HTTP_OK,
+        'code' => $code?? ResponseAlias::HTTP_OK,
         'status' => 'success',
         'message' => $message,
         'data' => $data
@@ -41,7 +42,7 @@ function success($message, $data, $code = null) {
 
 function expired($message, $data, $code = null) {
     $d = [
-        'code' => $code?? Response::HTTP_UNAUTHORIZED,
+        'code' => $code?? ResponseAlias::HTTP_UNAUTHORIZED,
         'status' => 'expired',
         'message' => $message,
         'data' => $data

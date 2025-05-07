@@ -4,7 +4,6 @@ return [
     'registration' => [
         'first_name' => 'required',
         'last_name' => 'required',
-        'role' => 'required',
         'phone_number' => 'required|unique:users,phone_number',
         'email' => 'required|unique:users,email|max:50',
         'password' => 'required|min:8',

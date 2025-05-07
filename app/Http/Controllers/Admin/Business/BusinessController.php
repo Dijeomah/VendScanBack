@@ -29,4 +29,28 @@ class BusinessController extends Controller
             return failed('No record found.', [], 404);
         }
     }
+
+    public function getBusinessLink($id)
+    {
+        try {
+            $businessLink = BusinessLink::findOrFail($id);
+            return success('Business link fetched', $businessLink, 200);
+        }catch (\Exception $exception)
+        {
+            return failed('No record found.', [], 404);
+        }
+    }
+
+    public function deleteBusinessLink($id)
+    {
+        try {
+            $businessLink = BusinessLink::find($id);
+            $businessLink->delete();
+            return success('Business link deleted', [], 200);
+        }catch (\Exception $exception)
+        {
+            return failed('Error in deleting business link.', [], 404);
+        }
+    }
+
 }

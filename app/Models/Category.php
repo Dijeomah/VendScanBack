@@ -16,13 +16,26 @@ class Category extends Model
         'category_code'
     ];
 
-    public function item(): HasMany
+//    public function item(): HasMany
+//    {
+//        return $this->hasMany(Item::class, 'category_id');
+//    }
+//
+//    public function subCategories(): HasMany
+//    {
+//        return $this->hasMany(SubCategory::class, 'category_id');
+//    }
+
+    public function items()
     {
-        return $this->hasMany(Item::class, 'category_id');
+        return $this->hasMany(Item::class)
+            ->where('status', true)
+            ->orderBy('price');
     }
 
-    public function subCategories(): HasMany
+    public function subcategories()
     {
-        return  $this->hasMany(SubCategory::class, 'category_id');
+        return $this->hasMany(SubCategory::class)
+            ->withCount('items');
     }
 }
