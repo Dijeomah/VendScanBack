@@ -6,6 +6,7 @@ use App\Interfaces\VendorInterface;
 use App\Models\BusinessLink;
 use App\Models\User;
 use App\Models\UserData;
+use App\Models\Vendor;
 use App\Models\VendorMedia;
 use App\Services\QrCodeService;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -83,18 +84,29 @@ class VendorRepository implements VendorInterface
         ]);
     }
 
-    public function createVendorBusinessLink(array $payload): BusinessLink
+    public function createVendorBusinessLink(array $payload)
     {
         $slug = Str::slug($payload['business_name']);
         $count = BusinessLink::where('business_link', $slug)->count();
         $uniqueSlug = $count > 0 ? "{$slug}-{$count}" : $slug;
+        $business_qr = $this->qrCodeService->generateForVendor($uniqueSlug);
+
+        // Update the Vendor model with the subdomain
+        auth()->user()->update(['subdomain' => $uniqueSlug]);
+
+        Vendor::create([
+            'name' => $payload['business_name'],
+            'subdomain' => $uniqueSlug,
+            'business_link' => $uniqueSlug,
+        ]);
 
         return BusinessLink::create([
             'uid' => auth()->id(),
             'userid' => auth()->user()->userid,
             'business_name' => $payload['business_name'],
             'business_link' => $uniqueSlug,
-            'business_qr' => $this->qrCodeService->generateForVendor($uniqueSlug),
+            'subdomain' => $uniqueSlug,
+            'business_qr' => $business_qr,
         ]);
     }
 
@@ -109,12 +121,12 @@ class VendorRepository implements VendorInterface
     public function getVendorWithMenu(string $userId)
     {
         return User::with([
-            'businessLinks.items' => function ($query) {
+            'business_links.items' => function ($query) {
                 $query->where('status', true)
                     ->orderBy('category_id')
                     ->orderBy('price');
             },
-            'businessLinks.items.category',
+            'business_links.items.category',
             'vendor_media'
         ])
             ->where('userid', $userId)

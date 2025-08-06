@@ -38,6 +38,20 @@ class Kernel extends HttpKernel
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ],
 
+        'subdomain_web' => [
+            \App\Http\Middleware\EncryptCookies::class,
+            \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,
+            \Illuminate\Session\Middleware\StartSession::class,
+            \Illuminate\View\Middleware\ShareErrorsFromSession::class,
+            \App\Http\Middleware\VerifyCsrfToken::class,
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+        ],
+
+        'subdomain_api' => [
+            \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            'throttle:api',
+        ],
+
         'api' => [
             // \Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful::class,
             'throttle:api',
@@ -66,6 +80,7 @@ class Kernel extends HttpKernel
         'authCheck' => \App\Http\Middleware\AuthCheck::class,
         'vendorCheck' => \App\Http\Middleware\VendorCheck::class,
         'role' => \App\Http\Middleware\RoleMiddleware::class,
+        'subdomain' => \App\Http\Middleware\SubdomainMiddleware::class,
         //        'CORS' => \App\Http\Middleware\CORS::class,
     ];
 }

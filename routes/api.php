@@ -113,8 +113,10 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::post('/media', [VendorController::class, 'setMedia']);
         Route::post('/media/upload', [VendorController::class, 'setMedia']); // Keeping legacy route
     });
-
-    // Public Routes
-    Route::get('/menu/{vendor_link}', [HomeController::class, 'vendor_site']);
-    Route::get('/qr/{vendor_link}', [HomeController::class, 'vendor_site']); // Legacy QR route
 });
+
+// Public Routes
+Route::get('/menu/{vendor_link}', [HomeController::class, 'vendor_site']);
+Route::get('/qr/{vendor_link}', [HomeController::class, 'vendor_site']); // Legacy QR route
+
+

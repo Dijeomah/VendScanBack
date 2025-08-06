@@ -19,7 +19,7 @@ return new class extends Migration
             $table->integer('user_id')->constrained('users');
             $table->integer('category_id')->constrained('categories');
             $table->integer('sub_category_id')->constrained('sub_categories');
-            $table->string('business_link');
+            $table->integer('business_link_id')->constrained('business_links');
             $table->string('userid');
             $table->string('title');
             $table->text('description')->nullable();

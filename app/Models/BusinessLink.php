@@ -40,4 +40,9 @@ class BusinessLink extends Model
     {
         return $this->hasMany(TableLinkQrData::class, 'bl_id');
     }
+
+    public function items():HasMany
+    {
+        return $this->hasMany(Item::class, 'business_link_id');
+    }
 }

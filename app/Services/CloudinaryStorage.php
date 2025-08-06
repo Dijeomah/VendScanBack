@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use Cloudinary\Api\Upload\UploadApi;
+use Illuminate\Support\Facades\Log;
 
 class CloudinaryStorage
 {
@@ -24,7 +25,8 @@ class CloudinaryStorage
             "folder" => $folder
         ], $options);
 
-        return cloudinary()->upload($file, $uploadOptions)->getSecurePath();
+        $uploadApi = cloudinary()->uploadApi();
+        return $uploadApi->upload($file, $uploadOptions)['secure_url'];
     }
 
     public static function upload(string $image, string $filename): string

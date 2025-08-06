@@ -14,18 +14,23 @@ class DatabaseSeeder extends Seeder
      */
     public function run()
     {
-        // \App\Models\User::factory(10)->create();
+        \App\Models\User::factory()->create([
+            'first_name' => 'Test',
+            'last_name' => 'User',
+            'email' => 'test@example.com',
+            'password' => bcrypt('password'),
+            'role' => 'admin',
+            'phone_number' => '1234567890',
+            'userid' => 'testuser',
+        ]);
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
         $this->call(
             [
                 CountriesTableSeeder::class,
                 StatesTableSeeder::class,
                 CitiesTableSeeder::class,
                 CategoriesSeeder::class,
+                SubCategorySeeder::class,
                 ItemSeeder::class
             ]);
     }

@@ -17,6 +17,8 @@ class QrCodeService
         $base64 = base64_encode($qrCode);
         $dataUri = 'data:image/png;base64,' . $base64;
 
+//        Log::info(json_encode([$url,$qrCode,$base64,$dataUri]));
+
         return CloudinaryStorage::uploadQr(
             $dataUri,
             'qr_' . $businessLink . '_' . time()

@@ -1,6 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Subdomain\VendorSiteController;
+use App\Http\Controllers\SubdomainController;
 
-Route::get('/', [VendorSiteController::class, 'show']);
+Route::get('/', [SubdomainController::class, 'handle']);

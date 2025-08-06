@@ -13,13 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('vendors', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('subdomain')->unique();
-            $table->string('business_link')->unique();
-
-            $table->timestamps();
+        Schema::table('business_links', function (Blueprint $table) {
+            $table->string('subdomain')->unique()->after('business_link');
         });
     }
 
@@ -30,6 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('vendors');
+        Schema::table('business_links', function (Blueprint $table) {
+            $table->dropColumn('subdomain');
+        });
     }
 };

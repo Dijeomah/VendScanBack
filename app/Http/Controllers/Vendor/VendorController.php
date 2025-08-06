@@ -20,10 +20,10 @@ class VendorController extends Controller
 
     public function __construct(VendorRepository $vendorRepository)
     {
-        $this->middleware('vendorCheck', ['except' => ['login', 'register']]);
-        $this->middleware('auth:api');
-        $this->middleware(VendorAccess::class)->except(['index', 'show']);
-        $this->authorizeResource(User::class, 'vendor');
+//        $this->middleware('vendorCheck', ['except' => ['login', 'register']]);
+//        $this->middleware('auth:api');
+        $this->middleware(VendorAccess::class)->except(['show']);
+//        $this->authorizeResource(User::class, 'vendor');
         $this->vendorRepository = $vendorRepository;
     }
 
@@ -92,18 +92,19 @@ class VendorController extends Controller
         try {
 
             $validated_data = $this->validate($request, config('validation.business_info'));
-
             $checkBusinessInfo = $this->vendorRepository->verifyVendorBusinessName($validated_data['business_name']);
             if (!$checkBusinessInfo) {
                 //                DB::transaction(function () use ($validated_data) {
                 $userData = $this->vendorRepository->createVendorData((array) $validated_data);
-                $userBusinessData = $this->vendorRepository->createVendorBusinessLink((array) $validated_data);
+                Log::debug("Creating user data: ".json_encode($userData));
+
+                $userBusinessData = $this->vendorRepository->createVendorBusinessLink((array)$validated_data);
                 return success('Business data created successfully. ', [$userData, $userBusinessData], Response::HTTP_CREATED);
                 //                });
             }
             return error('Business data already exist. ', [], 400);
         } catch (\Exception $exception) {
-            Log::debug('Set Business Name exception: ' . $exception->getMessage() . 'on line: ' . $exception->getLine());
+            Log::debug('Set Business Name exception: ' . $exception->getMessage() . 'on line: ' . $exception->getLine().'Full Error: '.$exception);
         }
         return error('Error creating Business Data. ', [], Response::HTTP_BAD_REQUEST);
     }
@@ -128,7 +129,7 @@ class VendorController extends Controller
         } catch (\Exception $exception) {
             Log::debug('Set Business Link exception: ' . $exception->getMessage() . 'on line: ' . $exception->getLine() . 'Full Error: ' . $exception);
         }
-//        return error('Error creating Business link, try again. ', [], Response::HTTP_BAD_REQUEST);
+        return error('Error creating Business link, try again. ', [], Response::HTTP_BAD_REQUEST);
     }
 
     public function setMedia(Request $request): JsonResponse
