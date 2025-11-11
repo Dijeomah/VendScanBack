@@ -23,9 +23,18 @@ export const useAuthStore = defineStore('auth', {
         const { auth } = useApi()
         const response = await auth.login(credentials)
 
-        const { token, user } = response.data.data
+        console.log('🔐 Login response structure:', response.data)
 
-        this.setAuth(token, user)
+        const { token: tokenObj, user } = response.data.data
+
+        // Extract the actual access_token from the token object
+        const accessToken = tokenObj.access_token
+
+        console.log('🔑 Token object:', tokenObj)
+        console.log('🔑 Access token:', accessToken)
+        console.log('👤 User:', user)
+
+        this.setAuth(accessToken, user)
         return user
       } catch (error) {
         console.error('Login error:', error)
@@ -68,23 +77,37 @@ export const useAuthStore = defineStore('auth', {
         const { auth } = useApi()
         const response = await auth.refresh()
 
-        // Refresh endpoint returns data directly (not wrapped in data.data)
-        const { token, user } = response.data
+        console.log('🔄 Refresh response:', response.data)
 
-        this.setAuth(token, user)
+        // Refresh endpoint returns data directly (not wrapped in data.data)
+        // and also returns token object with access_token inside
+        const accessToken = response.data.access_token
+        const user = response.data.user
+
+        console.log('🔄 Refresh access token:', accessToken)
+        console.log('🔄 Refresh user:', user)
+
+        this.setAuth(accessToken, user)
       } catch (error) {
+        console.error('🔄 Refresh error:', error)
         this.clearAuth()
         throw error
       }
     },
 
     setAuth(token, user) {
+      console.log('💾 Setting auth - Token:', token)
+      console.log('💾 Setting auth - User:', user)
+
       this.token = token
       this.user = user
       this.isAuthenticated = true
 
       localStorage.setItem('token', token)
       localStorage.setItem('user', JSON.stringify(user))
+
+      console.log('✅ Auth set in localStorage')
+      console.log('✅ Store token:', this.token)
     },
 
     clearAuth() {

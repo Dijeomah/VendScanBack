@@ -17,8 +17,16 @@ api.interceptors.request.use(
     const authStore = useAuthStore()
     const token = authStore.token
 
+    console.log('📤 Request interceptor')
+    console.log('📤 URL:', config.url)
+    console.log('📤 Token from store:', token)
+    console.log('📤 Token type:', typeof token)
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
+      console.log('✅ Authorization header set')
+    } else {
+      console.warn('⚠️ No token available for request')
     }
 
     return config
