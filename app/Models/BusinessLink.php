@@ -14,30 +14,35 @@ class BusinessLink extends Model
 
     protected $guarded = [];
 
-    public function vendor():HasMany
+    public function vendor(): HasMany
     {
         return $this->hasMany(Vendor::class);
     }
 
-    public function vendor_data():BelongsTo
+    public function vendor_data(): BelongsTo
     {
         return $this->belongsTo(VendorData::class, 'vd_id');
     }
 
-    public function business_links():HasMany
+    public function business_links(): HasMany
     {
         return $this->hasMany(BusinessLink::class, 'id');
 //        return $this->belongsTo(BusinessLink::class, 'uid');
     }
 
-    public function business_data():HasOne
+    public function business_data(): HasOne
     {
         return $this->hasOne(BusinessData::class, 'bd_id');
 //        return $this->belongsTo(BusinessLink::class, 'uid');
     }
 
-    public function table_link_qr_data():HasMany
+    public function table_link_qr_data(): HasMany
     {
         return $this->hasMany(TableLinkQrData::class, 'bl_id');
+    }
+
+    public function items(): HasMany
+    {
+        return $this->hasMany(Item::class, 'category_id');
     }
 }
