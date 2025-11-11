@@ -168,6 +168,19 @@
               />
             </div>
 
+              <!-- Address -->
+              <div>
+                  <label for="business_address" class="block text-sm font-medium text-gray-700 mb-2">
+                      Business Address
+                  </label>
+                  <input
+                      id="business_address"
+                      v-model="businessForm.business_address"
+                      type="text"
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+              </div>
+
             <!-- Country -->
             <div>
               <label for="country" class="block text-sm font-medium text-gray-700 mb-2">
@@ -498,7 +511,7 @@ const updateBusiness = async () => {
   businessSubmitting.value = true
   try {
     // await vendorStore.setBusinessLink(businessForm.value)
-    await vendorStore.setBusinessLink(businessForm.value)
+    await vendorStore.setBusinessInfo(businessForm.value)
     toast.success('Business information updated successfully!')
     await loadSettings()
   } catch (error) {

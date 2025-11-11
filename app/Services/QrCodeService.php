@@ -32,8 +32,10 @@ class QrCodeService
                 $dataUri,
                 'qr_' . $businessLink . '_' . time()
             );
+            //this is the response from the above code:
+            //[2025-11-11 23:36:22] local.ERROR: QR Code generation failed: Trying to access array offset on null::On File::/Users/dramesuccess/Documents/Laravel/qr-app/vendor/cloudinary-labs/cloudinary-laravel/src/CloudinaryServiceProvider.php::On Line::64
         } catch (\Exception $e) {
-            Log::error('QR Code generation failed: ' . $e->getMessage());
+            Log::error('QR Code generation failed: ' . $e->getMessage(). '::On File::'.$e->getFile().'::On Line::'.$e->getLine());
             throw $e;
         }
     }

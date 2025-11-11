@@ -31,12 +31,12 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::post('/login', [AuthController::class, 'login']);
         Route::post('/logout', [AuthController::class, 'logout']);
         Route::post('/refresh', [AuthController::class, 'refresh']);
-
-    });
         // Location endpoints
         Route::get('/countries', [AuthController::class, 'country']);
         Route::get('/states/{country_id}', [AuthController::class, 'state']);
         Route::get('/cities/{state_id}', [AuthController::class, 'city']);
+
+    });
 
     // Admin Routes
     Route::group([
