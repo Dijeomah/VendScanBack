@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
+use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class VendorController extends Controller
 {
@@ -115,6 +116,7 @@ class VendorController extends Controller
      */
     public function setBusinessLink(Request $request): JsonResponse
     {
+        Log::debug('Set Business Link request: ' . json_encode($request->all()));
         try {
             $validated_data = $this->validate($request, config('validation.set_business_name'));
 
@@ -122,13 +124,14 @@ class VendorController extends Controller
             if (!$checkBusinessLink || $checkBusinessLink->business_name != $validated_data['business_name']) {
 
                 $userData = $this->vendorRepository->createVendorBusinessLink($validated_data);
-                return success('Business link created successful. ', $userData, Response::HTTP_OK);
+                return success('Business link created successful. ', $userData, ResponseAlias::HTTP_OK);
             }
-            return error('Business link already exist, try another link. ', [], Response::HTTP_BAD_REQUEST);
+            return error('Business link already exist, try another link. ', [], ResponseAlias::HTTP_BAD_REQUEST);
         } catch (\Exception $exception) {
             Log::debug('Set Business Link exception: ' . $exception->getMessage() . 'on line: ' . $exception->getLine() . 'Full Error: ' . $exception);
+            return error('Error creating Business link, please try again. ', [], ResponseAlias::HTTP_BAD_REQUEST);
         }
-//        return error('Error creating Business link, try again. ', [], Response::HTTP_BAD_REQUEST);
+//        return error('Error creating Business link, try again. ', [], ResponseAlias::HTTP_BAD_REQUEST);
     }
 
     public function setMedia(Request $request): JsonResponse

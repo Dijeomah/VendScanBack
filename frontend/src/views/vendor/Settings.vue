@@ -168,6 +168,44 @@
               />
             </div>
 
+              <!-- City -->
+              <div>
+                  <label for="city" class="block text-sm font-medium text-gray-700 mb-2">
+                      City
+                  </label>
+                  <input
+                      id="city"
+                      v-model="businessForm.city"
+                      type="tel"
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+              </div>
+
+              <!-- State -->
+              <div>
+                  <label for="state" class="block text-sm font-medium text-gray-700 mb-2">
+                      State
+                  </label>
+                  <input
+                      id="state"
+                      v-model="businessForm.state"
+                      type="tel"
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+              </div>
+
+              <div>
+                  <label for="country" class="block text-sm font-medium text-gray-700 mb-2">
+                      Country
+                  </label>
+                  <input
+                      id="business_phone"
+                      v-model="businessForm.country"
+                      type="tel"
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  />
+              </div>
+
             <!-- Submit Button -->
             <div class="flex justify-end pt-6 border-t border-gray-200">
               <button
@@ -431,8 +469,8 @@ const updateProfile = async () => {
 
 const updateBusiness = async () => {
   businessSubmitting.value = true
-
   try {
+    // await vendorStore.setBusinessLink(businessForm.value)
     await vendorStore.setBusinessLink(businessForm.value)
     toast.success('Business information updated successfully!')
     await loadSettings()
