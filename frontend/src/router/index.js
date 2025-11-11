@@ -1,0 +1,161 @@
+import { createRouter, createWebHistory } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+
+const routes = [
+  // Auth routes
+  {
+    path: '/login',
+    name: 'login',
+    component: () => import('@/views/Login.vue'),
+    meta: { guest: true, title: 'Login' }
+  },
+  {
+    path: '/register',
+    name: 'register',
+    component: () => import('@/views/Register.vue'),
+    meta: { guest: true, title: 'Register' }
+  },
+
+  // Public menu routes
+  {
+    path: '/menu/:vendorLink',
+    name: 'public-menu',
+    component: () => import('@/views/menu/PublicMenu.vue'),
+    meta: { title: 'Menu' }
+  },
+
+  // Vendor routes
+  {
+    path: '/vendor',
+    redirect: '/vendor/dashboard',
+  },
+  {
+    path: '/vendor/dashboard',
+    name: 'vendor-dashboard',
+    component: () => import('@/views/vendor/Dashboard.vue'),
+    meta: { requiresAuth: true, role: 'vendor', title: 'Dashboard' }
+  },
+  {
+    path: '/vendor/menu',
+    name: 'vendor-menu',
+    component: () => import('@/views/vendor/MenuManagement.vue'),
+    meta: { requiresAuth: true, role: 'vendor', title: 'Menu Management' }
+  },
+  {
+    path: '/vendor/items/create',
+    name: 'vendor-item-create',
+    component: () => import('@/views/vendor/ItemCreate.vue'),
+    meta: { requiresAuth: true, role: 'vendor', title: 'Create Item' }
+  },
+  {
+    path: '/vendor/items/:id/edit',
+    name: 'vendor-item-edit',
+    component: () => import('@/views/vendor/ItemEdit.vue'),
+    meta: { requiresAuth: true, role: 'vendor', title: 'Edit Item' }
+  },
+  {
+    path: '/vendor/settings',
+    name: 'vendor-settings',
+    component: () => import('@/views/vendor/Settings.vue'),
+    meta: { requiresAuth: true, role: 'vendor', title: 'Settings' }
+  },
+
+  // Admin routes
+  {
+    path: '/admin',
+    redirect: '/admin/dashboard',
+  },
+  {
+    path: '/admin/dashboard',
+    name: 'admin-dashboard',
+    component: () => import('@/views/admin/Dashboard.vue'),
+    meta: { requiresAuth: true, role: 'admin', title: 'Admin Dashboard' }
+  },
+  {
+    path: '/admin/vendors',
+    name: 'admin-vendors',
+    component: () => import('@/views/admin/VendorList.vue'),
+    meta: { requiresAuth: true, role: 'admin', title: 'Vendors' }
+  },
+  {
+    path: '/admin/vendors/create',
+    name: 'admin-vendor-create',
+    component: () => import('@/views/admin/VendorCreate.vue'),
+    meta: { requiresAuth: true, role: 'admin', title: 'Create Vendor' }
+  },
+  {
+    path: '/admin/vendors/:id/edit',
+    name: 'admin-vendor-edit',
+    component: () => import('@/views/admin/VendorEdit.vue'),
+    meta: { requiresAuth: true, role: 'admin', title: 'Edit Vendor' }
+  },
+
+  // Default route
+  {
+    path: '/',
+    redirect: '/login'
+  },
+  
+  // 404 Not Found
+  {
+    path: '/:pathMatch(.*)*',
+    name: 'not-found',
+    component: () => import('@/views/NotFound.vue'),
+    meta: { title: 'Not Found' }
+  }
+]
+
+const router = createRouter({
+  history: createWebHistory(),
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { top: 0 }
+    }
+  }
+})
+
+// Navigation guard
+router.beforeEach((to, from, next) => {
+  const authStore = useAuthStore()
+  authStore.initAuth()
+
+  const requiresAuth = to.matched.some(record => record.meta.requiresAuth)
+  const isGuest = to.matched.some(record => record.meta.guest)
+  const requiredRole = to.meta.role
+
+  // Set page title
+  document.title = to.meta.title ? `${to.meta.title} - QR Menu` : 'QR Menu Management System'
+
+  if (requiresAuth && !authStore.isAuthenticated) {
+    // Redirect to login if not authenticated
+    next({ name: 'login', query: { redirect: to.fullPath } })
+  } else if (isGuest && authStore.isAuthenticated) {
+    // Redirect authenticated users away from guest pages
+    if (authStore.isAdmin) {
+      next('/admin/dashboard')
+    } else if (authStore.isVendor) {
+      next('/vendor/dashboard')
+    } else {
+      next('/')
+    }
+  } else if (requiredRole && authStore.user?.role !== requiredRole) {
+    // Role-based access control
+    console.warn(`Access denied. Required role: ${requiredRole}, User role: ${authStore.user?.role}`)
+    
+    // Redirect to appropriate dashboard
+    if (authStore.isAdmin) {
+      next('/admin/dashboard')
+    } else if (authStore.isVendor) {
+      next('/vendor/dashboard')
+    } else {
+      next('/login')
+    }
+  } else {
+    next()
+  }
+})
+
+export default router
