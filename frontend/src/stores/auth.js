@@ -25,8 +25,6 @@ export const useAuthStore = defineStore('auth', {
 
         const { token, user } = response.data.data
 
-          console.log('Login successful:', response.data.data);
-
         this.setAuth(token, user)
         return user
       } catch (error) {
@@ -69,9 +67,11 @@ export const useAuthStore = defineStore('auth', {
       try {
         const { auth } = useApi()
         const response = await auth.refresh()
-        const { access_token, user } = response.data
 
-        this.setAuth(access_token, user)
+        // Refresh endpoint returns data directly (not wrapped in data.data)
+        const { token, user } = response.data
+
+        this.setAuth(token, user)
       } catch (error) {
         this.clearAuth()
         throw error

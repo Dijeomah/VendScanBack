@@ -33,14 +33,26 @@ api.interceptors.response.use(
     const originalRequest = error.config
     const authStore = useAuthStore()
 
-    if (error.response?.status === 401 && !originalRequest._retry) {
+    // Don't try to refresh if this IS the refresh request or login/register
+    const isAuthEndpoint = originalRequest.url?.includes('/auth/login') ||
+                          originalRequest.url?.includes('/auth/register') ||
+                          originalRequest.url?.includes('/auth/refresh')
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
       originalRequest._retry = true
 
       try {
         await authStore.refreshToken()
+        // Update the Authorization header with the new token
+        originalRequest.headers.Authorization = `Bearer ${authStore.token}`
         return api(originalRequest)
       } catch (refreshError) {
-        authStore.logout()
+        // Token refresh failed, logout user
+        authStore.clearAuth()
+        // Redirect to login if we have a router
+        if (typeof window !== 'undefined') {
+          window.location.href = '/login'
+        }
         return Promise.reject(refreshError)
       }
     }
@@ -58,7 +70,7 @@ export function useApi() {
       login: (credentials) => api.post('/auth/login', credentials),
       register: (data) => api.post('/auth/register', data),
       logout: () => api.post('/auth/logout'),
-      refresh: (credentials) => api.post('/auth/refresh', credentials),
+      refresh: () => api.post('/auth/refresh'),
       getCountries: () => api.get('/auth/countries'),
       getStates: (countryId) => api.get(`/auth/states/${countryId}`),
       getCities: (stateId) => api.get(`/auth/cities/${stateId}`),
