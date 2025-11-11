@@ -168,43 +168,58 @@
               />
             </div>
 
-              <!-- City -->
-              <div>
-                  <label for="city" class="block text-sm font-medium text-gray-700 mb-2">
-                      City
-                  </label>
-                  <input
-                      id="city"
-                      v-model="businessForm.city"
-                      type="tel"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  />
-              </div>
+            <!-- Country -->
+            <div>
+              <label for="country" class="block text-sm font-medium text-gray-700 mb-2">
+                Country
+              </label>
+              <select
+                id="country"
+                v-model="businessForm.country_id"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              >
+                <option value="">Select a country</option>
+                <option v-for="country in countries" :key="country.id" :value="country.id">
+                  {{ country.name }}
+                </option>
+              </select>
+            </div>
 
-              <!-- State -->
-              <div>
-                  <label for="state" class="block text-sm font-medium text-gray-700 mb-2">
-                      State
-                  </label>
-                  <input
-                      id="state"
-                      v-model="businessForm.state"
-                      type="tel"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  />
-              </div>
+            <!-- State -->
+            <div>
+              <label for="state" class="block text-sm font-medium text-gray-700 mb-2">
+                State
+              </label>
+              <select
+                id="state"
+                v-model="businessForm.state_id"
+                :disabled="!businessForm.country_id || loadingStates"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="">{{ loadingStates ? 'Loading states...' : 'Select a state' }}</option>
+                <option v-for="state in states" :key="state.id" :value="state.id">
+                  {{ state.name }}
+                </option>
+              </select>
+            </div>
 
-              <div>
-                  <label for="country" class="block text-sm font-medium text-gray-700 mb-2">
-                      Country
-                  </label>
-                  <input
-                      id="business_phone"
-                      v-model="businessForm.country"
-                      type="tel"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  />
-              </div>
+            <!-- City -->
+            <div>
+              <label for="city" class="block text-sm font-medium text-gray-700 mb-2">
+                City
+              </label>
+              <select
+                id="city"
+                v-model="businessForm.city_id"
+                :disabled="!businessForm.state_id || loadingCities"
+                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+              >
+                <option value="">{{ loadingCities ? 'Loading cities...' : 'Select a city' }}</option>
+                <option v-for="city in cities" :key="city.id" :value="city.id">
+                  {{ city.name }}
+                </option>
+              </select>
+            </div>
 
             <!-- Submit Button -->
             <div class="flex justify-end pt-6 border-t border-gray-200">
@@ -362,14 +377,16 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useVendorStore } from '@/stores/vendor'
 import { useAuthStore } from '@/stores/auth'
+import { useApi } from '@/composables/useApi'
 import { useToast } from 'vue-toastification'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 
 const vendorStore = useVendorStore()
 const authStore = useAuthStore()
+const { auth } = useApi()
 const toast = useToast()
 
 const loading = ref(true)
@@ -389,9 +406,19 @@ const profileSubmitting = ref(false)
 const businessForm = ref({
   business_name: '',
   business_type: '',
-  phone_number: ''
+  phone_number: '',
+  country_id: '',
+  state_id: '',
+  city_id: ''
 })
 const businessSubmitting = ref(false)
+
+// Location data
+const countries = ref([])
+const states = ref([])
+const cities = ref([])
+const loadingStates = ref(false)
+const loadingCities = ref(false)
 
 // Media uploads
 const logoFile = ref(null)
@@ -533,6 +560,83 @@ const regenerateQR = async () => {
   }
 }
 
+// Fetch countries
+const fetchCountries = async () => {
+  try {
+    const response = await auth.getCountries()
+    countries.value = response.data.data || response.data || []
+  } catch (error) {
+    console.error('Error fetching countries:', error)
+    toast.error('Failed to load countries')
+  }
+}
+
+// Fetch states for selected country
+const fetchStates = async (countryId) => {
+  if (!countryId) {
+    states.value = []
+    return
+  }
+
+  loadingStates.value = true
+  try {
+    const response = await auth.getStates(countryId)
+    states.value = response.data.data || response.data || []
+  } catch (error) {
+    console.error('Error fetching states:', error)
+    toast.error('Failed to load states')
+    states.value = []
+  } finally {
+    loadingStates.value = false
+  }
+}
+
+// Fetch cities for selected state
+const fetchCities = async (stateId) => {
+  if (!stateId) {
+    cities.value = []
+    return
+  }
+
+  loadingCities.value = true
+  try {
+    const response = await auth.getCities(stateId)
+    cities.value = response.data.data || response.data || []
+  } catch (error) {
+    console.error('Error fetching cities:', error)
+    toast.error('Failed to load cities')
+    cities.value = []
+  } finally {
+    loadingCities.value = false
+  }
+}
+
+// Watch for country changes
+watch(() => businessForm.value.country_id, async (newCountryId) => {
+  // Clear state and city when country changes
+  businessForm.value.state_id = ''
+  businessForm.value.city_id = ''
+  states.value = []
+  cities.value = []
+
+  // Fetch states for new country
+  if (newCountryId) {
+    await fetchStates(newCountryId)
+  }
+})
+
+// Watch for state changes
+watch(() => businessForm.value.state_id, async (newStateId) => {
+  // Clear city when state changes
+  businessForm.value.city_id = ''
+  cities.value = []
+
+  // Fetch cities for new state
+  if (newStateId) {
+    await fetchCities(newStateId)
+  }
+})
+
 const loadSettings = async () => {
   try {
     await vendorStore.fetchFullProfile()
@@ -552,7 +656,18 @@ const loadSettings = async () => {
       businessForm.value = {
         business_name: vendorData.value.business_name || '',
         business_type: businessLink.business_type || '',
-        phone_number: businessLink.phone_number || ''
+        phone_number: businessLink.phone_number || '',
+        country_id: businessLink.country_id || '',
+        state_id: businessLink.state_id || '',
+        city_id: businessLink.city_id || ''
+      }
+
+      // If we have existing location data, fetch dependent dropdowns
+      if (businessLink.country_id) {
+        await fetchStates(businessLink.country_id)
+        if (businessLink.state_id) {
+          await fetchCities(businessLink.state_id)
+        }
       }
     }
   } catch (error) {
@@ -563,8 +678,11 @@ const loadSettings = async () => {
   }
 }
 
-onMounted(() => {
-  loadSettings()
+onMounted(async () => {
+  // Fetch countries first
+  await fetchCountries()
+  // Then load settings
+  await loadSettings()
 })
 </script>
 
