@@ -420,6 +420,7 @@ const businessForm = ref({
   business_name: '',
   business_type: '',
   phone_number: '',
+  business_address: '',
   country_id: '',
   state_id: '',
   city_id: ''
@@ -670,6 +671,7 @@ const loadSettings = async () => {
         business_name: vendorData.value.business_name || '',
         business_type: businessLink.business_type || '',
         phone_number: businessLink.phone_number || '',
+        business_address: businessLink.business_address || '',
         country_id: businessLink.country_id || '',
         state_id: businessLink.state_id || '',
         city_id: businessLink.city_id || ''

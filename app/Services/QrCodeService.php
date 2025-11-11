@@ -25,23 +25,34 @@ class QrCodeService
 
             // Check if Cloudinary is configured
             if (config('cloudinary.cloud_url')) {
-                // Upload to Cloudinary if configured
-                $base64 = base64_encode($qrCode);
-                $dataUri = 'data:image/svg+xml;base64,' . $base64;
+                try {
+                    // Try to upload to Cloudinary if configured
+                    $base64 = base64_encode($qrCode);
+                    $dataUri = 'data:image/svg+xml;base64,' . $base64;
 
-                return CloudinaryStorage::uploadQr(
-                    $dataUri,
-                    'qr_' . $businessLink . '_' . time()
-                );
-            } else {
-                // Fallback to local storage if Cloudinary is not configured
-                Log::warning('Cloudinary not configured, storing QR code locally');
+                    $cloudinaryUrl = CloudinaryStorage::uploadQr(
+                        $dataUri,
+                        'qr_' . $businessLink . '_' . time()
+                    );
 
-                $filename = 'qr_codes/qr_' . $businessLink . '_' . time() . '.svg';
-                Storage::disk('public')->put($filename, $qrCode);
+                    Log::info('QR code uploaded to Cloudinary successfully');
+                    return $cloudinaryUrl;
+                } catch (\Exception $cloudinaryError) {
+                    // If Cloudinary upload fails, log the error and fall back to local storage
+                    Log::error('Cloudinary upload failed, falling back to local storage: ' . $cloudinaryError->getMessage());
 
-                return Storage::disk('public')->url($filename);
+                    // Fall through to local storage
+                }
             }
+
+            // Use local storage (either Cloudinary not configured or upload failed)
+            Log::warning('Storing QR code locally');
+
+            $filename = 'qr_codes/qr_' . $businessLink . '_' . time() . '.svg';
+            Storage::disk('public')->put($filename, $qrCode);
+
+            return Storage::disk('public')->url($filename);
+
         } catch (\Exception $e) {
             Log::error('QR Code generation failed: ' . $e->getMessage(). '::On File::'.$e->getFile().'::On Line::'.$e->getLine());
             throw $e;
