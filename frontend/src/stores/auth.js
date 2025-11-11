@@ -22,9 +22,12 @@ export const useAuthStore = defineStore('auth', {
       try {
         const { auth } = useApi()
         const response = await auth.login(credentials)
-        const { access_token, user } = response.data
 
-        this.setAuth(access_token, user)
+        const { token, user } = response.data.data
+
+          console.log('Login successful:', response.data.data);
+
+        this.setAuth(token, user)
         return user
       } catch (error) {
         console.error('Login error:', error)

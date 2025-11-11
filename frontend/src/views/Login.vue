@@ -207,7 +207,7 @@ const handleLogin = async () => {
     }
   } catch (error) {
     console.error('Login error:', error)
-    
+
     if (error.response?.status === 401) {
       errors.general = 'Invalid email or password'
     } else if (error.response?.data?.message) {
@@ -215,7 +215,7 @@ const handleLogin = async () => {
     } else {
       errors.general = 'An error occurred during login. Please try again.'
     }
-    
+
     toast.error(errors.general)
   } finally {
     loading.value = false

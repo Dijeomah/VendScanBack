@@ -68,7 +68,7 @@
             </label>
             <input
               id="phone"
-              v-model="form.phone"
+              v-model="form.phone_number"
               type="tel"
               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
               placeholder="+1 (555) 000-0000"
@@ -217,7 +217,7 @@ const form = reactive({
   first_name: '',
   last_name: '',
   email: '',
-  phone: '',
+    phone_number: '',
   password: '',
   password_confirmation: '',
   role: 'vendor',
@@ -244,7 +244,7 @@ const handleRegister = async () => {
 
   try {
     const user = await authStore.register(form)
-    
+
     toast.success('Account created successfully!')
 
     // Redirect based on role
@@ -255,7 +255,7 @@ const handleRegister = async () => {
     }
   } catch (error) {
     console.error('Registration error:', error)
-    
+
     if (error.response?.data?.message) {
       errors.general = error.response.data.message
     } else if (error.response?.data?.errors) {
@@ -264,7 +264,7 @@ const handleRegister = async () => {
     } else {
       errors.general = 'An error occurred during registration. Please try again.'
     }
-    
+
     toast.error(errors.general)
   } finally {
     loading.value = false

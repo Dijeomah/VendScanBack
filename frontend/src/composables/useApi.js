@@ -58,7 +58,7 @@ export function useApi() {
       login: (credentials) => api.post('/auth/login', credentials),
       register: (data) => api.post('/auth/register', data),
       logout: () => api.post('/auth/logout'),
-      refresh: () => api.post('/auth/refresh'),
+      refresh: (credentials) => api.post('/auth/refresh', credentials),
       getCountries: () => api.get('/auth/countries'),
       getStates: (countryId) => api.get(`/auth/states/${countryId}`),
       getCities: (stateId) => api.get(`/auth/cities/${stateId}`),
