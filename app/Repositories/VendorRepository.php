@@ -108,7 +108,7 @@ class VendorRepository implements VendorInterface
 
     public function getVendorWithMenu(string $userId)
     {
-        return User::with([
+        $fullVendor =  User::with([
             'businessLinks.items' => function ($query) {
                 $query->where('status', true)
                     ->orderBy('category_id')
@@ -116,8 +116,11 @@ class VendorRepository implements VendorInterface
             },
             'businessLinks.items.category',
             'vendor_media'
-        ])
-            ->where('userid', $userId)
-            ->firstOrFail();
+        ])->where('userid', $userId)->first();
+
+        if (!$fullVendor) {
+            return [];
+        }
+        return $fullVendor;
     }
 }
