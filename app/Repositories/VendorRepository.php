@@ -94,6 +94,7 @@ class VendorRepository implements VendorInterface
             'userid' => auth()->user()->userid,
             'business_name' => $payload['business_name'],
             'business_link' => $uniqueSlug,
+            'subdomain' => $uniqueSlug,
             'business_qr' => $this->qrCodeService->generateForVendor($uniqueSlug),
         ]);
     }
