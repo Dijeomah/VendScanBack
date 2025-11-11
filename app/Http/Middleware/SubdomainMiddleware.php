@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use App\Models\BusinessLink;
+use App\Models\Vendor;
 
 class SubdomainMiddleware
 {
@@ -11,12 +11,12 @@ class SubdomainMiddleware
     {
         $subdomain = $request->route('subdomain');
 
-        if (!$business = BusinessLink::where('business_link', $subdomain)->first()) {
-            abort(404, 'Business not found');
+        if (!$vendor = Vendor::where('subdomain', $subdomain)->first()) {
+            abort(404, 'Vendor not found');
         }
 
-        // Make business available to all controllers
-        $request->attributes->add(['currentBusiness' => $business]);
+        // Make vendor available to all controllers
+        $request->attributes->add(['currentVendor' => $vendor]);
 
         return $next($request);
     }

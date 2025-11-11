@@ -22,6 +22,14 @@ class VendorRepository implements VendorInterface
         $this->qrCodeService = $qrCodeService;
     }
 
+    public function getVendor(string $userId)
+    {
+        return User::with([
+            'user_data'
+        ])
+            ->where('userid', $userId)
+            ->firstOrFail();
+    }
     public function getVendorDetails(string $userId)
     {
         return User::with([

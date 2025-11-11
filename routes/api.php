@@ -83,6 +83,7 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::get('/full-profile', [VendorController::class, 'getVendorWithMenu']);
 
         // Profile Section
+        Route::get('/me', [VendorController::class, 'userData']);
         Route::get('/profile', [VendorController::class, 'profile']);
         Route::get('/profile/edit', [VendorController::class, 'editProfile']);
         Route::put('/profile/update', [VendorController::class, 'updateProfile']);

@@ -30,7 +30,7 @@ class RouteServiceProvider extends ServiceProvider
 
         $this->routes(function () {
             // Handle subdomain routes
-            Route::domain('{subdomain}.'.env('APP_DOMAIN', 'qr-app.dev'))
+            Route::domain('{subdomain}.'.env('APP_DOMAIN', 'qr-app.test'))
                 ->middleware(['subdomain_api', 'subdomain'])
                 ->group(base_path('routes/subdomain.php'));
 

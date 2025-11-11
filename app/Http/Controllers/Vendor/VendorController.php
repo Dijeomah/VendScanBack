@@ -35,6 +35,17 @@ class VendorController extends Controller
     }
 
 
+    public function userData(): JsonResponse
+    {
+        try {
+            $user_id = authUser()->userid;
+            $user = $this->vendorRepository->getVendor($user_id);
+            return success('Vendor Information ', $user, Response::HTTP_OK);
+        } catch (\Exception $exception) {
+            Log::debug('Profile fetch exception: ' . $exception->getMessage() . 'on line: ' . $exception->getLine());
+        }
+        return error('Error fetching Profile, please try again. ', [], 400);
+    }
     public function profile(): JsonResponse
     {
         try {
