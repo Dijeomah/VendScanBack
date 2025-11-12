@@ -1,25 +1,12 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center py-4">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900">Dashboard</h1>
-            <p class="text-sm text-gray-600 mt-1">Welcome back, {{ authStore.userName }}!</p>
-          </div>
-          <button
-            @click="logout"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all"
-          >
-            Logout
-          </button>
+  <VendorLayout>
+    <div class="p-4 md:p-8">
+      <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6">
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p class="text-gray-600 mt-1">Welcome back, {{ authStore.userName }}!</p>
         </div>
-      </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Loading State -->
       <div v-if="loading" class="flex justify-center items-center h-64">
         <LoadingSpinner size="lg" text="Loading dashboard..." />
@@ -258,19 +245,17 @@
           </div>
         </div>
       </div>
-    </main>
-  </div>
+    </div>
+  </VendorLayout>
 </template>
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useVendorStore } from '@/stores/vendor'
 import { useToast } from 'vue-toastification'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
-
-const router = useRouter()
+import VendorLayout from '@/components/layouts/VendorLayout.vue'
 const authStore = useAuthStore()
 const vendorStore = useVendorStore()
 const toast = useToast()
@@ -312,16 +297,6 @@ onMounted(async () => {
     loading.value = false
   }
 })
-
-const logout = async () => {
-  try {
-    await authStore.logout()
-    toast.success('Logged out successfully')
-    router.push('/login')
-  } catch (error) {
-    console.error('Logout error:', error)
-  }
-}
 
 const downloadQR = () => {
   if (vendorStore.vendor?.qr_code_url) {

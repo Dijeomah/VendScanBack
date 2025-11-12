@@ -90,8 +90,14 @@ export function useApi() {
       getProfile: () => api.get('/vendor/profile'),
       getFullProfile: () => api.get('/vendor/full-profile'),
       updateProfile: (data) => api.put('/vendor/profile/update', data),
+
+      // Business management
+      getBusinessLinks: () => api.get('/vendor/business-links'),
       setBusinessInfo: (data) => api.post('/vendor/business-info', data),
+      updateBusinessInfo: (id, data) => api.put(`/vendor/business-info/${id}`, data),
+      deleteBusinessLink: (id) => api.delete(`/vendor/business-links/${id}`),
       setBusinessLink: (data) => api.post('/vendor/business-links', data),
+
       uploadMedia: (formData) => api.post('/vendor/media', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       }),

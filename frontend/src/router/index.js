@@ -54,6 +54,12 @@ const routes = [
     meta: { requiresAuth: true, role: 'vendor', title: 'Edit Item' }
   },
   {
+    path: '/vendor/businesses',
+    name: 'vendor-businesses',
+    component: () => import('@/views/vendor/BusinessManagement.vue'),
+    meta: { requiresAuth: true, role: 'vendor', title: 'Business Management' }
+  },
+  {
     path: '/vendor/settings',
     name: 'vendor-settings',
     component: () => import('@/views/vendor/Settings.vue'),
