@@ -534,10 +534,10 @@ const uploadMedia = async () => {
   try {
     const formData = new FormData()
     if (logoFile.value) {
-      formData.append('logo', logoFile.value)
+      formData.append('logo_file', logoFile.value)
     }
     if (heroFile.value) {
-      formData.append('hero_image', heroFile.value)
+      formData.append('hero_file', heroFile.value)
     }
 
     await vendorStore.uploadMedia(formData)
