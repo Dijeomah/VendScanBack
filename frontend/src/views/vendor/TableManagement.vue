@@ -244,6 +244,81 @@
       </div>
     </Transition>
 
+    <!-- Edit Table Modal -->
+    <Transition name="modal">
+      <div v-if="showEditModal" class="fixed inset-0 z-50 overflow-y-auto" @click.self="showEditModal = false">
+        <div class="flex items-center justify-center min-h-screen p-4">
+          <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"></div>
+
+          <div class="relative bg-white rounded-2xl max-w-lg w-full shadow-xl p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4">Edit Table</h3>
+
+            <form @submit.prevent="updateTable" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Table Number *</label>
+                <input
+                  v-model="tableForm.table_number"
+                  type="text"
+                  required
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="e.g., Table 1, T-05"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Table Name (Optional)</label>
+                <input
+                  v-model="tableForm.table_name"
+                  type="text"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="e.g., Window Booth"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Number of Seats</label>
+                <input
+                  v-model.number="tableForm.seats"
+                  type="number"
+                  min="1"
+                  max="50"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="4"
+                />
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Notes (Optional)</label>
+                <textarea
+                  v-model="tableForm.notes"
+                  rows="3"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  placeholder="Any special notes about this table..."
+                ></textarea>
+              </div>
+
+              <div class="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  @click="showEditModal = false"
+                  class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  :disabled="submitting"
+                  class="flex-1 px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 disabled:opacity-50"
+                >
+                  {{ submitting ? 'Updating...' : 'Update Table' }}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </Transition>
+
     <!-- Bulk Create Modal -->
     <Transition name="modal">
       <div v-if="showBulkCreateModal" class="fixed inset-0 z-50 overflow-y-auto" @click.self="showBulkCreateModal = false">
@@ -390,10 +465,12 @@ const selectedBusinessId = ref('')
 const tables = ref([])
 
 const showCreateModal = ref(false)
+const showEditModal = ref(false)
 const showBulkCreateModal = ref(false)
 const showQRModal = ref(false)
 const showDeleteModal = ref(false)
 const selectedTable = ref(null)
+const tableToEdit = ref(null)
 const tableToDelete = ref(null)
 
 const tableForm = ref({
@@ -474,8 +551,33 @@ const bulkCreateTables = async () => {
 }
 
 const editTable = (table) => {
-  // TODO: Implement edit functionality
-  toast.info('Edit functionality coming soon!')
+  tableToEdit.value = table
+  tableForm.value = {
+    table_number: table.table_number,
+    table_name: table.table_name || '',
+    seats: table.seats || 4,
+    notes: table.notes || ''
+  }
+  showEditModal.value = true
+}
+
+const updateTable = async () => {
+  if (!tableToEdit.value) return
+
+  submitting.value = true
+  try {
+    await vendor.updateTable(selectedBusinessId.value, tableToEdit.value.id, tableForm.value)
+    toast.success('Table updated successfully!')
+    showEditModal.value = false
+    tableToEdit.value = null
+    tableForm.value = { table_number: '', table_name: '', seats: 4, notes: '' }
+    await loadTables()
+  } catch (error) {
+    console.error('Error updating table:', error)
+    toast.error(error.response?.data?.message || 'Failed to update table')
+  } finally {
+    submitting.value = false
+  }
 }
 
 const viewQRCode = (table) => {
