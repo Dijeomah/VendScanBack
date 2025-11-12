@@ -91,6 +91,53 @@
           </div>
         </div>
 
+        <!-- Subscription Tier Card -->
+        <div class="bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg shadow-sm p-6 text-white">
+          <div class="flex items-center justify-between">
+            <div>
+              <p class="text-sm font-medium text-primary-100 mb-1">Current Plan</p>
+              <h3 class="text-2xl font-bold capitalize">{{ authStore.user?.subscription_tier || 'Free' }} Plan</h3>
+              <p class="text-sm text-primary-100 mt-2">
+                {{ authStore.user?.business_links?.length || 0 }} of {{ getBusinessLimit() }} businesses created
+              </p>
+            </div>
+            <div class="text-right">
+              <router-link
+                v-if="authStore.user?.subscription_tier !== 'max'"
+                to="/vendor/subscription"
+                class="inline-flex items-center px-4 py-2 bg-white text-primary-600 rounded-lg hover:bg-primary-50 transition-all font-medium text-sm"
+              >
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                Upgrade Plan
+              </router-link>
+              <span v-else class="inline-flex items-center px-4 py-2 bg-primary-500 text-white rounded-lg font-medium text-sm">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                </svg>
+                Max Plan
+              </span>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-primary-500">
+            <div class="grid grid-cols-3 gap-4 text-center">
+              <div>
+                <p class="text-2xl font-bold">{{ stats.totalItems }}</p>
+                <p class="text-xs text-primary-100">Menu Items</p>
+              </div>
+              <div>
+                <p class="text-2xl font-bold">{{ businessStats.totalTables }}</p>
+                <p class="text-xs text-primary-100">Tables</p>
+              </div>
+              <div>
+                <p class="text-2xl font-bold">{{ businessStats.totalServers }}</p>
+                <p class="text-xs text-primary-100">Servers</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- Quick Actions -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <!-- QR Code Section -->
@@ -163,6 +210,36 @@
               </router-link>
 
               <router-link
+                to="/vendor/tables"
+                class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-all group"
+              >
+                <div class="p-2 bg-blue-600 rounded-lg mr-4">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="font-medium text-gray-900 group-hover:text-blue-700">Table Management</p>
+                  <p class="text-sm text-gray-600">Manage tables and QR codes</p>
+                </div>
+              </router-link>
+
+              <router-link
+                to="/vendor/servers"
+                class="flex items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100 transition-all group"
+              >
+                <div class="p-2 bg-orange-600 rounded-lg mr-4">
+                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p class="font-medium text-gray-900 group-hover:text-orange-700">Server Management</p>
+                  <p class="text-sm text-gray-600">Manage servers and assignments</p>
+                </div>
+              </router-link>
+
+              <router-link
                 to="/vendor/settings"
                 class="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 transition-all group"
               >
@@ -199,6 +276,10 @@ const vendorStore = useVendorStore()
 const toast = useToast()
 
 const loading = ref(true)
+const businessStats = ref({
+  totalTables: 0,
+  totalServers: 0
+})
 
 const stats = computed(() => ({
   totalItems: vendorStore.totalItems || 0,
@@ -206,6 +287,20 @@ const stats = computed(() => ({
   totalCategories: vendorStore.totalCategories || 0,
   menuViews: 0 // This would come from analytics
 }))
+
+const getBusinessLimit = () => {
+  const tier = authStore.user?.subscription_tier || 'free'
+  switch (tier) {
+    case 'free':
+      return 3
+    case 'pro':
+      return 5
+    case 'max':
+      return 'Unlimited'
+    default:
+      return 3
+  }
+}
 
 onMounted(async () => {
   try {

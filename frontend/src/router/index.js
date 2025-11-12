@@ -71,6 +71,12 @@ const routes = [
     component: () => import('@/views/vendor/ServerManagement.vue'),
     meta: { requiresAuth: true, role: 'vendor', title: 'Server Management' }
   },
+  {
+    path: '/vendor/subscription',
+    name: 'vendor-subscription',
+    component: () => import('@/views/vendor/SubscriptionManagement.vue'),
+    meta: { requiresAuth: true, role: 'vendor', title: 'Subscription Management' }
+  },
 
   // Admin routes
   {
