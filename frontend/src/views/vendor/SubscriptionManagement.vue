@@ -1,20 +1,12 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-4 md:p-8">
-    <div class="max-w-7xl mx-auto">
-      <!-- Header -->
-      <div class="mb-8">
-        <router-link
-          to="/vendor/dashboard"
-          class="inline-flex items-center text-primary-600 hover:text-primary-700 mb-4"
-        >
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to Dashboard
-        </router-link>
-        <h1 class="text-3xl font-bold text-gray-900">Subscription Plans</h1>
-        <p class="text-gray-600 mt-2">Choose the plan that fits your business needs</p>
-      </div>
+  <VendorLayout>
+    <div class="p-4 md:p-8">
+      <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6">
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Subscription Plans</h1>
+          <p class="text-gray-600 mt-1">Choose the plan that fits your business needs</p>
+        </div>
 
       <!-- Current Plan Banner -->
       <div class="bg-gradient-to-r from-primary-600 to-primary-700 rounded-lg shadow-sm p-6 text-white mb-8">
@@ -312,8 +304,9 @@
           </button>
         </div>
       </div>
+      </div>
     </div>
-  </div>
+  </VendorLayout>
 </template>
 
 <script setup>
@@ -321,6 +314,7 @@ import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 import { useVendorStore } from '@/stores/vendor'
 import { useToast } from 'vue-toastification'
+import VendorLayout from '@/components/layouts/VendorLayout.vue'
 
 const authStore = useAuthStore()
 const vendorStore = useVendorStore()

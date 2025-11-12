@@ -1,37 +1,25 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-4 md:p-8">
-    <div class="max-w-7xl mx-auto">
-      <!-- Back Button -->
-      <div class="mb-4">
-        <router-link
-          to="/vendor/dashboard"
-          class="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          <span class="text-sm font-medium">Back to Dashboard</span>
-        </router-link>
-      </div>
-
-      <!-- Header -->
-      <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900 mb-2">Server Management</h1>
-            <p class="text-gray-600">Manage waiters/servers and their business assignments</p>
+  <VendorLayout>
+    <div class="p-4 md:p-8">
+      <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6">
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <div>
+              <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Server Management</h1>
+              <p class="text-gray-600 mt-1">Manage waiters/servers and their business assignments</p>
+            </div>
+            <button
+              @click="openCreateModal"
+              class="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all"
+            >
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Add Server
+            </button>
           </div>
-          <button
-            @click="openCreateModal"
-            class="inline-flex items-center justify-center px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all"
-          >
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            Add Server
-          </button>
         </div>
-      </div>
 
       <!-- Stats Cards -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
@@ -402,14 +390,16 @@
           </div>
         </div>
       </div>
+      </div>
     </div>
-  </div>
+  </VendorLayout>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useApi } from '@/composables/useApi'
 import { useToast } from 'vue-toastification'
+import VendorLayout from '@/components/layouts/VendorLayout.vue'
 
 const { vendor } = useApi()
 const toast = useToast()

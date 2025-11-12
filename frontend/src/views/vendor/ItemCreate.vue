@@ -1,25 +1,12 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center py-4">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900">Add New Menu Item</h1>
-            <p class="text-sm text-gray-600 mt-1">Create a new item for your menu</p>
-          </div>
-          <router-link
-            to="/vendor/menu"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all"
-          >
-            Cancel
-          </router-link>
+  <VendorLayout>
+    <div class="p-4 md:p-8">
+      <div class="max-w-4xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6">
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Add New Menu Item</h1>
+          <p class="text-gray-600 mt-1">Create a new item for your menu</p>
         </div>
-      </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Loading State -->
       <div v-if="loading" class="flex justify-center items-center h-64">
         <LoadingSpinner size="lg" text="Loading categories..." />
@@ -206,8 +193,9 @@
           </div>
         </div>
       </form>
-    </main>
-  </div>
+      </div>
+    </div>
+  </VendorLayout>
 </template>
 
 <script setup>
@@ -216,6 +204,7 @@ import { useRouter } from 'vue-router'
 import { useVendorStore } from '@/stores/vendor'
 import { useToast } from 'vue-toastification'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import VendorLayout from '@/components/layouts/VendorLayout.vue'
 
 const router = useRouter()
 const vendorStore = useVendorStore()
