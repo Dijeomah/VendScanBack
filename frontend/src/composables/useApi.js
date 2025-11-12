@@ -113,6 +113,33 @@ export function useApi() {
       deleteItem: (id) => api.delete(`/vendor/items/${id}`),
       getItemsByCategory: (categoryId) => api.get(`/vendor/items/by-category/${categoryId}`),
       addItemToCategory: (categoryId, data) => api.post(`/vendor/categories/${categoryId}/items`, data),
+
+      // Tables
+      getTables: (businessId) => api.get(`/vendor/businesses/${businessId}/tables`),
+      getTable: (businessId, tableId) => api.get(`/vendor/businesses/${businessId}/tables/${tableId}`),
+      createTable: (businessId, data) => api.post(`/vendor/businesses/${businessId}/tables`, data),
+      bulkCreateTables: (businessId, data) => api.post(`/vendor/businesses/${businessId}/tables/bulk-create`, data),
+      updateTable: (businessId, tableId, data) => api.put(`/vendor/businesses/${businessId}/tables/${tableId}`, data),
+      deleteTable: (businessId, tableId) => api.delete(`/vendor/businesses/${businessId}/tables/${tableId}`),
+
+      // Servers
+      getServers: () => api.get('/vendor/servers'),
+      getServer: (serverId) => api.get(`/vendor/servers/${serverId}`),
+      createServer: (data) => api.post('/vendor/servers', data),
+      updateServer: (serverId, data) => api.put(`/vendor/servers/${serverId}`, data),
+      deleteServer: (serverId) => api.delete(`/vendor/servers/${serverId}`),
+      assignServerToBusiness: (serverId, data) => api.post(`/vendor/servers/${serverId}/assign-business`, data),
+      removeServerFromBusiness: (serverId, data) => api.delete(`/vendor/servers/${serverId}/remove-business`, { data }),
+      getBusinessServers: (businessId) => api.get(`/vendor/businesses/${businessId}/servers`),
+
+      // Table Assignments
+      getTableAssignments: (businessId) => api.get(`/vendor/businesses/${businessId}/assignments`),
+      assignServerToTable: (businessId, data) => api.post(`/vendor/businesses/${businessId}/assignments`, data),
+      bulkAssignServerToTables: (businessId, data) => api.post(`/vendor/businesses/${businessId}/assignments/bulk`, data),
+      removeTableAssignment: (businessId, assignmentId) => api.delete(`/vendor/businesses/${businessId}/assignments/${assignmentId}`),
+      updateAssignmentStatus: (businessId, assignmentId, data) => api.patch(`/vendor/businesses/${businessId}/assignments/${assignmentId}/status`, data),
+      getServerAssignments: (businessId, serverId) => api.get(`/vendor/businesses/${businessId}/servers/${serverId}/assignments`),
+      getTableServerAssignments: (businessId, tableId) => api.get(`/vendor/businesses/${businessId}/tables/${tableId}/assignments`),
     },
 
     // Admin endpoints
