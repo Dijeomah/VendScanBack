@@ -66,6 +66,7 @@ class Kernel extends HttpKernel
         'authCheck' => \App\Http\Middleware\AuthCheck::class,
         'vendorCheck' => \App\Http\Middleware\VendorCheck::class,
         'role' => \App\Http\Middleware\RoleMiddleware::class,
+        'business.limit' => \App\Http\Middleware\CheckBusinessLimit::class,
         //        'CORS' => \App\Http\Middleware\CORS::class,
     ];
 }

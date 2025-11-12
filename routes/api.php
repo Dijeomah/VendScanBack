@@ -88,8 +88,8 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::put('/profile/update', [VendorController::class, 'updateProfile']);
 
         // Business Information
-        Route::post('/business-info', [VendorController::class, 'setBusinessInfo']);
-        Route::post('/business-links', [VendorController::class, 'setBusinessLink']);
+        Route::post('/business-info', [VendorController::class, 'setBusinessInfo'])->middleware('business.limit');
+        Route::post('/business-links', [VendorController::class, 'setBusinessLink'])->middleware('business.limit');
         Route::post('/generate-qr', [VendorController::class, 'generateQrCode']);
 
         // Categories
@@ -112,6 +112,39 @@ Route::group(['middleware' => 'api'], function ($router) {
         // Media
         Route::post('/media', [VendorController::class, 'setMedia']);
         Route::post('/media/upload', [VendorController::class, 'setMedia']); // Keeping legacy route
+
+        // Table Management
+        Route::group(['prefix' => 'businesses/{businessId}/tables'], function () {
+            Route::get('/', [\App\Http\Controllers\Vendor\TableController::class, 'index']);
+            Route::post('/', [\App\Http\Controllers\Vendor\TableController::class, 'store']);
+            Route::post('/bulk-create', [\App\Http\Controllers\Vendor\TableController::class, 'bulkCreate']);
+            Route::get('/{tableId}', [\App\Http\Controllers\Vendor\TableController::class, 'show']);
+            Route::put('/{tableId}', [\App\Http\Controllers\Vendor\TableController::class, 'update']);
+            Route::delete('/{tableId}', [\App\Http\Controllers\Vendor\TableController::class, 'destroy']);
+        });
+
+        // Server Management
+        Route::group(['prefix' => 'servers'], function () {
+            Route::get('/', [\App\Http\Controllers\Vendor\ServerController::class, 'index']);
+            Route::post('/', [\App\Http\Controllers\Vendor\ServerController::class, 'store']);
+            Route::get('/{serverId}', [\App\Http\Controllers\Vendor\ServerController::class, 'show']);
+            Route::put('/{serverId}', [\App\Http\Controllers\Vendor\ServerController::class, 'update']);
+            Route::delete('/{serverId}', [\App\Http\Controllers\Vendor\ServerController::class, 'destroy']);
+            Route::post('/{serverId}/assign-business', [\App\Http\Controllers\Vendor\ServerController::class, 'assignToBusiness']);
+            Route::delete('/{serverId}/remove-business', [\App\Http\Controllers\Vendor\ServerController::class, 'removeFromBusiness']);
+        });
+
+        // Server-Table Assignments
+        Route::group(['prefix' => 'businesses/{businessId}'], function () {
+            Route::get('/servers', [\App\Http\Controllers\Vendor\ServerController::class, 'getBusinessServers']);
+            Route::get('/assignments', [\App\Http\Controllers\Vendor\TableAssignmentController::class, 'index']);
+            Route::post('/assignments', [\App\Http\Controllers\Vendor\TableAssignmentController::class, 'store']);
+            Route::post('/assignments/bulk', [\App\Http\Controllers\Vendor\TableAssignmentController::class, 'bulkAssign']);
+            Route::delete('/assignments/{assignmentId}', [\App\Http\Controllers\Vendor\TableAssignmentController::class, 'destroy']);
+            Route::patch('/assignments/{assignmentId}/status', [\App\Http\Controllers\Vendor\TableAssignmentController::class, 'updateStatus']);
+            Route::get('/servers/{serverId}/assignments', [\App\Http\Controllers\Vendor\TableAssignmentController::class, 'getServerAssignments']);
+            Route::get('/tables/{tableId}/assignments', [\App\Http\Controllers\Vendor\TableAssignmentController::class, 'getTableAssignments']);
+        });
     });
 
     // Public Routes
