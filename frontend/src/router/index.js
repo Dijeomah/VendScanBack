@@ -59,6 +59,18 @@ const routes = [
     component: () => import('@/views/vendor/Settings.vue'),
     meta: { requiresAuth: true, role: 'vendor', title: 'Settings' }
   },
+  {
+    path: '/vendor/tables',
+    name: 'vendor-tables',
+    component: () => import('@/views/vendor/TableManagement.vue'),
+    meta: { requiresAuth: true, role: 'vendor', title: 'Table Management' }
+  },
+  {
+    path: '/vendor/servers',
+    name: 'vendor-servers',
+    component: () => import('@/views/vendor/ServerManagement.vue'),
+    meta: { requiresAuth: true, role: 'vendor', title: 'Server Management' }
+  },
 
   // Admin routes
   {

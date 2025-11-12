@@ -22,6 +22,32 @@
 
     <!-- Menu Content -->
     <div v-else-if="vendor">
+      <!-- Table Context Banner (shown when accessed via QR code) -->
+      <div v-if="tableNumber" class="bg-primary-600 text-white">
+        <div class="max-w-4xl mx-auto px-4 py-3">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              <div>
+                <p class="font-semibold">Table {{ tableNumber }}</p>
+                <p class="text-xs text-primary-100">Viewing menu for this table</p>
+              </div>
+            </div>
+            <button
+              @click="tableNumber = null"
+              class="p-1 rounded hover:bg-primary-700 transition-colors"
+              title="Clear table selection"
+            >
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Vendor Header -->
       <div class="bg-white shadow-sm">
         <!-- Hero Image -->
@@ -227,6 +253,7 @@ const businessLink = ref(null)
 const items = ref([])
 const searchQuery = ref('')
 const selectedItem = ref(null)
+const tableNumber = ref(null)
 
 const filteredItems = computed(() => {
   if (!searchQuery.value) return items.value
@@ -293,6 +320,12 @@ const loadMenu = async () => {
 }
 
 onMounted(() => {
+  // Check for table query parameter (from QR code scan)
+  if (route.query.table) {
+    tableNumber.value = route.query.table
+    console.log('Table context detected:', tableNumber.value)
+  }
+
   loadMenu()
 })
 </script>
