@@ -16,8 +16,13 @@
             'hero'
         ];
 
-//        public function user(): BelongsTo
-//        {
-//            return $this->belongsTo(User::class, 'id');
-//        }
+        protected $table = 'vendor_media';
+
+        /**
+         * Get the vendor that owns the media
+         */
+        public function vendor(): BelongsTo
+        {
+            return $this->belongsTo(User::class, 'vendor_id', 'id');
+        }
     }

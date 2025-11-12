@@ -14,9 +14,12 @@ class BusinessLink extends Model
 
     protected $guarded = [];
 
-    public function vendor(): HasMany
+    /**
+     * Get the user (vendor) that owns the business link
+     */
+    public function user(): BelongsTo
     {
-        return $this->hasMany(Vendor::class);
+        return $this->belongsTo(User::class, 'uid', 'id');
     }
 
     public function vendor_data(): BelongsTo

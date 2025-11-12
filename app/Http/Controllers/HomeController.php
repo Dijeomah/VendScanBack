@@ -52,26 +52,25 @@ class   HomeController extends Controller
         try {
             $validatedSubdomain = htmlspecialchars($subdomain, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-            // Find business link by subdomain
+            // Find business link by subdomain with vendor relationship
             $businessLink = BusinessLink::where('subdomain', $validatedSubdomain)
                 ->orWhere('business_link', $validatedSubdomain)
+                ->with('user') // Use relationship to load user
                 ->first();
 
             if (!$businessLink) {
                 return error('Vendor not found', null, Response::HTTP_NOT_FOUND);
             }
 
-            // Get vendor user data
-            $vendor = User::where('id', $businessLink->uid)
-                ->where('role', 'vendor')
-                ->first();
+            // Get vendor from relationship
+            $vendor = $businessLink->user;
 
-            if (!$vendor) {
+            if (!$vendor || $vendor->role !== 'vendor') {
                 return error('Vendor not found', null, Response::HTTP_NOT_FOUND);
             }
 
-            // Get vendor media
-            $vendorMedia = VendorMedia::where('uid', $vendor->id)->first();
+            // Get vendor media using relationship
+            $vendorMedia = $vendor->vendor_media;
 
             // Get categories with items for this vendor
             $categories = Category::whereHas('items', function($query) use ($businessLink) {
@@ -79,7 +78,8 @@ class   HomeController extends Controller
             })
                 ->with(['items' => function($query) use ($businessLink) {
                     $query->where('business_link', $businessLink->business_link)
-                        ->where('status', true); // Only active items
+                        ->where('status', true) // Only active items
+                        ->with('category'); // Include category in items
                 }])
                 ->get();
 
@@ -87,7 +87,6 @@ class   HomeController extends Controller
             $allItems = [];
             foreach ($categories as $category) {
                 foreach ($category->items as $item) {
-                    $item->category = $category; // Add category info to item
                     $allItems[] = $item;
                 }
             }
@@ -109,7 +108,7 @@ class   HomeController extends Controller
                 ],
                 'vendor_media' => $vendorMedia ? [
                     'logo' => $vendorMedia->logo,
-                    'hero_image' => $vendorMedia->hero_image
+                    'hero_image' => $vendorMedia->hero
                 ] : null,
                 'categories' => $categories,
                 'vendor_info' => [
