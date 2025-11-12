@@ -96,6 +96,12 @@ class VendorRepository implements VendorInterface
             'business_link' => $uniqueSlug,
             'subdomain' => $uniqueSlug,
             'business_qr' => $this->qrCodeService->generateForVendor($uniqueSlug),
+            'business_type' => $payload['business_type'] ?? null,
+            'phone_number' => $payload['phone_number'] ?? null,
+            'business_address' => $payload['business_address'] ?? null,
+            'city_id' => $payload['city_id'] ?? null,
+            'state_id' => $payload['state_id'] ?? null,
+            'country_id' => $payload['country_id'] ?? null,
         ]);
     }
 

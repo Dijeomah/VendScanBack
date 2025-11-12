@@ -91,22 +91,52 @@ class VendorController extends Controller
     public function setBusinessInfo(Request $request)
     {
         try {
-
             $validated_data = $this->validate($request, config('validation.business_info'));
+            $userId = auth()->id();
+            $userIdString = auth()->user()->userid;
 
-            $checkBusinessInfo = $this->vendorRepository->verifyVendorBusinessName($validated_data['business_name']);
-            if (!$checkBusinessInfo) {
-                //                DB::transaction(function () use ($validated_data) {
+            // Check if user already has business data
+            $existingUserData = \App\Models\UserData::where('uid', $userId)->first();
+            $existingBusinessLink = \App\Models\BusinessLink::where('uid', $userId)->first();
+
+            if ($existingUserData || $existingBusinessLink) {
+                // Update existing records
+                if ($existingUserData) {
+                    $existingUserData->update([
+                        'business_name' => $validated_data['business_name'],
+                        'business_address' => $validated_data['business_address'] ?? null,
+                        'city_id' => $validated_data['city_id'] ?? null,
+                        'state_id' => $validated_data['state_id'] ?? null,
+                        'country_id' => $validated_data['country_id'] ?? null,
+                    ]);
+                }
+
+                if ($existingBusinessLink) {
+                    $existingBusinessLink->update([
+                        'business_name' => $validated_data['business_name'],
+                        'business_type' => $validated_data['business_type'] ?? null,
+                        'phone_number' => $validated_data['phone_number'] ?? null,
+                        'business_address' => $validated_data['business_address'] ?? null,
+                        'city_id' => $validated_data['city_id'] ?? null,
+                        'state_id' => $validated_data['state_id'] ?? null,
+                        'country_id' => $validated_data['country_id'] ?? null,
+                    ]);
+                }
+
+                return success('Business information updated successfully', [
+                    'user_data' => $existingUserData,
+                    'business_link' => $existingBusinessLink
+                ], Response::HTTP_OK);
+            } else {
+                // Create new records
                 $userData = $this->vendorRepository->createVendorData((array) $validated_data);
                 $userBusinessData = $this->vendorRepository->createVendorBusinessLink((array) $validated_data);
-                return success('Business data created successfully. ', [$userData, $userBusinessData], Response::HTTP_CREATED);
-                //                });
+                return success('Business data created successfully', [$userData, $userBusinessData], Response::HTTP_CREATED);
             }
-            return error('Business data already exist. ', [], 400);
         } catch (\Exception $exception) {
-            Log::debug('Set Business Name exception: ' . $exception->getMessage() . 'on line: ' . $exception->getLine());
+            Log::error('Set Business Info exception: ' . $exception->getMessage() . ' on line: ' . $exception->getLine());
+            return error('Error saving business data: ' . $exception->getMessage(), [], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-        return error('Error creating Business Data. ', [], Response::HTTP_BAD_REQUEST);
     }
 
     /**
