@@ -23,6 +23,8 @@ class User extends Authenticatable implements JWTSubject
     protected $fillable = [
         'name',
         'role',
+        'subscription_tier',
+        'business_limit',
         'phone_number',
         'email',
         'password',
@@ -85,6 +87,60 @@ class User extends Authenticatable implements JWTSubject
     public function vendor_media():HasOne
     {
         return $this->hasOne(VendorMedia::class, 'vendor_id');
+    }
+
+    /**
+     * Servers that belong to this vendor (for vendors)
+     */
+    public function servers():HasMany
+    {
+        return $this->hasMany(User::class, 'created_by')->where('role', 'server');
+    }
+
+    /**
+     * Businesses that this server is assigned to (for servers)
+     */
+    public function assigned_businesses():HasMany
+    {
+        return $this->hasMany(BusinessServer::class, 'server_id');
+    }
+
+    /**
+     * Tables that this server is assigned to (for servers)
+     */
+    public function assigned_tables():HasMany
+    {
+        return $this->hasMany(ServerTableAssignment::class, 'server_id');
+    }
+
+    /**
+     * Check if user can create more businesses based on their tier
+     */
+    public function canCreateBusiness(): bool
+    {
+        $currentCount = $this->business_links()->count();
+
+        return match($this->subscription_tier) {
+            'free' => $currentCount < 3,
+            'pro' => $currentCount < 5,
+            'max' => true, // unlimited
+            default => $currentCount < 3
+        };
+    }
+
+    /**
+     * Get remaining business slots
+     */
+    public function getRemainingBusinessSlotsAttribute(): int
+    {
+        $currentCount = $this->business_links()->count();
+
+        return match($this->subscription_tier) {
+            'free' => max(0, 3 - $currentCount),
+            'pro' => max(0, 5 - $currentCount),
+            'max' => PHP_INT_MAX, // unlimited
+            default => max(0, 3 - $currentCount)
+        };
     }
 
 }

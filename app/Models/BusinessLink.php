@@ -41,7 +41,31 @@ class BusinessLink extends Model
 
     public function table_link_qr_data(): HasMany
     {
-        return $this->hasMany(TableLinkQrData::class, 'bl_id');
+        return $this->hasMany(TableLinkQrData::class, 'business_link_id');
+    }
+
+    /**
+     * Alias for table_link_qr_data
+     */
+    public function tables(): HasMany
+    {
+        return $this->table_link_qr_data();
+    }
+
+    /**
+     * Get servers assigned to this business
+     */
+    public function business_servers(): HasMany
+    {
+        return $this->hasMany(BusinessServer::class, 'business_link_id');
+    }
+
+    /**
+     * Get active servers for this business
+     */
+    public function active_servers()
+    {
+        return $this->business_servers()->where('status', 'active')->with('server');
     }
 
     public function items(): HasMany
