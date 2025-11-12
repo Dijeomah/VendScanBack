@@ -58,4 +58,52 @@ class QrCodeService
             throw $e;
         }
     }
+
+    /**
+     * Generate QR code for a specific table
+     *
+     * @param string $subdomain Business subdomain
+     * @param string $tableNumber Table number/identifier
+     * @return string URL to the QR code
+     */
+    public function generateTableQR(string $subdomain, string $tableNumber): string
+    {
+        // Generate URL with table context
+        $url = $subdomain . '.localhost:3000?table=' . urlencode($tableNumber);
+
+        // Use SVG format
+        try {
+            $qrCode = QrCode::format('svg')
+                ->size(300)
+                ->generate($url);
+
+            // Check if Cloudinary is configured
+            if (config('cloudinary.cloud_url')) {
+                try {
+                    $base64 = base64_encode($qrCode);
+                    $dataUri = 'data:image/svg+xml;base64,' . $base64;
+
+                    $cloudinaryUrl = CloudinaryStorage::uploadQr(
+                        $dataUri,
+                        'table_qr_' . $subdomain . '_' . $tableNumber . '_' . time()
+                    );
+
+                    Log::info('Table QR code uploaded to Cloudinary successfully');
+                    return $cloudinaryUrl;
+                } catch (\Exception $cloudinaryError) {
+                    Log::error('Cloudinary upload failed for table QR, falling back to local storage: ' . $cloudinaryError->getMessage());
+                }
+            }
+
+            // Use local storage
+            $filename = 'qr_codes/table_' . $subdomain . '_' . str_replace(' ', '_', $tableNumber) . '_' . time() . '.svg';
+            Storage::disk('public')->put($filename, $qrCode);
+
+            return Storage::disk('public')->url($filename);
+
+        } catch (\Exception $e) {
+            Log::error('Table QR Code generation failed: ' . $e->getMessage());
+            throw $e;
+        }
+    }
 }
