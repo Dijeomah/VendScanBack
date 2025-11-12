@@ -243,15 +243,39 @@ const formatPrice = (price) => {
   return parseFloat(price).toFixed(2)
 }
 
+const getSubdomain = () => {
+  const hostname = window.location.hostname
+  const parts = hostname.split('.')
+
+  // If hostname is like 'airvend-res.localhost' or 'airvend-res.example.com'
+  // Return the first part as subdomain
+  if (parts.length > 1 && parts[0] !== 'localhost' && parts[0] !== 'www') {
+    return parts[0]
+  }
+
+  return null
+}
+
 const loadMenu = async () => {
   loading.value = true
   error.value = null
 
   try {
-    const vendorLink = route.params.vendorLink
-    console.log('Loading menu for:', vendorLink)
+    let response
 
-    const response = await publicApi.getVendorMenuByLink(vendorLink)
+    // Check if we're on a subdomain
+    const subdomain = getSubdomain()
+
+    if (subdomain) {
+      console.log('Loading menu for subdomain:', subdomain)
+      response = await publicApi.getVendorBySubdomain(subdomain)
+    } else {
+      // Fall back to path-based routing
+      const vendorLink = route.params.vendorLink
+      console.log('Loading menu for vendor link:', vendorLink)
+      response = await publicApi.getVendorMenuByLink(vendorLink)
+    }
+
     console.log('Menu response:', response)
 
     vendor.value = response.data || response

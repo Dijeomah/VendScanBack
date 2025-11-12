@@ -90,10 +90,25 @@ const routes = [
     meta: { requiresAuth: true, role: 'admin', title: 'Edit Vendor' }
   },
 
-  // Default route
+  // Default route - check for subdomain
   {
     path: '/',
-    redirect: '/login'
+    name: 'home',
+    component: () => import('@/views/menu/PublicMenu.vue'),
+    beforeEnter: (to, from, next) => {
+      // Check if we're on a subdomain
+      const hostname = window.location.hostname
+      const parts = hostname.split('.')
+
+      // If on subdomain (e.g., airvend-res.localhost), show public menu
+      if (parts.length > 1 && parts[0] !== 'localhost' && parts[0] !== 'www') {
+        next()
+      } else {
+        // Otherwise redirect to login
+        next('/login')
+      }
+    },
+    meta: { title: 'Menu' }
   },
   
   // 404 Not Found

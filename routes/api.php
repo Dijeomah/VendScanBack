@@ -117,4 +117,5 @@ Route::group(['middleware' => 'api'], function ($router) {
     // Public Routes
     Route::get('/menu/{vendor_link}', [HomeController::class, 'vendor_site']);
     Route::get('/qr/{vendor_link}', [HomeController::class, 'vendor_site']); // Legacy QR route
+    Route::get('/subdomain/{subdomain}', [HomeController::class, 'getVendorBySubdomain']); // Subdomain-based menu
 });

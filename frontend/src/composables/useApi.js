@@ -151,6 +151,10 @@ export function useApi() {
       getVendorMenuByLink: async (vendorLink) => {
         const response = await api.get(`/menu/${vendorLink}`)
         return response.data
+      },
+      getVendorBySubdomain: async (subdomain) => {
+        const response = await api.get(`/subdomain/${subdomain}`)
+        return response.data
       }
     }
   }
