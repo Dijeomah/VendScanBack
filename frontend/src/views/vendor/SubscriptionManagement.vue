@@ -319,9 +319,11 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '@/stores/auth'
+import { useVendorStore } from '@/stores/vendor'
 import { useToast } from 'vue-toastification'
 
 const authStore = useAuthStore()
+const vendorStore = useVendorStore()
 const toast = useToast()
 
 const showConfirmModal = ref(false)
@@ -376,7 +378,9 @@ const processPlanChange = async () => {
     showConfirmModal.value = false
 
     // Refresh user data
-    await authStore.fetchUser()
+    await vendorStore.fetchFullProfile()
+    // Also refresh token to get updated user data
+    await authStore.refreshToken()
   } catch (error) {
     console.error('Error changing plan:', error)
     toast.error('Failed to change plan. Please try again.')
