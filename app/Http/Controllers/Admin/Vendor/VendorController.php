@@ -86,11 +86,58 @@ class VendorController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-        $category = User::find($id);
-        $category->category_name = $request->category_name;
-        $category->save();
-        return success('Category information updated', $category, 200);
+        $vendor = User::find($id);
+
+        if (!$vendor || $vendor->role !== 'vendor') {
+            return error('Vendor not found', [], Response::HTTP_NOT_FOUND);
+        }
+
+        try {
+            // Validate only the fields that are being updated
+            $validationRules = [];
+
+            if ($request->has('email')) {
+                $validationRules['email'] = 'required|email|max:50|unique:users,email,' . $id;
+            }
+
+            if ($request->has('phone_number')) {
+                $validationRules['phone_number'] = 'required|unique:users,phone_number,' . $id;
+            }
+
+            if ($request->has('first_name')) {
+                $validationRules['first_name'] = 'required';
+            }
+
+            if ($request->has('last_name')) {
+                $validationRules['last_name'] = 'required';
+            }
+
+            $this->validate($request, $validationRules);
+
+            // Update vendor information
+            if ($request->has('first_name')) {
+                $vendor->first_name = $request->first_name;
+            }
+
+            if ($request->has('last_name')) {
+                $vendor->last_name = $request->last_name;
+            }
+
+            if ($request->has('email')) {
+                $vendor->email = $request->email;
+            }
+
+            if ($request->has('phone_number')) {
+                $vendor->phone_number = $request->phone_number;
+            }
+
+            $vendor->save();
+
+            return success('Vendor information updated successfully', $vendor, Response::HTTP_OK);
+        } catch (\Exception $exception) {
+            Log::error('Vendor update failed: ' . $exception->getMessage());
+            return error($exception->getMessage(), [], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
