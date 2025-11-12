@@ -1,5 +1,16 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import NProgress from 'nprogress'
+import 'nprogress/nprogress.css'
+
+// Configure NProgress
+NProgress.configure({
+  showSpinner: false,
+  trickleSpeed: 200,
+  minimum: 0.3,
+  easing: 'ease',
+  speed: 500
+})
 
 const routes = [
   // Auth routes
@@ -197,6 +208,9 @@ const router = createRouter({
 
 // Navigation guard
 router.beforeEach((to, from, next) => {
+  // Start loading bar
+  NProgress.start()
+
   const authStore = useAuthStore()
   authStore.initAuth()
 
@@ -234,6 +248,11 @@ router.beforeEach((to, from, next) => {
   } else {
     next()
   }
+})
+
+// Complete loading bar after navigation
+router.afterEach(() => {
+  NProgress.done()
 })
 
 export default router
