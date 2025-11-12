@@ -112,7 +112,6 @@ const routes = [
   {
     path: '/',
     name: 'home',
-    component: () => import('@/views/menu/PublicMenu.vue'),
     beforeEnter: (to, from, next) => {
       // Check if we're on a subdomain
       const hostname = window.location.hostname
@@ -120,13 +119,21 @@ const routes = [
 
       // If on subdomain (e.g., airvend-res.localhost), show public menu
       if (parts.length > 1 && parts[0] !== 'localhost' && parts[0] !== 'www') {
+        // Load the PublicMenu component dynamically for subdomains
+        to.matched[0].components = {
+          default: () => import('@/views/menu/PublicMenu.vue')
+        }
         next()
       } else {
-        // Otherwise redirect to login
-        next('/login')
+        // Otherwise show landing page
+        to.matched[0].components = {
+          default: () => import('@/views/LandingPage.vue')
+        }
+        next()
       }
     },
-    meta: { title: 'Menu' }
+    component: () => import('@/views/LandingPage.vue'),
+    meta: { title: 'VendScan - Digital QR Menus' }
   },
   
   // 404 Not Found

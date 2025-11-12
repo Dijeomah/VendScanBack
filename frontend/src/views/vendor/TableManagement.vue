@@ -3,36 +3,43 @@
     <!-- Header -->
     <header class="bg-white shadow-sm border-b border-gray-200">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center py-4">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900">Table Management</h1>
-            <p class="text-sm text-gray-600 mt-1">Manage tables and generate QR codes</p>
-          </div>
-          <div class="flex gap-3">
+        <div class="py-4">
+          <div class="flex items-center gap-2 mb-3">
             <router-link
               to="/vendor/dashboard"
-              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all"
+              class="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
             >
-              Back to Dashboard
+              <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+              </svg>
+              <span class="text-sm font-medium">Back</span>
             </router-link>
-            <button
-              @click="showBulkCreateModal = true"
-              class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-all flex items-center gap-2"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-              </svg>
-              Bulk Create
-            </button>
-            <button
-              @click="showCreateModal = true"
-              class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-all flex items-center gap-2"
-            >
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-              </svg>
-              Add Table
-            </button>
+          </div>
+          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900">Table Management</h1>
+              <p class="text-sm text-gray-600 mt-1">Manage tables and generate QR codes</p>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <button
+                @click="showBulkCreateModal = true"
+                class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 transition-all flex items-center justify-center gap-2"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Bulk Create
+              </button>
+              <button
+                @click="showCreateModal = true"
+                class="px-4 py-2 text-sm font-medium text-white bg-primary-600 rounded-lg hover:bg-primary-700 transition-all flex items-center justify-center gap-2"
+              >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Add Table
+              </button>
+            </div>
           </div>
         </div>
       </div>
