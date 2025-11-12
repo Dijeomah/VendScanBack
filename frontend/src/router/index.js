@@ -24,6 +24,38 @@ const routes = [
     meta: { title: 'Menu' }
   },
 
+  // Footer pages
+  {
+    path: '/about',
+    name: 'about',
+    component: () => import('@/views/About.vue'),
+    meta: { title: 'About Us' }
+  },
+  {
+    path: '/contact',
+    name: 'contact',
+    component: () => import('@/views/Contact.vue'),
+    meta: { title: 'Contact Us' }
+  },
+  {
+    path: '/support',
+    name: 'support',
+    component: () => import('@/views/Support.vue'),
+    meta: { title: 'Support Center' }
+  },
+  {
+    path: '/privacy',
+    name: 'privacy',
+    component: () => import('@/views/Privacy.vue'),
+    meta: { title: 'Privacy Policy' }
+  },
+  {
+    path: '/terms',
+    name: 'terms',
+    component: () => import('@/views/Terms.vue'),
+    meta: { title: 'Terms of Service' }
+  },
+
   // Vendor routes
   {
     path: '/vendor',
