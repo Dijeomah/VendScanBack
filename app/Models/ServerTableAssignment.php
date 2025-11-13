@@ -15,15 +15,15 @@ class ServerTableAssignment extends Model
         'table_id',
         'business_link_id',
         'status',
-        'assigned_at'
+        'assigned_at',
     ];
 
     protected $casts = [
-        'assigned_at' => 'datetime'
+        'assigned_at' => 'datetime',
     ];
 
     /**
-     * Get the server assigned to this table
+     * Get the server user
      */
     public function server(): BelongsTo
     {
@@ -39,9 +39,9 @@ class ServerTableAssignment extends Model
     }
 
     /**
-     * Get the business
+     * Get the business link
      */
-    public function business(): BelongsTo
+    public function businessLink(): BelongsTo
     {
         return $this->belongsTo(BusinessLink::class, 'business_link_id');
     }

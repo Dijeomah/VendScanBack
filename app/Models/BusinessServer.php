@@ -14,13 +14,13 @@ class BusinessServer extends Model
         'business_link_id',
         'server_id',
         'vendor_id',
-        'status'
+        'status',
     ];
 
     /**
-     * Get the business this assignment belongs to
+     * Get the business link this assignment belongs to
      */
-    public function business(): BelongsTo
+    public function businessLink(): BelongsTo
     {
         return $this->belongsTo(BusinessLink::class, 'business_link_id');
     }
@@ -34,7 +34,7 @@ class BusinessServer extends Model
     }
 
     /**
-     * Get the vendor who created this assignment
+     * Get the vendor who made this assignment
      */
     public function vendor(): BelongsTo
     {

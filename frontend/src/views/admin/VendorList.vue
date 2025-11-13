@@ -255,6 +255,7 @@ const searchQuery = ref('')
 const vendorToDelete = ref(null)
 
 const filteredVendors = computed(() => {
+  if (!Array.isArray(vendors.value)) return []
   if (!searchQuery.value) return vendors.value
 
   const query = searchQuery.value.toLowerCase()
@@ -268,10 +269,12 @@ const filteredVendors = computed(() => {
 })
 
 const activeVendors = computed(() => {
+  if (!Array.isArray(vendors.value)) return 0
   return vendors.value.filter(v => v.business_links?.length > 0).length
 })
 
 const totalItems = computed(() => {
+  if (!Array.isArray(vendors.value)) return 0
   return vendors.value.reduce((total, vendor) => total + (vendor.items_count || 0), 0)
 })
 
