@@ -477,9 +477,13 @@ const loadOrders = async () => {
 const loadStatistics = async () => {
   try {
     const response = await vendor.getOrderStatistics()
+    console.log('Statistics response:', response.data)
     statistics.value = response.data.data || response.data
+    console.log('Statistics value:', statistics.value)
   } catch (error) {
     console.error('Error loading statistics:', error)
+    console.error('Error details:', error.response?.data)
+    toast.error('Failed to load order statistics')
   }
 }
 
