@@ -156,6 +156,18 @@ const routes = [
     component: () => import('@/views/admin/VendorEdit.vue'),
     meta: { requiresAuth: true, role: 'admin', title: 'Edit Vendor' }
   },
+  {
+    path: '/admin/tables',
+    name: 'admin-tables',
+    component: () => import('@/views/admin/Tables.vue'),
+    meta: { requiresAuth: true, role: 'admin', title: 'Tables Management' }
+  },
+  {
+    path: '/admin/servers',
+    name: 'admin-servers',
+    component: () => import('@/views/admin/Servers.vue'),
+    meta: { requiresAuth: true, role: 'admin', title: 'Servers Management' }
+  },
 
   // Default route - check for subdomain
   {
