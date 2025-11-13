@@ -19,14 +19,14 @@ return new class extends Migration
             $table->string('customer_phone')->nullable();
             $table->decimal('subtotal', 10, 2);
             $table->decimal('tax', 10, 2)->default(0);
-            $table->decimal('total', 10, 2');
+            $table->decimal('total', 10, '2');
             $table->text('notes')->nullable();
             $table->enum('payment_status', ['pending', 'paid', 'failed'])->default('pending');
             $table->enum('payment_method', ['pay_before', 'pay_after'])->default('pay_after');
             $table->timestamp('payment_at')->nullable();
             $table->enum('status', ['pending', 'confirmed', 'preparing', 'served', 'completed', 'cancelled'])->default('pending');
             $table->timestamps();
-            
+
             $table->index(['business_link_id', 'created_at']);
             $table->index(['vendor_id', 'created_at']);
             $table->index(['server_id', 'created_at']);

@@ -217,7 +217,7 @@ class ServerController extends Controller
 
             // Verify business belongs to vendor
             $business = BusinessLink::where('id', $validated['business_link_id'])
-                ->where('uid', $vendor->id)
+                ->where('vendor_id', $vendor->id)
                 ->first();
 
             if (!$business) {
@@ -289,7 +289,7 @@ class ServerController extends Controller
 
             // Verify business belongs to vendor
             $business = BusinessLink::where('id', $businessId)
-                ->where('uid', $vendor->id)
+                ->where('vendor_id', $vendor->id)
                 ->first();
 
             if (!$business) {

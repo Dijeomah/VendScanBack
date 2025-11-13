@@ -20,7 +20,7 @@ class MenuSeeder extends Seeder
     {
         // Get the vendor user
         $vendor = User::where('userid', 'YLROCZ')->first();
-        
+
         if (!$vendor) {
             $this->command->error('Vendor with userid YLROCZ not found!');
             return;
@@ -28,7 +28,7 @@ class MenuSeeder extends Seeder
 
         // Get the business
         $business = BusinessLink::where('business_link', 'airvend3')->first();
-        
+
         if (!$business) {
             $this->command->error('Business with business_link airvend3 not found!');
             return;
@@ -306,7 +306,7 @@ class MenuSeeder extends Seeder
             $subcategory = $createdSubcategories["{$itemData['category']}-{$itemData['subcategory']}"];
 
             Item::create([
-                'uid' => $vendor->id,
+                'user_id' => $vendor->id,
                 'userid' => $vendor->userid,
                 'business_link' => $business->business_link,
                 'title' => $itemData['title'],
@@ -314,6 +314,7 @@ class MenuSeeder extends Seeder
                 'price' => $itemData['price'],
                 'category_id' => $category->id,
                 'sub_category_id' => $subcategory->id,
+                'business_link_id' => 4,
                 'status' => true,
             ]);
 
