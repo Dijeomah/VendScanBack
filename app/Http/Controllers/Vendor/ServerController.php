@@ -28,6 +28,41 @@ class ServerController extends Controller
                 ->with(['assigned_businesses.business', 'assigned_tables.table'])
                 ->get();
 
+            // Add statistics for each server
+            $servers->each(function ($server) {
+                $today = now()->startOfDay();
+
+                // Total orders
+                $server->total_orders = \App\Models\Order::where('server_id', $server->id)->count();
+
+                // Today's orders
+                $server->today_orders = \App\Models\Order::where('server_id', $server->id)
+                    ->whereDate('created_at', $today)
+                    ->count();
+
+                // Pending orders (awaiting fulfillment)
+                $server->pending_orders = \App\Models\Order::where('server_id', $server->id)
+                    ->whereIn('status', ['pending', 'confirmed'])
+                    ->count();
+
+                // Fulfilled orders today
+                $server->today_fulfilled = \App\Models\Order::where('server_id', $server->id)
+                    ->whereDate('created_at', $today)
+                    ->whereIn('status', ['completed'])
+                    ->count();
+
+                // Today's revenue
+                $server->today_revenue = \App\Models\Order::where('server_id', $server->id)
+                    ->whereDate('created_at', $today)
+                    ->where('payment_status', 'paid')
+                    ->sum('total');
+
+                // Total revenue
+                $server->total_revenue = \App\Models\Order::where('server_id', $server->id)
+                    ->where('payment_status', 'paid')
+                    ->sum('total');
+            });
+
             return success('Servers fetched successfully', $servers, Response::HTTP_OK);
 
         } catch (\Exception $e) {

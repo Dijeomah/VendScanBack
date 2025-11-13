@@ -85,92 +85,134 @@
         <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
       </div>
 
-      <!-- Servers Grid -->
-      <div v-else-if="servers.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <div
-          v-for="server in servers"
-          :key="server.id"
-          class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-all"
-        >
-          <div class="p-6">
-            <div class="flex items-start justify-between mb-4">
-              <div class="flex items-center">
-                <div class="w-12 h-12 bg-primary-100 rounded-full flex items-center justify-center mr-3">
-                  <span class="text-lg font-bold text-primary-600">
-                    {{ server.first_name[0] }}{{ server.last_name[0] }}
+      <!-- Servers Table -->
+      <div v-else-if="servers.length > 0" class="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Server</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Businesses</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Pending</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Today</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Total Orders</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Today's Revenue</th>
+                <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Total Revenue</th>
+                <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+              <tr v-for="server in servers" :key="server.id" class="hover:bg-gray-50">
+                <!-- Server Info -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center mr-3">
+                      <span class="text-sm font-bold text-primary-600">
+                        {{ server.first_name[0] }}{{ server.last_name[0] }}
+                      </span>
+                    </div>
+                    <div>
+                      <div class="text-sm font-medium text-gray-900">
+                        {{ server.first_name }} {{ server.last_name }}
+                      </div>
+                      <div class="text-xs text-gray-500">{{ server.userid }}</div>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Contact -->
+                <td class="px-6 py-4">
+                  <div class="text-sm text-gray-900">{{ server.email }}</div>
+                  <div class="text-xs text-gray-500">{{ server.phone_number }}</div>
+                </td>
+
+                <!-- Businesses -->
+                <td class="px-6 py-4">
+                  <div class="flex flex-wrap gap-1">
+                    <span
+                      v-for="assignment in server.assigned_businesses"
+                      :key="assignment.id"
+                      class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"
+                    >
+                      {{ assignment.business?.business_name || 'Business' }}
+                    </span>
+                    <span v-if="!server.assigned_businesses || server.assigned_businesses.length === 0" class="text-xs text-gray-400 italic">
+                      None
+                    </span>
+                  </div>
+                  <div class="text-xs text-gray-500 mt-1">
+                    {{ server.assigned_tables?.length || 0 }} table(s)
+                  </div>
+                </td>
+
+                <!-- Pending Orders -->
+                <td class="px-6 py-4 text-center">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
+                    {{ server.pending_orders || 0 }}
                   </span>
-                </div>
-                <div>
-                  <h3 class="text-lg font-semibold text-gray-900">
-                    {{ server.first_name }} {{ server.last_name }}
-                  </h3>
-                  <p class="text-sm text-gray-500">{{ server.userid }}</p>
-                </div>
-              </div>
-              <div class="flex gap-1">
-                <button
-                  @click="openEditModal(server)"
-                  class="p-2 text-gray-400 hover:text-blue-600 transition-colors"
-                  title="Edit Server"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                  </svg>
-                </button>
-                <button
-                  @click="confirmDelete(server)"
-                  class="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                  title="Delete Server"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
-            </div>
+                </td>
 
-            <div class="space-y-2 mb-4">
-              <div class="flex items-center text-sm text-gray-600">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                {{ server.email }}
-              </div>
-              <div class="flex items-center text-sm text-gray-600">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                </svg>
-                {{ server.phone_number }}
-              </div>
-            </div>
+                <!-- Today's Fulfilled -->
+                <td class="px-6 py-4 text-center">
+                  <div class="text-sm text-gray-900">{{ server.today_fulfilled || 0 }}</div>
+                  <div class="text-xs text-gray-500">of {{ server.today_orders || 0 }}</div>
+                </td>
 
-            <div class="border-t pt-4">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700">Assigned To:</span>
-                <button
-                  @click="openAssignModal(server)"
-                  class="text-sm text-primary-600 hover:text-primary-700 font-medium"
-                >
-                  Manage
-                </button>
-              </div>
-              <div class="flex flex-wrap gap-2">
-                <span
-                  v-for="assignment in server.assigned_businesses"
-                  :key="assignment.id"
-                  class="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded"
-                >
-                  {{ assignment.business?.business_name || 'Business' }}
-                </span>
-                <span v-if="!server.assigned_businesses || server.assigned_businesses.length === 0" class="text-xs text-gray-400 italic">
-                  No assignments yet
-                </span>
-              </div>
-              <div class="mt-2 text-xs text-gray-500">
-                Tables: {{ server.assigned_tables?.length || 0 }}
-              </div>
-            </div>
-          </div>
+                <!-- Total Orders -->
+                <td class="px-6 py-4 text-center">
+                  <span class="text-sm font-medium text-gray-900">{{ server.total_orders || 0 }}</span>
+                </td>
+
+                <!-- Today's Revenue -->
+                <td class="px-6 py-4 text-right">
+                  <span class="text-sm font-medium text-green-600">
+                    ${{ parseFloat(server.today_revenue || 0).toFixed(2) }}
+                  </span>
+                </td>
+
+                <!-- Total Revenue -->
+                <td class="px-6 py-4 text-right">
+                  <span class="text-sm font-semibold text-gray-900">
+                    ${{ parseFloat(server.total_revenue || 0).toFixed(2) }}
+                  </span>
+                </td>
+
+                <!-- Actions -->
+                <td class="px-6 py-4 text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <button
+                      @click="openAssignModal(server)"
+                      class="text-blue-600 hover:text-blue-900"
+                      title="Manage Assignments"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                      </svg>
+                    </button>
+                    <button
+                      @click="openEditModal(server)"
+                      class="text-gray-600 hover:text-blue-600"
+                      title="Edit Server"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                      </svg>
+                    </button>
+                    <button
+                      @click="confirmDelete(server)"
+                      class="text-gray-600 hover:text-red-600"
+                      title="Delete Server"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
