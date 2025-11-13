@@ -201,6 +201,30 @@ const routes = [
     meta: { requiresAuth: true, role: 'admin', title: 'Orders & Transactions' }
   },
 
+  // Subdomain routes for ordering system
+  {
+    path: '/checkout',
+    name: 'subdomain-checkout',
+    component: () => import('@/views/public/Checkout.vue'),
+    meta: { title: 'Checkout' },
+    beforeEnter: (to, from, next) => {
+      // Only allow on subdomains
+      const hostname = window.location.hostname
+      const parts = hostname.split('.')
+      if (parts.length > 1 && parts[0] !== 'localhost' && parts[0] !== 'www') {
+        next()
+      } else {
+        next('/') // Redirect to home if not on subdomain
+      }
+    }
+  },
+  {
+    path: '/order/:orderNumber',
+    name: 'subdomain-order-confirmation',
+    component: () => import('@/views/public/OrderConfirmation.vue'),
+    meta: { title: 'Order Confirmation' }
+  },
+
   // Default route - check for subdomain
   {
     path: '/',
@@ -210,11 +234,11 @@ const routes = [
       const hostname = window.location.hostname
       const parts = hostname.split('.')
 
-      // If on subdomain (e.g., airvend-res.localhost), show public menu
+      // If on subdomain (e.g., airvend3.localhost), show new menu ordering system
       if (parts.length > 1 && parts[0] !== 'localhost' && parts[0] !== 'www') {
-        // Load the PublicMenu component dynamically for subdomains
+        // Load the new Menu component for subdomains
         to.matched[0].components = {
-          default: () => import('@/views/menu/PublicMenu.vue')
+          default: () => import('@/views/public/Menu.vue')
         }
         next()
       } else {

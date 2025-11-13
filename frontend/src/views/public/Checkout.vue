@@ -194,7 +194,18 @@ const paymentMethods = [
 ]
 
 const goBack = () => {
-  router.back()
+  // Check if we're on a subdomain
+  const hostname = window.location.hostname
+  const parts = hostname.split('.')
+  const isSubdomain = parts.length > 1 && parts[0] !== 'localhost' && parts[0] !== 'www'
+
+  if (isSubdomain) {
+    // Subdomain routing - go to root
+    router.push('/')
+  } else {
+    // Path-based routing - go back
+    router.back()
+  }
 }
 
 const placeOrder = async () => {
@@ -230,22 +241,23 @@ const placeOrder = async () => {
       const paymentResponse = await publicApi.processPayment(order.id, {
         payment_method: form.value.payment_type
       })
+    }
 
-      // Clear cart
-      localStorage.removeItem(`cart_${checkoutData.value.business.business_link}`)
-      localStorage.removeItem('checkout_data')
+    // Clear cart
+    localStorage.removeItem(`cart_${checkoutData.value.business.business_link}`)
+    localStorage.removeItem('checkout_data')
 
-      // Redirect to order confirmation
-      router.push({
-        name: 'OrderConfirmation',
-        params: { orderNumber: order.order_number }
-      })
+    // Check if we're on a subdomain
+    const hostname = window.location.hostname
+    const parts = hostname.split('.')
+    const isSubdomain = parts.length > 1 && parts[0] !== 'localhost' && parts[0] !== 'www'
+
+    // Redirect to order confirmation
+    if (isSubdomain) {
+      // Subdomain routing - use path
+      router.push(`/order/${order.order_number}`)
     } else {
-      // Clear cart
-      localStorage.removeItem(`cart_${checkoutData.value.business.business_link}`)
-      localStorage.removeItem('checkout_data')
-
-      // Redirect to order confirmation
+      // Path-based routing - use named route
       router.push({
         name: 'OrderConfirmation',
         params: { orderNumber: order.order_number }

@@ -275,7 +275,16 @@ const formatDate = (dateString) => {
 }
 
 const goToMenu = () => {
-  if (order.value?.business_link) {
+  // Check if we're on a subdomain
+  const hostname = window.location.hostname
+  const parts = hostname.split('.')
+  const isSubdomain = parts.length > 1 && parts[0] !== 'localhost' && parts[0] !== 'www'
+
+  if (isSubdomain) {
+    // Subdomain routing - go to root
+    router.push('/')
+  } else if (order.value?.business_link) {
+    // Path-based routing - go to menu with business link
     router.push({
       name: 'Menu',
       params: { businessLink: order.value.business_link.business_link }

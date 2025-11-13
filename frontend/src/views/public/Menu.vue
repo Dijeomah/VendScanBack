@@ -228,7 +228,26 @@ const selectedCategory = ref(null)
 const cart = ref([])
 const showCart = ref(false)
 
-const businessLink = route.params.businessLink
+// Get business link from subdomain or route param
+const getBusinessLink = () => {
+  // Check if we have route param (path-based routing)
+  if (route.params.businessLink) {
+    return route.params.businessLink
+  }
+
+  // Otherwise extract from subdomain
+  const hostname = window.location.hostname
+  const parts = hostname.split('.')
+
+  // Return subdomain if exists (e.g., airvend3.localhost -> airvend3)
+  if (parts.length > 1 && parts[0] !== 'localhost' && parts[0] !== 'www') {
+    return parts[0]
+  }
+
+  return null
+}
+
+const businessLink = getBusinessLink()
 const tableId = route.query.table
 
 // Computed
@@ -342,11 +361,25 @@ const proceedToCheckout = () => {
     total: total.value
   }))
 
-  router.push({
-    name: 'Checkout',
-    params: { businessLink },
-    query: tableId ? { table: tableId } : {}
-  })
+  // Check if we're on a subdomain
+  const hostname = window.location.hostname
+  const parts = hostname.split('.')
+  const isSubdomain = parts.length > 1 && parts[0] !== 'localhost' && parts[0] !== 'www'
+
+  if (isSubdomain) {
+    // Subdomain routing - use simple path
+    router.push({
+      path: '/checkout',
+      query: tableId ? { table: tableId } : {}
+    })
+  } else {
+    // Path-based routing - use named route with params
+    router.push({
+      name: 'Checkout',
+      params: { businessLink },
+      query: tableId ? { table: tableId } : {}
+    })
+  }
 }
 
 onMounted(() => {
