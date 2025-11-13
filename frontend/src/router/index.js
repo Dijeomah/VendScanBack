@@ -67,6 +67,26 @@ const routes = [
     meta: { title: 'Terms of Service' }
   },
 
+  // Public menu ordering routes
+  {
+    path: '/m/:businessLink',
+    name: 'Menu',
+    component: () => import('@/views/public/Menu.vue'),
+    meta: { title: 'Menu' }
+  },
+  {
+    path: '/m/:businessLink/checkout',
+    name: 'Checkout',
+    component: () => import('@/views/public/Checkout.vue'),
+    meta: { title: 'Checkout' }
+  },
+  {
+    path: '/order/:orderNumber',
+    name: 'OrderConfirmation',
+    component: () => import('@/views/public/OrderConfirmation.vue'),
+    meta: { title: 'Order Confirmation' }
+  },
+
   // Vendor routes
   {
     path: '/vendor',
@@ -126,6 +146,12 @@ const routes = [
     component: () => import('@/views/vendor/SubscriptionManagement.vue'),
     meta: { requiresAuth: true, role: 'vendor', title: 'Subscription Management' }
   },
+  {
+    path: '/vendor/orders',
+    name: 'vendor-orders',
+    component: () => import('@/views/vendor/Orders.vue'),
+    meta: { requiresAuth: true, role: 'vendor', title: 'Orders & Transactions' }
+  },
 
   // Admin routes
   {
@@ -167,6 +193,12 @@ const routes = [
     name: 'admin-servers',
     component: () => import('@/views/admin/Servers.vue'),
     meta: { requiresAuth: true, role: 'admin', title: 'Servers Management' }
+  },
+  {
+    path: '/admin/orders',
+    name: 'admin-orders',
+    component: () => import('@/views/admin/Orders.vue'),
+    meta: { requiresAuth: true, role: 'admin', title: 'Orders & Transactions' }
   },
 
   // Default route - check for subdomain
