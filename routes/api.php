@@ -6,12 +6,16 @@ use App\Http\Controllers\Admin\Business\BusinessController;
 use App\Http\Controllers\Admin\Category\CategoryController;
 use App\Http\Controllers\Admin\TableController as AdminTableController;
 use App\Http\Controllers\Admin\ServerController as AdminServerController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Vendor\ItemController;
 use App\Http\Controllers\Vendor\VendorController;
 use App\Http\Controllers\Vendor\CategoryController as VendorCategoryController;
+use App\Http\Controllers\Vendor\OrderController as VendorOrderController;
 use App\Http\Controllers\Admin\Vendor\VendorController as AdminVendorController;
+use App\Http\Controllers\Public\MenuController;
+use App\Http\Controllers\Public\OrderController as PublicOrderController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -82,6 +86,11 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::get('/servers', [AdminServerController::class, 'index']);
         Route::get('/servers/statistics', [AdminServerController::class, 'statistics']);
         Route::delete('/servers/{id}', [AdminServerController::class, 'destroy']);
+
+        // Orders & Transactions
+        Route::get('/orders', [AdminOrderController::class, 'index']);
+        Route::get('/orders/statistics', [AdminOrderController::class, 'getStatistics']);
+        Route::get('/orders/{id}', [AdminOrderController::class, 'show']);
 
         // QR Code Generation
         Route::post('/vendors/{id}/generate-qr', [AdminVendorController::class, 'generateQrCode']);
@@ -162,10 +171,29 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('/servers/{serverId}/assignments', [\App\Http\Controllers\Vendor\TableAssignmentController::class, 'getServerAssignments']);
             Route::get('/tables/{tableId}/assignments', [\App\Http\Controllers\Vendor\TableAssignmentController::class, 'getTableAssignments']);
         });
+
+        // Orders & Transactions
+        Route::get('/orders', [VendorOrderController::class, 'index']);
+        Route::get('/orders/statistics', [VendorOrderController::class, 'getStatistics']);
+        Route::get('/orders/{id}', [VendorOrderController::class, 'show']);
+        Route::patch('/orders/{id}/status', [VendorOrderController::class, 'updateStatus']);
     });
 
     // Public Routes
     Route::get('/menu/{vendor_link}', [HomeController::class, 'vendor_site']);
     Route::get('/qr/{vendor_link}', [HomeController::class, 'vendor_site']); // Legacy QR route
     Route::get('/subdomain/{subdomain}', [HomeController::class, 'getVendorBySubdomain']); // Subdomain-based menu
+
+    // Public Menu & Orders (no authentication required)
+    Route::group(['prefix' => 'public'], function () {
+        // Menu
+        Route::get('/menu/{businessLink}', [MenuController::class, 'getMenu']);
+        Route::get('/items/{itemId}', [MenuController::class, 'getItem']);
+        Route::get('/tables/{tableId}', [MenuController::class, 'getTableInfo']);
+
+        // Orders
+        Route::post('/orders', [PublicOrderController::class, 'createOrder']);
+        Route::post('/orders/{orderId}/payment', [PublicOrderController::class, 'processPayment']);
+        Route::get('/orders/{orderNumber}', [PublicOrderController::class, 'getOrder']);
+    });
 });
