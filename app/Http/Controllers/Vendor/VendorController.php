@@ -233,6 +233,10 @@ class VendorController extends Controller
                         'city_id' => $validated_data['city_id'] ?? null,
                         'state_id' => $validated_data['state_id'] ?? null,
                         'country_id' => $validated_data['country_id'] ?? null,
+                        'geofence_enabled' => $validated_data['geofence_enabled'] ?? false,
+                        'latitude' => $validated_data['latitude'] ?? null,
+                        'longitude' => $validated_data['longitude'] ?? null,
+                        'geofence_radius' => $validated_data['geofence_radius'] ?? 100,
                     ]);
                 }
 
@@ -357,6 +361,10 @@ class VendorController extends Controller
                 'business_type' => 'nullable|string|max:100',
                 'phone_number' => 'nullable|string|max:20',
                 'address' => 'nullable|string|max:500',
+                'geofence_enabled' => 'nullable|boolean',
+                'latitude' => 'nullable|numeric|between:-90,90',
+                'longitude' => 'nullable|numeric|between:-180,180',
+                'geofence_radius' => 'nullable|integer|min:1|max:10000',
             ]);
 
             $business = $this->vendorRepository->updateBusinessLink($id, $validated_data);

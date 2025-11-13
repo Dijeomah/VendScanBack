@@ -170,6 +170,10 @@ class VendorRepository implements VendorInterface
             'business_type' => $payload['business_type'] ?? $business->business_type,
             'phone_number' => $payload['phone_number'] ?? $business->phone_number,
             'address' => $payload['address'] ?? $business->address,
+            'geofence_enabled' => $payload['geofence_enabled'] ?? $business->geofence_enabled,
+            'latitude' => $payload['latitude'] ?? $business->latitude,
+            'longitude' => $payload['longitude'] ?? $business->longitude,
+            'geofence_radius' => $payload['geofence_radius'] ?? $business->geofence_radius,
         ]);
 
         return $business->fresh(['items']);

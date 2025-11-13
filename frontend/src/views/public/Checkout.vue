@@ -177,6 +177,11 @@ const toast = useToast()
 
 const checkoutData = ref(null)
 const processing = ref(false)
+const userLocation = ref({
+  latitude: null,
+  longitude: null,
+  error: null
+})
 
 const form = ref({
   customer_name: '',
@@ -192,6 +197,32 @@ const paymentMethods = [
   { value: 'mobile', label: 'Mobile', icon: '📱' },
   { value: 'simulated', label: 'Simulated', icon: '🧪' }
 ]
+
+const requestLocation = () => {
+  if ('geolocation' in navigator) {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        userLocation.value.latitude = position.coords.latitude
+        userLocation.value.longitude = position.coords.longitude
+        userLocation.value.error = null
+        console.log('Location captured:', position.coords.latitude, position.coords.longitude)
+      },
+      (error) => {
+        console.warn('Location error:', error.message)
+        userLocation.value.error = error.message
+        // Don't show error toast yet - only if geofencing is required
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0
+      }
+    )
+  } else {
+    console.warn('Geolocation not supported')
+    userLocation.value.error = 'Geolocation not supported by your browser'
+  }
+}
 
 const goBack = () => {
   // Check if we're on a subdomain
@@ -223,6 +254,8 @@ const placeOrder = async () => {
       table_id: checkoutData.value.table?.id || null,
       customer_name: form.value.customer_name || null,
       customer_phone: form.value.customer_phone || null,
+      customer_latitude: userLocation.value.latitude,
+      customer_longitude: userLocation.value.longitude,
       notes: form.value.notes || null,
       payment_method: form.value.payment_method,
       items: checkoutData.value.cart.map(item => ({
@@ -281,5 +314,8 @@ onMounted(() => {
     toast.error('No checkout data found')
     router.push({ name: 'Menu', params: { businessLink: route.params.businessLink } })
   }
+
+  // Request user location for geofencing
+  requestLocation()
 })
 </script>

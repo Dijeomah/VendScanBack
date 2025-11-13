@@ -283,6 +283,87 @@
               ></textarea>
             </div>
 
+            <!-- Geofencing Settings -->
+            <div class="border-t pt-4">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="text-sm font-medium text-gray-900">Geofencing</h3>
+                  <p class="text-xs text-gray-500 mt-1">Restrict orders to customers within a specific area</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    v-model="businessForm.geofence_enabled"
+                    class="sr-only peer"
+                  />
+                  <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                </label>
+              </div>
+
+              <div v-if="businessForm.geofence_enabled" class="space-y-4 pl-4 border-l-2 border-gray-200">
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Latitude *</label>
+                    <input
+                      v-model.number="businessForm.latitude"
+                      type="number"
+                      step="0.000001"
+                      min="-90"
+                      max="90"
+                      :required="businessForm.geofence_enabled"
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      placeholder="40.7128"
+                    />
+                  </div>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Longitude *</label>
+                    <input
+                      v-model.number="businessForm.longitude"
+                      type="number"
+                      step="0.000001"
+                      min="-180"
+                      max="180"
+                      :required="businessForm.geofence_enabled"
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                      placeholder="-74.0060"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Geofence Radius: {{ businessForm.geofence_radius }}m
+                  </label>
+                  <select
+                    v-model.number="businessForm.geofence_radius"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                  >
+                    <option :value="50">50 meters (~164 feet)</option>
+                    <option :value="100">100 meters (~328 feet)</option>
+                    <option :value="200">200 meters (~656 feet)</option>
+                    <option :value="500">500 meters (~0.3 miles)</option>
+                    <option :value="1000">1 kilometer (~0.6 miles)</option>
+                    <option :value="2000">2 kilometers (~1.2 miles)</option>
+                  </select>
+                  <p class="text-xs text-gray-500 mt-1">
+                    Only customers within this radius can place orders
+                  </p>
+                </div>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                  <div class="flex items-start">
+                    <svg class="w-5 h-5 text-blue-600 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div class="flex-1 text-xs text-blue-800">
+                      <strong>Tip:</strong> You can use Google Maps to find your business coordinates.
+                      Right-click on your location and select "What's here?" to see the coordinates.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div class="flex justify-end gap-3 pt-4">
               <button
                 type="button"
@@ -366,7 +447,11 @@ const businessForm = ref({
   business_link: '',
   business_type: '',
   phone_number: '',
-  address: ''
+  address: '',
+  geofence_enabled: false,
+  latitude: null,
+  longitude: null,
+  geofence_radius: 100
 })
 
 const businessLimit = computed(() => {
@@ -429,7 +514,11 @@ const openCreateModal = () => {
     business_link: '',
     business_type: '',
     phone_number: '',
-    address: ''
+    address: '',
+    geofence_enabled: false,
+    latitude: null,
+    longitude: null,
+    geofence_radius: 100
   }
   showModal.value = true
 }
@@ -441,7 +530,11 @@ const openEditModal = (business) => {
     business_link: business.business_link,
     business_type: business.business_type || '',
     phone_number: business.phone_number || '',
-    address: business.address || ''
+    address: business.address || '',
+    geofence_enabled: business.geofence_enabled || false,
+    latitude: business.latitude || null,
+    longitude: business.longitude || null,
+    geofence_radius: business.geofence_radius || 100
   }
   showModal.value = true
 }

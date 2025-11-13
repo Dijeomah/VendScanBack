@@ -9,6 +9,8 @@ use App\Models\OrderItem;
 use App\Models\Payment;
 use App\Models\Item;
 use App\Models\TableLinkQrData;
+use App\Models\User;
+use App\Notifications\NewOrderNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -28,6 +30,8 @@ class OrderController extends Controller
                 'table_id' => 'nullable|exists:table_link_qr_data,id',
                 'customer_name' => 'nullable|string|max:255',
                 'customer_phone' => 'nullable|string|max:20',
+                'customer_latitude' => 'nullable|numeric|between:-90,90',
+                'customer_longitude' => 'nullable|numeric|between:-180,180',
                 'items' => 'required|array|min:1',
                 'items.*.item_id' => 'required|exists:items,id',
                 'items.*.quantity' => 'required|integer|min:1',
@@ -41,13 +45,56 @@ class OrderController extends Controller
             // Get business
             $business = BusinessLink::where('business_link', $validated['business_link'])->firstOrFail();
 
+            // Geofence validation
+            if ($business->geofence_enabled) {
+                if (empty($validated['customer_latitude']) || empty($validated['customer_longitude'])) {
+                    DB::rollBack();
+                    return error('Location permission is required to place an order at this business', null, Response::HTTP_FORBIDDEN);
+                }
+
+                if (empty($business->latitude) || empty($business->longitude)) {
+                    DB::rollBack();
+                    Log::warning('Business geofence enabled but location not set: ' . $business->id);
+                    return error('Business location not configured. Please contact the business.', null, Response::HTTP_BAD_REQUEST);
+                }
+
+                // Calculate distance using Haversine formula
+                $distance = $this->calculateDistance(
+                    $validated['customer_latitude'],
+                    $validated['customer_longitude'],
+                    $business->latitude,
+                    $business->longitude
+                );
+
+                Log::info('Geofence check', [
+                    'business' => $business->business_name,
+                    'customer_location' => [$validated['customer_latitude'], $validated['customer_longitude']],
+                    'business_location' => [$business->latitude, $business->longitude],
+                    'distance' => $distance,
+                    'radius' => $business->geofence_radius
+                ]);
+
+                if ($distance > $business->geofence_radius) {
+                    DB::rollBack();
+                    return error(
+                        "You must be within {$business->geofence_radius} meters of the business to place an order. You are currently " . round($distance) . " meters away.",
+                        ['distance' => round($distance), 'required_radius' => $business->geofence_radius],
+                        Response::HTTP_FORBIDDEN
+                    );
+                }
+            }
+
             // Get table and assigned server
             $table = null;
             $serverId = null;
             if (!empty($validated['table_id'])) {
-                $table = TableLinkQrData::with('server_assignments')->find($validated['table_id']);
-                if ($table && $table->serverAssignment) {
-                    $serverId = $table->serverAssignment->server_id;
+                $table = TableLinkQrData::with(['server_assignments' => function($query) {
+                    $query->where('status', 'active')->with('server');
+                }])->find($validated['table_id']);
+
+                // Get the first active server assignment for this table
+                if ($table && $table->server_assignments->isNotEmpty()) {
+                    $serverId = $table->server_assignments->first()->server_id;
                 }
             }
 
@@ -114,6 +161,26 @@ class OrderController extends Controller
 
             // Load relationships
             $order->load(['orderItems.item', 'table', 'businessLink', 'payment']);
+
+            // Send notifications
+            try {
+                // Notify vendor
+                $vendor = User::find($business->uid);
+                if ($vendor) {
+                    $vendor->notify(new NewOrderNotification($order, 'vendor'));
+                }
+
+                // Notify assigned server if exists
+                if ($serverId) {
+                    $server = User::find($serverId);
+                    if ($server) {
+                        $server->notify(new NewOrderNotification($order, 'server'));
+                    }
+                }
+            } catch (\Exception $e) {
+                Log::warning('Failed to send order notifications: ' . $e->getMessage());
+                // Don't fail the order if notification fails
+            }
 
             return success('Order created successfully', $order, Response::HTTP_CREATED);
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -197,5 +264,29 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             return error('Order not found', null, Response::HTTP_NOT_FOUND);
         }
+    }
+
+    /**
+     * Calculate distance between two coordinates using Haversine formula
+     * Returns distance in meters
+     */
+    private function calculateDistance($lat1, $lon1, $lat2, $lon2): float
+    {
+        $earthRadius = 6371000; // Earth's radius in meters
+
+        $latFrom = deg2rad($lat1);
+        $lonFrom = deg2rad($lon1);
+        $latTo = deg2rad($lat2);
+        $lonTo = deg2rad($lon2);
+
+        $latDelta = $latTo - $latFrom;
+        $lonDelta = $lonTo - $lonFrom;
+
+        $angle = 2 * asin(sqrt(
+            pow(sin($latDelta / 2), 2) +
+            cos($latFrom) * cos($latTo) * pow(sin($lonDelta / 2), 2)
+        ));
+
+        return $angle * $earthRadius;
     }
 }

@@ -153,6 +153,31 @@ export function useApi() {
       getOrder: (id) => api.get(`/vendor/orders/${id}`),
       getOrderStatistics: () => api.get('/vendor/orders/statistics'),
       updateOrderStatus: (id, data) => api.patch(`/vendor/orders/${id}/status`, data),
+
+      // Notifications
+      getNotifications: (params) => api.get('/vendor/notifications', { params }),
+      getUnreadNotifications: () => api.get('/vendor/notifications/unread'),
+      getUnreadCount: () => api.get('/vendor/notifications/unread-count'),
+      markNotificationAsRead: (id) => api.post(`/vendor/notifications/${id}/read`),
+      markAllNotificationsAsRead: () => api.post('/vendor/notifications/mark-all-read'),
+      deleteNotification: (id) => api.delete(`/vendor/notifications/${id}`),
+      deleteAllReadNotifications: () => api.delete('/vendor/notifications/read/all'),
+    },
+
+    // Server endpoints
+    server: {
+      // Orders
+      getOrders: (params) => api.get('/server/orders', { params }),
+      getOrder: (id) => api.get(`/server/orders/${id}`),
+      updateOrderStatus: (id, data) => api.patch(`/server/orders/${id}/status`, data),
+
+      // Notifications
+      getNotifications: (params) => api.get('/server/notifications', { params }),
+      getUnreadNotifications: () => api.get('/server/notifications/unread'),
+      getUnreadCount: () => api.get('/server/notifications/unread-count'),
+      markNotificationAsRead: (id) => api.post(`/server/notifications/${id}/read`),
+      markAllNotificationsAsRead: () => api.post('/server/notifications/mark-all-read'),
+      deleteNotification: (id) => api.delete(`/server/notifications/${id}`),
     },
 
     // Admin endpoints

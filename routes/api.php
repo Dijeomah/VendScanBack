@@ -177,6 +177,38 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::get('/orders/statistics', [VendorOrderController::class, 'getStatistics']);
         Route::get('/orders/{id}', [VendorOrderController::class, 'show']);
         Route::patch('/orders/{id}/status', [VendorOrderController::class, 'updateStatus']);
+
+        // Notifications
+        Route::group(['prefix' => 'notifications'], function () {
+            Route::get('/', [\App\Http\Controllers\Vendor\NotificationController::class, 'index']);
+            Route::get('/unread', [\App\Http\Controllers\Vendor\NotificationController::class, 'unread']);
+            Route::get('/unread-count', [\App\Http\Controllers\Vendor\NotificationController::class, 'unreadCount']);
+            Route::post('/{id}/read', [\App\Http\Controllers\Vendor\NotificationController::class, 'markAsRead']);
+            Route::post('/mark-all-read', [\App\Http\Controllers\Vendor\NotificationController::class, 'markAllAsRead']);
+            Route::delete('/{id}', [\App\Http\Controllers\Vendor\NotificationController::class, 'destroy']);
+            Route::delete('/read/all', [\App\Http\Controllers\Vendor\NotificationController::class, 'deleteAllRead']);
+        });
+    });
+
+    // Server Routes
+    Route::group([
+        'middleware' => ['authCheck', 'role:server'],
+        'prefix' => 'server'
+    ], function () {
+        // Notifications
+        Route::group(['prefix' => 'notifications'], function () {
+            Route::get('/', [\App\Http\Controllers\Vendor\NotificationController::class, 'index']);
+            Route::get('/unread', [\App\Http\Controllers\Vendor\NotificationController::class, 'unread']);
+            Route::get('/unread-count', [\App\Http\Controllers\Vendor\NotificationController::class, 'unreadCount']);
+            Route::post('/{id}/read', [\App\Http\Controllers\Vendor\NotificationController::class, 'markAsRead']);
+            Route::post('/mark-all-read', [\App\Http\Controllers\Vendor\NotificationController::class, 'markAllAsRead']);
+            Route::delete('/{id}', [\App\Http\Controllers\Vendor\NotificationController::class, 'destroy']);
+        });
+
+        // Server can view orders assigned to them
+        Route::get('/orders', [VendorOrderController::class, 'index']);
+        Route::get('/orders/{id}', [VendorOrderController::class, 'show']);
+        Route::patch('/orders/{id}/status', [VendorOrderController::class, 'updateStatus']);
     });
 
     // Public Routes

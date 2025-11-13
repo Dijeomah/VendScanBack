@@ -85,7 +85,12 @@
           </svg>
         </button>
         <span class="text-lg font-bold text-gray-900">VendScan</span>
-        <div class="w-10"></div>
+        <NotificationDropdown userRole="vendor" />
+      </header>
+
+      <!-- Top Bar (Desktop) -->
+      <header class="hidden lg:flex h-16 bg-white border-b border-gray-200 items-center justify-end px-6">
+        <NotificationDropdown userRole="vendor" />
       </header>
 
       <!-- Page Content -->
@@ -108,6 +113,7 @@ import { ref, computed, h } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'vue-toastification'
+import NotificationDropdown from '@/components/common/NotificationDropdown.vue'
 
 const router = useRouter()
 const route = useRoute()
