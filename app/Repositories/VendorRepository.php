@@ -130,4 +130,48 @@ class VendorRepository implements VendorInterface
         }
         return $fullVendor;
     }
+
+    public function getVendorBusinessLinks(int $userId)
+    {
+        return BusinessLink::with(['items'])
+            ->where('uid', $userId)
+            ->latest()
+            ->get();
+    }
+
+    public function getVendorBusinessStats(int $userId): array
+    {
+        $businesses = $this->getVendorBusinessLinks($userId);
+        $totalItems = 0;
+
+        foreach ($businesses as $business) {
+            $totalItems += $business->items->count();
+        }
+
+        return [
+            'total_businesses' => $businesses->count(),
+            'total_items' => $totalItems,
+            'businesses' => $businesses
+        ];
+    }
+
+    public function updateBusinessLink(int $businessId, array $payload): ?BusinessLink
+    {
+        $business = BusinessLink::where('id', $businessId)
+            ->where('uid', auth()->id())
+            ->first();
+
+        if (!$business) {
+            return null;
+        }
+
+        $business->update([
+            'business_name' => $payload['business_name'] ?? $business->business_name,
+            'business_type' => $payload['business_type'] ?? $business->business_type,
+            'phone_number' => $payload['phone_number'] ?? $business->phone_number,
+            'address' => $payload['address'] ?? $business->address,
+        ]);
+
+        return $business->fresh(['items']);
+    }
 }

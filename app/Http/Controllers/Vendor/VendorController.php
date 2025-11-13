@@ -212,4 +212,76 @@ class VendorController extends Controller
         }
     }
 
+    /**
+     * Get vendor's business links with statistics
+     *
+     * @return JsonResponse
+     */
+    public function getBusinessLinks(): JsonResponse
+    {
+        try {
+            $userId = auth()->id();
+            $stats = $this->vendorRepository->getVendorBusinessStats($userId);
+            return success('Business links fetched successfully', $stats, Response::HTTP_OK);
+        } catch (\Exception $exception) {
+            Log::error('Get Business Links exception: ' . $exception->getMessage() . ' on line: ' . $exception->getLine());
+            return error('Error fetching business links', [], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Update a specific business link
+     *
+     * @param int $id
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function updateBusinessInfo(int $id, Request $request): JsonResponse
+    {
+        try {
+            $validated_data = $request->validate([
+                'business_name' => 'sometimes|required|string|max:255',
+                'business_type' => 'nullable|string|max:100',
+                'phone_number' => 'nullable|string|max:20',
+                'address' => 'nullable|string|max:500',
+            ]);
+
+            $business = $this->vendorRepository->updateBusinessLink($id, $validated_data);
+
+            if (!$business) {
+                return error('Business not found or unauthorized', [], Response::HTTP_NOT_FOUND);
+            }
+
+            return success('Business updated successfully', $business, Response::HTTP_OK);
+        } catch (\Exception $exception) {
+            Log::error('Update Business Info exception: ' . $exception->getMessage() . ' on line: ' . $exception->getLine());
+            return error('Error updating business: ' . $exception->getMessage(), [], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Delete a business link
+     *
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function deleteBusinessLink(int $id): JsonResponse
+    {
+        try {
+            $business = \App\Models\BusinessLink::where('id', $id)
+                ->where('uid', auth()->id())
+                ->first();
+
+            if (!$business) {
+                return error('Business not found or unauthorized', [], Response::HTTP_NOT_FOUND);
+            }
+
+            $business->delete();
+            return success('Business deleted successfully', [], Response::HTTP_OK);
+        } catch (\Exception $exception) {
+            Log::error('Delete Business Link exception: ' . $exception->getMessage() . ' on line: ' . $exception->getLine());
+            return error('Error deleting business', [], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
 }

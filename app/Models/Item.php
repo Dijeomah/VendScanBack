@@ -23,4 +23,9 @@ class Item extends Model
     {
         return $this->belongsTo(SubCategory::class, 'sub_category_id');
     }
+
+    public function business():BelongsTo
+    {
+        return $this->belongsTo(BusinessLink::class, 'business_link', 'business_link');
+    }
 }

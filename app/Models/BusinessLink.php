@@ -70,6 +70,6 @@ class BusinessLink extends Model
 
     public function items(): HasMany
     {
-        return $this->hasMany(Item::class, 'category_id');
+        return $this->hasMany(Item::class, 'business_link', 'business_link');
     }
 }

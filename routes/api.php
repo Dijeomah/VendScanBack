@@ -88,8 +88,11 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::put('/profile/update', [VendorController::class, 'updateProfile']);
 
         // Business Information
+        Route::get('/business-links', [VendorController::class, 'getBusinessLinks']);
         Route::post('/business-info', [VendorController::class, 'setBusinessInfo'])->middleware('business.limit');
+        Route::put('/business-info/{id}', [VendorController::class, 'updateBusinessInfo']);
         Route::post('/business-links', [VendorController::class, 'setBusinessLink'])->middleware('business.limit');
+        Route::delete('/business-links/{id}', [VendorController::class, 'deleteBusinessLink']);
         Route::post('/generate-qr', [VendorController::class, 'generateQrCode']);
 
         // Categories

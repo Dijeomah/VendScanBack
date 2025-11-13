@@ -398,7 +398,12 @@ const loadBusinesses = async () => {
   try {
     loading.value = true
     const response = await vendor.getBusinessLinks()
-    businesses.value = response.data?.data || []
+    const responseData = response.data?.data || response.data || {}
+
+    // Extract businesses array from the response
+    businesses.value = responseData.businesses || []
+
+    console.log('Loaded businesses:', businesses.value)
   } catch (error) {
     console.error('Error loading businesses:', error)
     toast.error('Failed to load businesses')
