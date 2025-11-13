@@ -147,6 +147,12 @@ export function useApi() {
       updateAssignmentStatus: (businessId, assignmentId, data) => api.patch(`/vendor/businesses/${businessId}/assignments/${assignmentId}/status`, data),
       getServerAssignments: (businessId, serverId) => api.get(`/vendor/businesses/${businessId}/servers/${serverId}/assignments`),
       getTableServerAssignments: (businessId, tableId) => api.get(`/vendor/businesses/${businessId}/tables/${tableId}/assignments`),
+
+      // Orders & Transactions
+      getOrders: (params) => api.get('/vendor/orders', { params }),
+      getOrder: (id) => api.get(`/vendor/orders/${id}`),
+      getOrderStatistics: () => api.get('/vendor/orders/statistics'),
+      updateOrderStatus: (id, data) => api.patch(`/vendor/orders/${id}/status`, data),
     },
 
     // Admin endpoints
@@ -189,6 +195,11 @@ export function useApi() {
       getServers: () => api.get('/admin/servers'),
       getServerStatistics: () => api.get('/admin/servers/statistics'),
       deleteServer: (id) => api.delete(`/admin/servers/${id}`),
+
+      // Orders & Transactions
+      getOrders: (params) => api.get('/admin/orders', { params }),
+      getOrder: (id) => api.get(`/admin/orders/${id}`),
+      getOrderStatistics: () => api.get('/admin/orders/statistics'),
     },
 
     // Public endpoints
@@ -200,7 +211,15 @@ export function useApi() {
       getVendorBySubdomain: async (subdomain) => {
         const response = await api.get(`/subdomain/${subdomain}`)
         return response.data
-      }
+      },
+
+      // Menu & Orders (no authentication required)
+      getMenu: (businessLink) => api.get(`/public/menu/${businessLink}`),
+      getItem: (itemId) => api.get(`/public/items/${itemId}`),
+      getTableInfo: (tableId) => api.get(`/public/tables/${tableId}`),
+      createOrder: (data) => api.post('/public/orders', data),
+      processPayment: (orderId, data) => api.post(`/public/orders/${orderId}/payment`, data),
+      getOrder: (orderNumber) => api.get(`/public/orders/${orderNumber}`),
     }
   }
 }
