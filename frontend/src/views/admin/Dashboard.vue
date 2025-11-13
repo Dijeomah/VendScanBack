@@ -1,25 +1,12 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center py-4">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
-            <p class="text-sm text-gray-600 mt-1">Manage vendors and monitor system activity</p>
-          </div>
-          <button
-            @click="handleLogout"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all"
-          >
-            Logout
-          </button>
+  <AdminLayout>
+    <div class="p-4 md:p-8">
+      <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6">
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Dashboard</h1>
+          <p class="text-gray-600 mt-1">Manage vendors and monitor system activity</p>
         </div>
-      </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Loading State -->
       <div v-if="loading" class="flex justify-center items-center h-64">
         <LoadingSpinner size="lg" text="Loading dashboard..." />
@@ -239,21 +226,18 @@
           </div>
         </div>
       </div>
-    </main>
-  </div>
+    </div>
+  </AdminLayout>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
-import { useAuthStore } from '@/stores/auth'
 import { useToast } from 'vue-toastification'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import AdminLayout from '@/components/layouts/AdminLayout.vue'
 
-const router = useRouter()
 const { admin } = useApi()
-const authStore = useAuthStore()
 const toast = useToast()
 
 const loading = ref(true)
@@ -297,11 +281,6 @@ const refreshDashboard = async () => {
   await loadDashboard()
   refreshing.value = false
   toast.success('Dashboard refreshed!')
-}
-
-const handleLogout = async () => {
-  await authStore.logout()
-  router.push('/login')
 }
 
 onMounted(() => {

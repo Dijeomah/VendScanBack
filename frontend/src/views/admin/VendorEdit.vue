@@ -1,25 +1,12 @@
 <template>
-  <div class="min-h-screen bg-gray-50">
-    <!-- Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex justify-between items-center py-4">
-          <div>
-            <h1 class="text-2xl font-bold text-gray-900">Edit Vendor</h1>
-            <p class="text-sm text-gray-600 mt-1">Update vendor account information</p>
-          </div>
-          <router-link
-            to="/admin/vendors"
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all"
-          >
-            Back to Vendors
-          </router-link>
+  <AdminLayout>
+    <div class="p-4 md:p-8">
+      <div class="max-w-3xl mx-auto">
+        <!-- Header -->
+        <div class="mb-6">
+          <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Edit Vendor</h1>
+          <p class="text-gray-600 mt-1">Update vendor account information</p>
         </div>
-      </div>
-    </header>
-
-    <!-- Main Content -->
-    <main class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <!-- Loading State -->
       <div v-if="loading" class="flex justify-center items-center h-64">
         <LoadingSpinner size="lg" text="Loading vendor..." />
@@ -188,8 +175,9 @@
           </div>
         </form>
       </div>
-    </main>
-  </div>
+      </div>
+    </div>
+  </AdminLayout>
 </template>
 
 <script setup>
@@ -198,6 +186,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useToast } from 'vue-toastification'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import AdminLayout from '@/components/layouts/AdminLayout.vue'
 
 const router = useRouter()
 const route = useRoute()
