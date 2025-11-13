@@ -33,10 +33,12 @@ class BusinessLink extends Model
 //        return $this->belongsTo(BusinessLink::class, 'uid');
     }
 
+    /**
+     * Get the business data (detailed information)
+     */
     public function business_data(): HasOne
     {
-        return $this->hasOne(BusinessData::class, 'bd_id');
-//        return $this->belongsTo(BusinessLink::class, 'uid');
+        return $this->hasOne(BusinessData::class, 'business_link_id');
     }
 
     public function table_link_qr_data(): HasMany
