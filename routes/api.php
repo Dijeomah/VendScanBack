@@ -4,6 +4,8 @@ use App\Http\Controllers\Admin\Base\AdminController;
 use App\Http\Controllers\Admin\Base\AdminProfileController;
 use App\Http\Controllers\Admin\Business\BusinessController;
 use App\Http\Controllers\Admin\Category\CategoryController;
+use App\Http\Controllers\Admin\TableController as AdminTableController;
+use App\Http\Controllers\Admin\ServerController as AdminServerController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\Vendor\ItemController;
@@ -69,6 +71,17 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::get('/categories-with-items', [CategoryController::class, 'categoriesWithItems']);
         Route::post('/categories', [CategoryController::class, 'addCategory']);
         Route::apiResource('/categories', CategoryController::class)->except(['index', 'store']);
+
+        // Tables
+        Route::get('/tables', [AdminTableController::class, 'index']);
+        Route::get('/tables/statistics', [AdminTableController::class, 'statistics']);
+        Route::get('/tables/business/{businessId}', [AdminTableController::class, 'getBusinessTables']);
+        Route::delete('/tables/{id}', [AdminTableController::class, 'destroy']);
+
+        // Servers
+        Route::get('/servers', [AdminServerController::class, 'index']);
+        Route::get('/servers/statistics', [AdminServerController::class, 'statistics']);
+        Route::delete('/servers/{id}', [AdminServerController::class, 'destroy']);
 
         // QR Code Generation
         Route::post('/vendors/{id}/generate-qr', [AdminVendorController::class, 'generateQrCode']);

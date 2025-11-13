@@ -177,6 +177,17 @@ export function useApi() {
       createCategory: (data) => api.post('/admin/categories', data),
       updateCategory: (id, data) => api.put(`/admin/categories/${id}`, data),
       deleteCategory: (id) => api.delete(`/admin/categories/${id}`),
+
+      // Tables
+      getTables: () => api.get('/admin/tables'),
+      getTableStatistics: () => api.get('/admin/tables/statistics'),
+      getBusinessTables: (businessId) => api.get(`/admin/tables/business/${businessId}`),
+      deleteTable: (id) => api.delete(`/admin/tables/${id}`),
+
+      // Servers
+      getServers: () => api.get('/admin/servers'),
+      getServerStatistics: () => api.get('/admin/servers/statistics'),
+      deleteServer: (id) => api.delete(`/admin/servers/${id}`),
     },
 
     // Public endpoints
