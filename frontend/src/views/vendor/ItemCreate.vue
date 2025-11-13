@@ -29,7 +29,7 @@
                             >
                                 <option value="">Select a Business</option>
                                 <option v-for="business in businesses" :key="business.id" :value="business.business_link">
-                                    {{ business.business_link }}
+                                    {{ business.business_data.business_name }}
                                 </option>
                             </select>
                             <p v-if="errors.business_link" class="mt-1 text-sm text-red-600">
@@ -394,7 +394,6 @@ onMounted(async () => {
     try {
         await vendorStore.fetchFullProfile();
         businesses.value = vendorStore.vendor?.business_links || [];
-        console.log(businesses.value);
         categories.value = vendorStore.categories;
     } catch (error) {
         console.error('Error loading categories:', error)
