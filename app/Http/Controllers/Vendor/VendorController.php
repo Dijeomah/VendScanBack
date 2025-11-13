@@ -80,8 +80,8 @@ class VendorController extends Controller
                 ->count();
 
             // Get servers for this vendor
-            $totalServers = \App\Models\Server::where('user_id', $userId)->count();
-            $activeServers = \App\Models\Server::where('user_id', $userId)
+            $totalServers = \App\Models\Server::where('id', $userId)->count();
+            $activeServers = \App\Models\Server::where('id', $userId)
                 ->where('status', 'active')
                 ->count();
 
@@ -209,7 +209,7 @@ class VendorController extends Controller
             $userIdString = auth()->user()->userid;
 
             // Check if user already has business data
-            $existingUserData = \App\Models\UserData::where('uid', $userId)->first();
+            $existingUserData = \App\Models\UserData::where('user_id', $userId)->first();
             $existingBusinessLink = \App\Models\BusinessLink::where('uid', $userId)->first();
 
             if ($existingUserData || $existingBusinessLink) {

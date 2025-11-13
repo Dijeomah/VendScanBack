@@ -42,7 +42,7 @@
                   <p class="text-cyan-100 text-sm font-medium mb-1">Platform Orders</p>
                   <p class="text-3xl font-bold">{{ orderStatistics?.total_orders || 0 }}</p>
                   <p class="text-cyan-100 text-xs mt-2">
-                    ${{ (orderStatistics?.total_revenue || 0).toFixed(2) }} revenue
+                      ${{ parseFloat(orderStatistics?.total_revenue || 0).toFixed(2) }} revenue
                   </p>
                 </div>
                 <div class="w-12 h-12 bg-cyan-400 bg-opacity-30 rounded-lg flex items-center justify-center">
