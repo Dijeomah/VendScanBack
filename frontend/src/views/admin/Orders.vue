@@ -46,7 +46,7 @@
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-green-100 text-sm font-medium mb-1">Total Revenue</p>
-                <p class="text-3xl font-bold">${{ (statistics.total_revenue || 0).toFixed(2) }}</p>
+                <p class="text-3xl font-bold">${{ parseFloat(statistics.total_revenue || 0).toFixed(2) }}</p>
               </div>
               <div class="w-12 h-12 bg-green-400 bg-opacity-30 rounded-lg flex items-center justify-center">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -74,7 +74,7 @@
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-orange-100 text-sm font-medium mb-1">Today's Revenue</p>
-                <p class="text-3xl font-bold">${{ (statistics.today_revenue || 0).toFixed(2) }}</p>
+                <p class="text-3xl font-bold">${{ parseFloat(statistics.today_revenue || 0).toFixed(2) }}</p>
               </div>
               <div class="w-12 h-12 bg-orange-400 bg-opacity-30 rounded-lg flex items-center justify-center">
                 <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -466,12 +466,9 @@ const loadOrders = async () => {
 const loadStatistics = async () => {
   try {
     const response = await admin.getOrderStatistics()
-    console.log('Statistics response:', response.data)
     statistics.value = response.data.data || response.data
-    console.log('Statistics value:', statistics.value)
   } catch (error) {
     console.error('Error loading statistics:', error)
-    console.error('Error details:', error.response?.data)
     toast.error('Failed to load order statistics')
   }
 }

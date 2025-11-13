@@ -106,16 +106,9 @@ class OrderController extends Controller
     {
         try {
             $vendorId = authUser()->id;
-            Log::info('Getting statistics for vendor: ' . $vendorId);
-
-            // Debug: Check what SQL is being generated
-            $query = Order::forVendor($vendorId);
-            Log::info('SQL Query: ' . $query->toSql());
-            Log::info('Query bindings: ' . json_encode($query->getBindings()));
 
             // Total orders
-            $totalOrders = $query->count();
-            Log::info('Total orders count: ' . $totalOrders);
+            $totalOrders = Order::forVendor($vendorId)->count();
 
             // Orders by status
             $ordersByStatus = Order::forVendor($vendorId)
@@ -170,7 +163,7 @@ class OrderController extends Controller
                 ->limit(10)
                 ->get();
 
-            $statistics = [
+            return success('Statistics fetched successfully', [
                 'total_orders' => $totalOrders,
                 'orders_by_status' => $ordersByStatus,
                 'total_revenue' => $totalRevenue,
@@ -179,14 +172,9 @@ class OrderController extends Controller
                 'top_servers' => $topServers,
                 'revenue_by_day' => $revenueByDay,
                 'top_items' => $topItems,
-            ];
-
-            Log::info('Statistics data:', $statistics);
-
-            return success('Statistics fetched successfully', $statistics, Response::HTTP_OK);
+            ], Response::HTTP_OK);
         } catch (\Exception $e) {
             Log::error('Statistics fetch error: ' . $e->getMessage());
-            Log::error('Stack trace: ' . $e->getTraceAsString());
             return error('Error fetching statistics', null, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
