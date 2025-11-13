@@ -16,7 +16,25 @@
         <!-- Dashboard Content -->
         <div v-else class="space-y-6">
           <!-- Stats Grid -->
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            <!-- Total Orders -->
+            <div class="bg-gradient-to-br from-cyan-500 to-cyan-600 rounded-xl shadow-lg p-6 text-white">
+              <div class="flex items-center justify-between">
+                <div>
+                  <p class="text-cyan-100 text-sm font-medium mb-1">Total Orders</p>
+                  <p class="text-3xl font-bold">{{ orderStatistics?.total_orders || 0 }}</p>
+                  <p class="text-cyan-100 text-xs mt-2">
+                    ${{ (orderStatistics?.total_revenue || 0).toFixed(2) }} revenue
+                  </p>
+                </div>
+                <div class="w-12 h-12 bg-cyan-400 bg-opacity-30 rounded-lg flex items-center justify-center">
+                  <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                  </svg>
+                </div>
+              </div>
+            </div>
+
             <!-- Total Businesses -->
             <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
               <div class="flex items-center justify-between">
@@ -87,6 +105,21 @@
                   </svg>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- Transaction Charts Row -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Revenue Trends Chart -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Revenue Trends (Last 7 Days)</h3>
+              <canvas ref="revenueChartRef"></canvas>
+            </div>
+
+            <!-- Top Servers Chart -->
+            <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Top Servers by Sales</h3>
+              <canvas ref="topServersChartRef"></canvas>
             </div>
           </div>
 
@@ -262,14 +295,19 @@ const toast = useToast()
 
 const loading = ref(true)
 const statistics = ref({})
+const orderStatistics = ref({})
 
 // Chart refs
 const itemGrowthChartRef = ref(null)
 const itemsCategoryChartRef = ref(null)
+const revenueChartRef = ref(null)
+const topServersChartRef = ref(null)
 
 // Chart instances
 let itemGrowthChart = null
 let itemsCategoryChart = null
+let revenueChart = null
+let topServersChart = null
 
 const getBusinessLimit = () => {
   const tier = authStore.user?.subscription_tier || 'free'
@@ -293,6 +331,16 @@ const loadDashboard = async () => {
 
     console.log('Dashboard statistics:', statistics.value)
 
+    // Load order statistics
+    try {
+      const orderResponse = await vendor.getOrderStatistics()
+      orderStatistics.value = orderResponse.data.data || orderResponse.data
+      console.log('Order statistics:', orderStatistics.value)
+    } catch (orderError) {
+      console.error('Error loading order statistics:', orderError)
+      // Don't fail the whole dashboard if orders fail
+    }
+
     // Wait for next tick to ensure DOM is updated
     await nextTick()
     initCharts()
@@ -306,13 +354,109 @@ const loadDashboard = async () => {
 
 const initCharts = () => {
   destroyCharts()
+  createRevenueChart()
+  createTopServersChart()
   createItemGrowthChart()
   createItemsCategoryChart()
 }
 
 const destroyCharts = () => {
+  if (revenueChart) revenueChart.destroy()
+  if (topServersChart) topServersChart.destroy()
   if (itemGrowthChart) itemGrowthChart.destroy()
   if (itemsCategoryChart) itemsCategoryChart.destroy()
+}
+
+const createRevenueChart = () => {
+  if (!revenueChartRef.value || !orderStatistics.value.revenue_by_day?.length) return
+
+  const ctx = revenueChartRef.value.getContext('2d')
+  const dates = orderStatistics.value.revenue_by_day.map(item => {
+    const date = new Date(item.date)
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  })
+
+  revenueChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: dates,
+      datasets: [{
+        label: 'Revenue ($)',
+        data: orderStatistics.value.revenue_by_day.map(item => parseFloat(item.revenue)),
+        borderColor: 'rgb(6, 182, 212)',
+        backgroundColor: 'rgba(6, 182, 212, 0.1)',
+        tension: 0.4,
+        fill: true
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return '$' + value.toFixed(2)
+            }
+          }
+        }
+      }
+    }
+  })
+}
+
+const createTopServersChart = () => {
+  if (!topServersChartRef.value || !orderStatistics.value.top_servers?.length) return
+
+  const ctx = topServersChartRef.value.getContext('2d')
+  const serverData = orderStatistics.value.top_servers.slice(0, 5) // Top 5 servers
+
+  topServersChart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: serverData.map(server => {
+        const firstName = server.server?.first_name || 'Server'
+        const lastName = server.server?.last_name || ''
+        return `${firstName} ${lastName}`.trim()
+      }),
+      datasets: [{
+        label: 'Sales ($)',
+        data: serverData.map(server => parseFloat(server.total_sales)),
+        backgroundColor: [
+          'rgba(59, 130, 246, 0.8)',
+          'rgba(34, 197, 94, 0.8)',
+          'rgba(168, 85, 247, 0.8)',
+          'rgba(251, 146, 60, 0.8)',
+          'rgba(236, 72, 153, 0.8)'
+        ]
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: true,
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            callback: function(value) {
+              return '$' + value.toFixed(2)
+            }
+          }
+        }
+      }
+    }
+  })
 }
 
 const createItemGrowthChart = () => {
