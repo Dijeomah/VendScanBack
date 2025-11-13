@@ -183,7 +183,7 @@ const handleNotificationClick = async (notification) => {
   if (notification.data.order_id) {
     closeDropdown()
     router.push({
-      name: props.userRole === 'vendor' ? 'VendorOrders' : 'ServerOrders',
+      name: 'vendor-orders',
       query: { orderId: notification.data.order_id }
     })
   }
