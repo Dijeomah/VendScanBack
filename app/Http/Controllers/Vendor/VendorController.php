@@ -333,6 +333,60 @@ class VendorController extends Controller
             return error('Upload failed', null, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
+    public function uploadBusinessMedia(int $businessId, Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'header_image' => 'nullable|image|max:5120',
+                'logo_image' => 'nullable|image|max:5120'
+            ]);
+
+            // Verify business belongs to vendor
+            $business = BusinessLink::where('id', $businessId)
+                ->where('uid', auth()->id())
+                ->with('business_data')
+                ->firstOrFail();
+
+            $mediaData = [];
+
+            if ($request->hasFile('header_image')) {
+                $header = $request->file('header_image');
+                $mediaData['header_image'] = CloudinaryStorage::upload(
+                    $header->getRealPath(),
+                    $header->getClientOriginalName()
+                );
+            }
+
+            if ($request->hasFile('logo_image')) {
+                $logo = $request->file('logo_image');
+                $mediaData['logo_image'] = CloudinaryStorage::upload(
+                    $logo->getRealPath(),
+                    $logo->getClientOriginalName()
+                );
+            }
+
+            if (empty($mediaData)) {
+                return error('No valid files provided', null, Response::HTTP_BAD_REQUEST);
+            }
+
+            // Update or create business_data
+            if ($business->business_data) {
+                $business->business_data->update($mediaData);
+            } else {
+                $business->business_data()->create($mediaData);
+            }
+
+            $business->load('business_data');
+            return success('Business media uploaded successfully', $business, Response::HTTP_OK);
+
+        } catch (ModelNotFoundException $e) {
+            return error('Business not found or access denied', null, Response::HTTP_NOT_FOUND);
+        } catch (Exception $exception) {
+            Log::error('Business media upload error: ' . $exception->getMessage());
+            return error('Upload failed', null, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
     public function getVendorWithMenu()
     {
         try {

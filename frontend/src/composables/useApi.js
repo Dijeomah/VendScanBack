@@ -102,6 +102,9 @@ export function useApi() {
       uploadMedia: (formData) => api.post('/vendor/media', formData, {
         headers: { 'Content-Type': 'multipart/form-data' }
       }),
+      uploadBusinessMedia: (businessId, formData) => api.post(`/vendor/businesses/${businessId}/media`, formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      }),
       generateQR: () => api.post('/vendor/generate-qr'),
 
       // Categories
@@ -115,8 +118,19 @@ export function useApi() {
       // Items
       getItems: () => api.get('/vendor/items'),
       getItem: (id) => api.get(`/vendor/items/${id}`),
-      createItem: (data) => api.post('/vendor/items', data),
-      updateItem: (id, data) => api.put(`/vendor/items/${id}`, data),
+      createItem: (data) => api.post('/vendor/items', data, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      }),
+      updateItem: (id, data) => {
+        // For multipart/form-data, we use POST with _method spoofing
+        if (data instanceof FormData) {
+          data.append('_method', 'PUT')
+          return api.post(`/vendor/items/${id}`, data, {
+            headers: { 'Content-Type': 'multipart/form-data' }
+          })
+        }
+        return api.put(`/vendor/items/${id}`, data)
+      },
       deleteItem: (id) => api.delete(`/vendor/items/${id}`),
       getItemsByCategory: (categoryId) => api.get(`/vendor/items/by-category/${categoryId}`),
       addItemToCategory: (categoryId, data) => api.post(`/vendor/categories/${categoryId}/items`, data),

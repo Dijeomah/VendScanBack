@@ -93,6 +93,24 @@
             </div>
           </div>
 
+          <!-- Subcategory (Optional) -->
+          <div v-if="form.category_id && availableSubcategories.length > 0">
+            <label for="sub_category_id" class="block text-sm font-medium text-gray-700 mb-2">
+              Subcategory (Optional)
+            </label>
+            <select
+              id="sub_category_id"
+              v-model="form.sub_category_id"
+              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            >
+              <option value="">No subcategory</option>
+              <option v-for="subcategory in availableSubcategories" :key="subcategory.id" :value="subcategory.id">
+                {{ subcategory.sub_category_name }}
+              </option>
+            </select>
+            <p class="mt-1 text-xs text-gray-500">Select a subcategory to further organize this item</p>
+          </div>
+
           <!-- Image Upload -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-2">
@@ -199,7 +217,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useVendorStore } from '@/stores/vendor'
 import { useToast } from 'vue-toastification'
@@ -221,10 +239,19 @@ const form = ref({
   description: '',
   price: '',
   category_id: '',
+  sub_category_id: '',
   status: true
 })
 
 const errors = ref({})
+
+// Computed property to get subcategories for selected category
+const availableSubcategories = computed(() => {
+  if (!form.value.category_id) return []
+
+  const selectedCategory = categories.value.find(cat => cat.id === form.value.category_id)
+  return selectedCategory?.subcategories || []
+})
 
 const handleImageChange = (event) => {
   const file = event.target.files[0]
@@ -284,15 +311,28 @@ const handleSubmit = async () => {
     return
   }
 
+  // Check if vendor has a business
+  if (!vendorStore.vendor?.business_links || vendorStore.vendor.business_links.length === 0) {
+    toast.error('Please create a business first')
+    router.push('/vendor/businesses')
+    return
+  }
+
   submitting.value = true
 
   try {
     const formData = new FormData()
     formData.append('title', form.value.title)
-    formData.append('description', form.value.description)
+    formData.append('description', form.value.description || '')
     formData.append('price', form.value.price)
     formData.append('category_id', form.value.category_id)
+    formData.append('business_link', vendorStore.vendor.business_links[0].business_link)
     formData.append('status', form.value.status ? '1' : '0')
+
+    // sub_category_id is optional
+    if (form.value.sub_category_id) {
+      formData.append('sub_category_id', form.value.sub_category_id)
+    }
 
     if (imageFile.value) {
       formData.append('image', imageFile.value)

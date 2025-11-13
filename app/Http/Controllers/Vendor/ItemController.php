@@ -8,11 +8,13 @@ use App\Http\Requests\ItemUpdateRequest;
 use App\Models\BusinessLink;
 use App\Models\Category;
 use App\Models\Item;
+use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary as CloudinaryStorage;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class ItemController extends Controller
@@ -28,6 +30,62 @@ class ItemController extends Controller
         // dd('Hello');
         $item = Item::where('userid', authUser()->userid)->paginate(10);
         return success('Item: ', $item, 200);
+    }
+
+    /**
+     * Store a newly created item (supports image upload)
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function store(Request $request): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'title' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'price' => 'required|numeric|min:0',
+                'category_id' => 'required|exists:categories,id',
+                'sub_category_id' => 'nullable|exists:sub_categories,id',
+                'business_link' => 'required|string',
+                'status' => 'nullable|boolean',
+                'image' => 'nullable|image|max:5120' // 5MB max
+            ]);
+
+            // Verify business belongs to user
+            if (!BusinessLink::where(['userid' => authUser()->userid, 'business_link' => $validated['business_link']])->exists()) {
+                return error('Business not found or access denied', [], Response::HTTP_FORBIDDEN);
+            }
+
+            $imageUrl = null;
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $imageUrl = CloudinaryStorage::upload(
+                    $image->getRealPath(),
+                    $image->getClientOriginalName()
+                );
+            }
+
+            $item = Item::create([
+                'uid' => authUser()->id,
+                'userid' => authUser()->userid,
+                'business_link' => $validated['business_link'],
+                'title' => $validated['title'],
+                'category_id' => $validated['category_id'],
+                'sub_category_id' => $validated['sub_category_id'] ?? null,
+                'description' => $validated['description'] ?? null,
+                'price' => $validated['price'],
+                'status' => $validated['status'] ?? true,
+                'image' => $imageUrl
+            ]);
+
+            return success('Item created successfully', $item, Response::HTTP_CREATED);
+        } catch (ValidationException $e) {
+            return error('Validation failed', $e->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
+        } catch (Exception $e) {
+            Log::error('Item creation error: ' . $e->getMessage());
+            return error('Failed to create item', null, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -82,7 +140,53 @@ class ItemController extends Controller
     }
 
     /**
-     * Update the Authenticated User profile.
+     * Update an existing item (supports image upload)
+     *
+     * @param Request $request
+     * @param int $id
+     * @return JsonResponse
+     */
+    public function update(Request $request, $id): JsonResponse
+    {
+        try {
+            $item = Item::where('id', $id)
+                ->where('userid', authUser()->userid)
+                ->firstOrFail();
+
+            $validated = $request->validate([
+                'title' => 'sometimes|required|string|max:255',
+                'description' => 'nullable|string',
+                'price' => 'sometimes|required|numeric|min:0',
+                'category_id' => 'sometimes|required|exists:categories,id',
+                'sub_category_id' => 'nullable|exists:sub_categories,id',
+                'status' => 'nullable|boolean',
+                'image' => 'nullable|image|max:5120' // 5MB max
+            ]);
+
+            // Handle image upload if present
+            if ($request->hasFile('image')) {
+                $image = $request->file('image');
+                $validated['image'] = CloudinaryStorage::upload(
+                    $image->getRealPath(),
+                    $image->getClientOriginalName()
+                );
+            }
+
+            $item->update($validated);
+
+            return success('Item updated successfully', $item->fresh(), Response::HTTP_OK);
+        } catch (ModelNotFoundException $e) {
+            return error('Item not found or access denied', null, Response::HTTP_NOT_FOUND);
+        } catch (ValidationException $e) {
+            return error('Validation failed', $e->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
+        } catch (Exception $e) {
+            Log::error('Item update error: ' . $e->getMessage());
+            return error('Failed to update item', null, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Update the Authenticated User profile (legacy method).
      *
      * @return JsonResponse
      * @throws ValidationException

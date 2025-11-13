@@ -12,8 +12,18 @@
           </svg>
           Back to Menu
         </button>
-        <h1 class="text-3xl font-bold text-gray-900">Checkout</h1>
-        <p class="text-gray-600">{{ checkoutData?.business?.business_data?.business_name || checkoutData?.business?.business_link }}</p>
+        <div class="flex items-center gap-3">
+          <img
+            v-if="checkoutData?.business?.business_data?.logo_image"
+            :src="checkoutData.business.business_data.logo_image"
+            :alt="checkoutData.business.business_data?.business_name || 'Logo'"
+            class="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+          />
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">Checkout</h1>
+            <p class="text-gray-600">{{ checkoutData?.business?.business_data?.business_name || checkoutData?.business?.business_link }}</p>
+          </div>
+        </div>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

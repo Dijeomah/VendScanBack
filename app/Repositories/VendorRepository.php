@@ -127,14 +127,15 @@ class VendorRepository implements VendorInterface
     {
         $fullVendor =  User::with([
             'business_links.items' => function ($query) {
-                $query->where('status', true)
-                    ->orderBy('category_id')
+                $query->orderBy('category_id')
                     ->orderBy('price');
             },
             'business_links.items.category',
+            'business_links.items.sub_category',
             'business_links.business_data',
             'categories' => function ($query) {
-                $query->orderBy('category_name');
+                $query->with('subcategories')
+                    ->orderBy('category_name');
             },
             'vendor_media'
         ])->where('userid', $userId)->first();

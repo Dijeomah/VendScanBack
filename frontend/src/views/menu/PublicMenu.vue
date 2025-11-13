@@ -50,11 +50,11 @@
 
       <!-- Vendor Header -->
       <div class="bg-white shadow-sm">
-        <!-- Hero Image -->
-        <div v-if="vendor.vendor_media?.hero_image" class="h-48 md:h-64 overflow-hidden">
+        <!-- Business Header Image (Priority) or Vendor Hero Image (Fallback) -->
+        <div v-if="businessLink?.business_data?.header_image || vendor.vendor_media?.hero_image" class="h-48 md:h-64 overflow-hidden">
           <img
-            :src="vendor.vendor_media.hero_image"
-            :alt="vendor.business_links?.[0]?.business_data?.business_name || 'Business'"
+            :src="businessLink?.business_data?.header_image || vendor.vendor_media?.hero_image"
+            :alt="businessLink?.business_data?.business_name || 'Business'"
             class="w-full h-full object-cover"
           />
         </div>
@@ -62,11 +62,11 @@
         <!-- Vendor Info -->
         <div class="max-w-4xl mx-auto px-4 py-6">
           <div class="flex items-center gap-4">
-            <!-- Logo -->
-            <div v-if="vendor.vendor_media?.logo" class="flex-shrink-0">
+            <!-- Business Logo (Priority) or Vendor Logo (Fallback) -->
+            <div v-if="businessLink?.business_data?.logo_image || vendor.vendor_media?.logo" class="flex-shrink-0">
               <img
-                :src="vendor.vendor_media.logo"
-                :alt="vendor.business_links?.[0]?.business_data?.business_name || 'Business'"
+                :src="businessLink?.business_data?.logo_image || vendor.vendor_media?.logo"
+                :alt="businessLink?.business_data?.business_name || 'Business'"
                 class="w-20 h-20 rounded-full border-4 border-white shadow-lg -mt-10"
               />
             </div>

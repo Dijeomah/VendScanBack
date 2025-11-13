@@ -283,6 +283,102 @@
               ></textarea>
             </div>
 
+            <!-- Business Media -->
+            <div v-if="editingBusiness" class="border-t pt-4">
+              <h3 class="text-sm font-medium text-gray-900 mb-4">Business Media</h3>
+
+              <!-- Header Image -->
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Header Image</label>
+                <div class="flex items-start gap-4">
+                  <div v-if="headerImagePreview || editingBusiness?.business_data?.header_image" class="flex-shrink-0">
+                    <img
+                      :src="headerImagePreview || editingBusiness?.business_data?.header_image"
+                      alt="Header preview"
+                      class="w-40 h-24 object-cover rounded-lg border-2 border-gray-200"
+                    />
+                  </div>
+                  <div class="flex-1">
+                    <label class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-all">
+                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      {{ headerImagePreview || editingBusiness?.business_data?.header_image ? 'Change' : 'Upload' }} Header
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      class="hidden"
+                      @change="handleHeaderImageChange"
+                    />
+                    <p class="text-xs text-gray-500 mt-2">Recommended: 1920x400px, Max 5MB</p>
+                  </div>
+                  <button
+                    v-if="headerImagePreview"
+                    type="button"
+                    @click="removeHeaderImage"
+                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Logo Image -->
+              <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Logo Image</label>
+                <div class="flex items-start gap-4">
+                  <div v-if="logoImagePreview || editingBusiness?.business_data?.logo_image" class="flex-shrink-0">
+                    <img
+                      :src="logoImagePreview || editingBusiness?.business_data?.logo_image"
+                      alt="Logo preview"
+                      class="w-24 h-24 object-cover rounded-lg border-2 border-gray-200"
+                    />
+                  </div>
+                  <div class="flex-1">
+                    <label class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 cursor-pointer transition-all">
+                      <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      {{ logoImagePreview || editingBusiness?.business_data?.logo_image ? 'Change' : 'Upload' }} Logo
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      class="hidden"
+                      @change="handleLogoImageChange"
+                    />
+                    <p class="text-xs text-gray-500 mt-2">Recommended: Square 512x512px, Max 5MB</p>
+                  </div>
+                  <button
+                    v-if="logoImagePreview"
+                    type="button"
+                    @click="removeLogoImage"
+                    class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Upload Button -->
+              <div v-if="headerImageFile || logoImageFile" class="flex justify-end">
+                <button
+                  type="button"
+                  @click="uploadBusinessMedia"
+                  :disabled="uploadingMedia"
+                  class="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50 transition-all flex items-center gap-2"
+                >
+                  <span v-if="uploadingMedia">Uploading...</span>
+                  <span v-else>Upload Media</span>
+                </button>
+              </div>
+            </div>
+
             <!-- Geofencing Settings -->
             <div class="border-t pt-4">
               <div class="flex items-center justify-between mb-4">
@@ -454,6 +550,12 @@ const businessForm = ref({
   geofence_radius: 100
 })
 
+const headerImageFile = ref(null)
+const headerImagePreview = ref(null)
+const logoImageFile = ref(null)
+const logoImagePreview = ref(null)
+const uploadingMedia = ref(false)
+
 const businessLimit = computed(() => {
   const tier = authStore.user?.subscription_tier || 'free'
   switch (tier) {
@@ -542,6 +644,10 @@ const openEditModal = (business) => {
 const closeModal = () => {
   showModal.value = false
   editingBusiness.value = null
+  headerImageFile.value = null
+  headerImagePreview.value = null
+  logoImageFile.value = null
+  logoImagePreview.value = null
 }
 
 const saveBusiness = async () => {
@@ -591,6 +697,94 @@ const deleteBusiness = async () => {
     toast.error('Failed to delete business')
   } finally {
     deleting.value = false
+  }
+}
+
+const handleHeaderImageChange = (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  if (file.size > 5 * 1024 * 1024) {
+    toast.error('Header image size must be less than 5MB')
+    return
+  }
+
+  if (!file.type.startsWith('image/')) {
+    toast.error('Please upload a valid image file')
+    return
+  }
+
+  headerImageFile.value = file
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    headerImagePreview.value = e.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
+const handleLogoImageChange = (event) => {
+  const file = event.target.files[0]
+  if (!file) return
+
+  if (file.size > 5 * 1024 * 1024) {
+    toast.error('Logo image size must be less than 5MB')
+    return
+  }
+
+  if (!file.type.startsWith('image/')) {
+    toast.error('Please upload a valid image file')
+    return
+  }
+
+  logoImageFile.value = file
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    logoImagePreview.value = e.target.result
+  }
+  reader.readAsDataURL(file)
+}
+
+const removeHeaderImage = () => {
+  headerImageFile.value = null
+  headerImagePreview.value = null
+}
+
+const removeLogoImage = () => {
+  logoImageFile.value = null
+  logoImagePreview.value = null
+}
+
+const uploadBusinessMedia = async () => {
+  if (!editingBusiness.value) return
+
+  try {
+    uploadingMedia.value = true
+    const formData = new FormData()
+
+    if (headerImageFile.value) {
+      formData.append('header_image', headerImageFile.value)
+    }
+
+    if (logoImageFile.value) {
+      formData.append('logo_image', logoImageFile.value)
+    }
+
+    await vendor.uploadBusinessMedia(editingBusiness.value.id, formData)
+    toast.success('Business media uploaded successfully!')
+
+    // Clear the files
+    headerImageFile.value = null
+    logoImageFile.value = null
+    headerImagePreview.value = null
+    logoImagePreview.value = null
+
+    // Reload businesses to show the new images
+    await loadBusinesses()
+  } catch (error) {
+    console.error('Error uploading business media:', error)
+    toast.error(error.response?.data?.message || 'Failed to upload business media')
+  } finally {
+    uploadingMedia.value = false
   }
 }
 

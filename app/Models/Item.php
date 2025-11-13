@@ -19,7 +19,8 @@ class Item extends Model
         'sub_category_id',
         'description',
         'price',
-        'status'
+        'status',
+        'image'
     ];
 
 //    public function user(){

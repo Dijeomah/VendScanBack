@@ -139,6 +139,7 @@ Route::group(['middleware' => 'api'], function ($router) {
         // Media
         Route::post('/media', [VendorController::class, 'setMedia']);
         Route::post('/media/upload', [VendorController::class, 'setMedia']); // Keeping legacy route
+        Route::post('/businesses/{businessId}/media', [VendorController::class, 'uploadBusinessMedia']);
 
         // Table Management
         Route::group(['prefix' => 'businesses/{businessId}/tables'], function () {
