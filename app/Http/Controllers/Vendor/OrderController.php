@@ -106,9 +106,16 @@ class OrderController extends Controller
     {
         try {
             $vendorId = authUser()->id;
+            Log::info('Getting statistics for vendor: ' . $vendorId);
+
+            // Debug: Check what SQL is being generated
+            $query = Order::forVendor($vendorId);
+            Log::info('SQL Query: ' . $query->toSql());
+            Log::info('Query bindings: ' . json_encode($query->getBindings()));
 
             // Total orders
-            $totalOrders = Order::forVendor($vendorId)->count();
+            $totalOrders = $query->count();
+            Log::info('Total orders count: ' . $totalOrders);
 
             // Orders by status
             $ordersByStatus = Order::forVendor($vendorId)
@@ -148,7 +155,7 @@ class OrderController extends Controller
                 ->select(DB::raw('DATE(created_at) as date'), DB::raw('sum(total) as revenue'), DB::raw('count(*) as orders'))
                 ->where('payment_status', 'paid')
                 ->where('created_at', '>=', now()->subDays(7))
-                ->groupBy('date')
+                ->groupBy(DB::raw('DATE(created_at)'))
                 ->orderBy('date', 'desc')
                 ->get();
 
@@ -163,7 +170,7 @@ class OrderController extends Controller
                 ->limit(10)
                 ->get();
 
-            return success('Statistics fetched successfully', [
+            $statistics = [
                 'total_orders' => $totalOrders,
                 'orders_by_status' => $ordersByStatus,
                 'total_revenue' => $totalRevenue,
@@ -172,9 +179,14 @@ class OrderController extends Controller
                 'top_servers' => $topServers,
                 'revenue_by_day' => $revenueByDay,
                 'top_items' => $topItems,
-            ], Response::HTTP_OK);
+            ];
+
+            Log::info('Statistics data:', $statistics);
+
+            return success('Statistics fetched successfully', $statistics, Response::HTTP_OK);
         } catch (\Exception $e) {
             Log::error('Statistics fetch error: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
             return error('Error fetching statistics', null, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
