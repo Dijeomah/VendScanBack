@@ -129,14 +129,14 @@ class OrderController extends Controller
     /**
      * Process payment
      */
-    public function processPayment(Request $request, int $orderId): JsonResponse
+    public function processPayment(Request $request, $orderId): JsonResponse
     {
         try {
             $validated = $request->validate([
                 'payment_method' => 'required|in:cash,card,mobile,simulated',
             ]);
 
-            $order = Order::with('payment')->findOrFail($orderId);
+            $order = Order::with('payment')->findOrFail((int)$orderId);
 
             if ($order->payment_status === 'paid') {
                 return error('Order already paid', null, Response::HTTP_BAD_REQUEST);

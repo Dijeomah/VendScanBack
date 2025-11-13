@@ -61,11 +61,11 @@ class MenuController extends Controller
     /**
      * Get single item details
      */
-    public function getItem(int $itemId): JsonResponse
+    public function getItem($itemId): JsonResponse
     {
         try {
             $item = Item::with(['category', 'sub_category', 'business'])
-                ->where('id', $itemId)
+                ->where('id', (int)$itemId)
                 ->where('status', true)
                 ->first();
 
@@ -82,11 +82,11 @@ class MenuController extends Controller
     /**
      * Get table information
      */
-    public function getTableInfo(int $tableId): JsonResponse
+    public function getTableInfo($tableId): JsonResponse
     {
 
         try {
-            $table = TableLinkQrData::with('business_link')->find($tableId);
+            $table = TableLinkQrData::with('business_link')->find((int)$tableId);
 
             if (!$table) {
                 return error('Table not found', null, Response::HTTP_NOT_FOUND);
