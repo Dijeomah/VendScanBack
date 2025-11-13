@@ -308,10 +308,10 @@
 
     <!-- Assign to Business Modal -->
         <div v-if="showAssignModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div class="bg-white rounded-lg max-w-xl w-full max-h-[90vh] overflow-y-auto">
+            <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
                 <div class="p-6 border-b">
                     <h2 class="text-xl font-bold text-gray-900">
-                        Manage Business Assignments
+                        Manage Business & Table Assignments
                     </h2>
                     <p class="text-sm text-gray-600 mt-1">
                         {{ selectedServer?.first_name }} {{ selectedServer?.last_name }}
@@ -322,26 +322,83 @@
                         <div
                             v-for="business in businesses"
                             :key="business.id"
-                            class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                            class="border border-gray-200 rounded-lg"
                         >
-                            <div>
-                                <p class="font-medium text-gray-900">{{ business.business_name }}</p>
-                                <p class="text-sm text-gray-500">{{ business.business_link }}</p>
+                            <!-- Business Header -->
+                            <div class="flex items-center justify-between p-4 hover:bg-gray-50">
+                                <div class="flex-1">
+                                    <p class="font-medium text-gray-900">{{ business.business_name }}</p>
+                                    <p class="text-sm text-gray-500">{{ business.business_link }}</p>
+                                    <p v-if="getBusinessAssignedTablesCount(business.id) > 0" class="text-xs text-primary-600 mt-1">
+                                        {{ getBusinessAssignedTablesCount(business.id) }} table(s) assigned
+                                    </p>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button
+                                        v-if="isServerAssignedToBusiness(business.id)"
+                                        @click="toggleBusinessTables(business.id)"
+                                        class="px-4 py-2 text-sm bg-primary-50 text-primary-600 rounded-lg hover:bg-primary-100 transition-all"
+                                    >
+                                        {{ expandedBusinessId === business.id ? 'Hide' : 'Manage' }} Tables
+                                    </button>
+                                    <button
+                                        v-if="isServerAssignedToBusiness(business.id)"
+                                        @click="unassignFromBusiness(business.id)"
+                                        class="px-4 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all"
+                                    >
+                                        Remove
+                                    </button>
+                                    <button
+                                        v-else
+                                        @click="assignToBusiness(business.id)"
+                                        class="px-4 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all"
+                                    >
+                                        Assign
+                                    </button>
+                                </div>
                             </div>
-                            <button
-                                v-if="isServerAssignedToBusiness(business.id)"
-                                @click="unassignFromBusiness(business.id)"
-                                class="px-4 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all"
-                            >
-                                Remove
-                            </button>
-                            <button
-                                v-else
-                                @click="assignToBusiness(business.id)"
-                                class="px-4 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all"
-                            >
-                                Assign
-                            </button>
+
+                            <!-- Tables Section (Expandable) -->
+                            <div v-if="expandedBusinessId === business.id && isServerAssignedToBusiness(business.id)"
+                                 class="border-t border-gray-200 p-4 bg-gray-50">
+                                <div v-if="loadingTables" class="text-center py-4">
+                                    <p class="text-sm text-gray-500">Loading tables...</p>
+                                </div>
+                                <div v-else-if="businessTables.length === 0" class="text-center py-4">
+                                    <p class="text-sm text-gray-500">No tables found for this business</p>
+                                </div>
+                                <div v-else class="space-y-2">
+                                    <p class="text-sm font-medium text-gray-700 mb-3">Select tables to assign:</p>
+                                    <div class="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
+                                        <label
+                                            v-for="table in businessTables"
+                                            :key="table.id"
+                                            class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-white cursor-pointer"
+                                            :class="{ 'bg-primary-50 border-primary-300': isTableAssignedToServer(table.id) }"
+                                        >
+                                            <input
+                                                type="checkbox"
+                                                :checked="isTableAssignedToServer(table.id)"
+                                                @change="toggleTableAssignment(business.id, table.id)"
+                                                class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
+                                            />
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-900">{{ table.table_name }}</p>
+                                                <p class="text-xs text-gray-500">{{ table.table_number }}</p>
+                                            </div>
+                                        </label>
+                                    </div>
+                                    <div class="mt-3 pt-3 border-t border-gray-200">
+                                        <button
+                                            @click="saveTableAssignments(business.id)"
+                                            :disabled="savingTables"
+                                            class="w-full px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all disabled:opacity-50"
+                                        >
+                                            {{ savingTables ? 'Saving...' : 'Save Table Assignments' }}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         <p v-if="businesses.length === 0" class="text-center text-gray-500 py-8">
                             No businesses available
@@ -407,8 +464,14 @@ const toast = useToast()
 const loading = ref(false)
 const saving = ref(false)
 const deleting = ref(false)
+const loadingTables = ref(false)
+const savingTables = ref(false)
 const servers = ref([])
 const businesses = ref([])
+const businessTables = ref([])
+const serverTableAssignments = ref([])
+const expandedBusinessId = ref(null)
+const selectedTableIds = ref(new Set())
 
 const showServerModal = ref(false)
 const showAssignModal = ref(false)
@@ -594,10 +657,121 @@ const unassignFromBusiness = async (businessId) => {
     await loadServers()
     // Update selectedServer with fresh data
     selectedServer.value = servers.value.find(s => s.id === selectedServer.value.id)
+    // Clear table data if this was the expanded business
+    if (expandedBusinessId.value === businessId) {
+      expandedBusinessId.value = null
+      businessTables.value = []
+      serverTableAssignments.value = []
+    }
   } catch (error) {
     console.error('Error removing server:', error)
     toast.error('Failed to remove server from business')
   }
+}
+
+const toggleBusinessTables = async (businessId) => {
+  if (expandedBusinessId.value === businessId) {
+    expandedBusinessId.value = null
+    businessTables.value = []
+    serverTableAssignments.value = []
+    selectedTableIds.value = new Set()
+  } else {
+    expandedBusinessId.value = businessId
+    await loadBusinessTables(businessId)
+  }
+}
+
+const loadBusinessTables = async (businessId) => {
+  try {
+    loadingTables.value = true
+
+    // Load all tables for this business
+    const tablesResponse = await vendor.getTables(businessId)
+    businessTables.value = tablesResponse.data?.data || []
+
+    // Load current server's table assignments for this business
+    const assignmentsResponse = await vendor.getServerAssignments(businessId, selectedServer.value.id)
+    serverTableAssignments.value = assignmentsResponse.data?.data || []
+
+    // Initialize selectedTableIds with currently assigned tables
+    selectedTableIds.value = new Set(
+      serverTableAssignments.value.map(assignment => assignment.table_id)
+    )
+  } catch (error) {
+    console.error('Error loading tables:', error)
+    toast.error('Failed to load tables')
+  } finally {
+    loadingTables.value = false
+  }
+}
+
+const isTableAssignedToServer = (tableId) => {
+  return selectedTableIds.value.has(tableId)
+}
+
+const toggleTableAssignment = (businessId, tableId) => {
+  if (selectedTableIds.value.has(tableId)) {
+    selectedTableIds.value.delete(tableId)
+  } else {
+    selectedTableIds.value.add(tableId)
+  }
+  // Force reactivity
+  selectedTableIds.value = new Set(selectedTableIds.value)
+}
+
+const saveTableAssignments = async (businessId) => {
+  try {
+    savingTables.value = true
+
+    const currentlyAssignedIds = new Set(
+      serverTableAssignments.value.map(a => a.table_id)
+    )
+
+    // Find tables to assign (newly selected)
+    const tablesToAssign = [...selectedTableIds.value].filter(
+      id => !currentlyAssignedIds.has(id)
+    )
+
+    // Find tables to unassign (previously selected but now deselected)
+    const tablesToUnassign = [...currentlyAssignedIds].filter(
+      id => !selectedTableIds.value.has(id)
+    )
+
+    // Assign new tables
+    if (tablesToAssign.length > 0) {
+      await vendor.bulkAssignServerToTables(businessId, {
+        server_id: selectedServer.value.id,
+        table_ids: tablesToAssign
+      })
+    }
+
+    // Unassign removed tables
+    for (const tableId of tablesToUnassign) {
+      const assignment = serverTableAssignments.value.find(a => a.table_id === tableId)
+      if (assignment) {
+        await vendor.removeTableAssignment(businessId, assignment.id)
+      }
+    }
+
+    toast.success('Table assignments saved successfully!')
+
+    // Reload assignments
+    await loadBusinessTables(businessId)
+    await loadServers()
+
+  } catch (error) {
+    console.error('Error saving table assignments:', error)
+    toast.error('Failed to save table assignments')
+  } finally {
+    savingTables.value = false
+  }
+}
+
+const getBusinessAssignedTablesCount = (businessId) => {
+  if (!selectedServer.value || !selectedServer.value.assigned_tables) return 0
+  return selectedServer.value.assigned_tables.filter(
+    assignment => assignment.business_link_id === businessId
+  ).length
 }
 
 onMounted(async () => {
