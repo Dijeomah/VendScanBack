@@ -55,7 +55,7 @@ class   HomeController extends Controller
             // Find business link by subdomain with vendor relationship
             $businessLink = BusinessLink::where('subdomain', $validatedSubdomain)
                 ->orWhere('business_link', $validatedSubdomain)
-                ->with('user') // Use relationship to load user
+                ->with(['user', 'business_data']) // Use relationship to load user and business_data
                 ->first();
 
             if (!$businessLink) {
@@ -93,16 +93,18 @@ class   HomeController extends Controller
 
             // Build response
             $response = [
-                'business_name' => $businessLink->business_name,
+                'business_name' => $businessLink->business_data->business_name ?? $businessLink->business_link,
                 'business_links' => [
                     [
-                        'business_name' => $businessLink->business_name,
                         'business_link' => $businessLink->business_link,
                         'subdomain' => $businessLink->subdomain,
-                        'business_type' => $businessLink->business_type,
-                        'phone_number' => $businessLink->phone_number,
-                        'business_address' => $businessLink->business_address,
                         'business_qr' => $businessLink->business_qr,
+                        'business_data' => $businessLink->business_data ? [
+                            'business_name' => $businessLink->business_data->business_name,
+                            'business_type' => $businessLink->business_data->business_type,
+                            'phone_number' => $businessLink->business_data->phone_number,
+                            'address' => $businessLink->business_data->address,
+                        ] : null,
                         'items' => $allItems
                     ]
                 ],

@@ -166,7 +166,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="flex items-center">
                                             <div v-if="vendor.vendor_media?.logo" class="flex-shrink-0 h-10 w-10">
-                                                <img :src="vendor.vendor_media.logo" :alt="vendor.business_name"
+                                                <img :src="vendor.vendor_media.logo" :alt="vendor.business_links?.[0]?.business_data?.business_name || vendor.first_name"
                                                      class="h-10 w-10 rounded-full object-cover"/>
                                             </div>
                                             <div :class="vendor.vendor_media?.logo ? 'ml-4' : ''">
@@ -178,9 +178,9 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <div class="text-sm text-gray-900">{{ vendor.business_name || 'N/A' }}</div>
+                                        <div class="text-sm text-gray-900">{{ vendor.business_links?.[0]?.business_data?.business_name || 'N/A' }}</div>
                                         <div class="text-sm text-gray-500">
-                                            {{ vendor.business_links?.[0]?.business_type || 'Not set' }}
+                                            {{ vendor.business_links?.[0]?.business_data?.business_type || 'Not set' }}
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
@@ -237,7 +237,7 @@
                     <h3 class="text-lg font-semibold text-gray-900 mb-2">Delete Vendor</h3>
                     <p class="text-gray-600 mb-6">
                         Are you sure you want to delete <strong>{{
-                            vendorToDelete.business_name || vendorToDelete.first_name + ' ' + vendorToDelete.last_name
+                            vendorToDelete.business_links?.[0]?.business_data?.business_name || vendorToDelete.first_name + ' ' + vendorToDelete.last_name
                         }}</strong>?
                         This action cannot be undone.
                     </p>
@@ -290,7 +290,7 @@ const filteredVendors = computed(() => {
         vendor.first_name?.toLowerCase().includes(query) ||
         vendor.last_name?.toLowerCase().includes(query) ||
         vendor.email?.toLowerCase().includes(query) ||
-        vendor.business_name?.toLowerCase().includes(query) ||
+        vendor.business_links?.[0]?.business_data?.business_name?.toLowerCase().includes(query) ||
         vendor.business_links?.[0]?.business_link?.toLowerCase().includes(query)
     )
 })

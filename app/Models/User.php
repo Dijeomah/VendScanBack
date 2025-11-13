@@ -129,6 +129,11 @@ class User extends Authenticatable implements JWTSubject
         return $this->hasMany(BusinessLink::class, 'uid');
     }
 
+    public function categories(): HasMany
+    {
+        return $this->hasMany(Category::class, 'user_id');
+    }
+
     /**
      * Get remaining business slots
      */

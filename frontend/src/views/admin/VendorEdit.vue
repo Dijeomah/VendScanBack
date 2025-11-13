@@ -118,7 +118,7 @@
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p class="text-sm text-gray-600">Business Name</p>
-                  <p class="font-medium text-gray-900">{{ vendor.business_links[0].business_name || 'Not set' }}</p>
+                  <p class="font-medium text-gray-900">{{ vendor.business_links[0].business_data?.business_name || vendor.business_links[0].business_link || 'Not set' }}</p>
                 </div>
                 <div>
                   <p class="text-sm text-gray-600">Business Link</p>

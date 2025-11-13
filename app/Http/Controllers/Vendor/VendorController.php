@@ -46,7 +46,7 @@ class VendorController extends Controller
             $userId = auth()->id();
 
             // Get all businesses for this vendor
-            $businesses = \App\Models\BusinessLink::where('uid', $userId)->get();
+            $businesses = \App\Models\BusinessLink::with('business_data')->where('uid', $userId)->get();
             $businessIds = $businesses->pluck('id')->toArray();
             $businessLinks = $businesses->pluck('business_link')->toArray();
 
@@ -104,7 +104,9 @@ class VendorController extends Controller
             }
 
             // Business type distribution (if vendor has multiple businesses)
-            $businessTypeDistribution = $businesses->groupBy('business_type')
+            $businessTypeDistribution = $businesses->groupBy(function($business) {
+                    return $business->business_data->business_type ?? 'Other';
+                })
                 ->map(function ($group) {
                     return $group->count();
                 })
@@ -210,7 +212,7 @@ class VendorController extends Controller
 
             // Check if user already has business data
             $existingUserData = \App\Models\UserData::where('user_id', $userId)->first();
-            $existingBusinessLink = \App\Models\BusinessLink::where('uid', $userId)->first();
+            $existingBusinessLink = \App\Models\BusinessLink::with('business_data')->where('uid', $userId)->first();
 
             if ($existingUserData || $existingBusinessLink) {
                 // Update existing records
@@ -225,24 +227,36 @@ class VendorController extends Controller
                 }
 
                 if ($existingBusinessLink) {
-                    $existingBusinessLink->update([
-                        'business_name' => $validated_data['business_name'],
-                        'business_type' => $validated_data['business_type'] ?? null,
-                        'phone_number' => $validated_data['phone_number'] ?? null,
-                        'business_address' => $validated_data['business_address'] ?? null,
-                        'city_id' => $validated_data['city_id'] ?? null,
-                        'state_id' => $validated_data['state_id'] ?? null,
-                        'country_id' => $validated_data['country_id'] ?? null,
-                        'geofence_enabled' => $validated_data['geofence_enabled'] ?? false,
-                        'latitude' => $validated_data['latitude'] ?? null,
-                        'longitude' => $validated_data['longitude'] ?? null,
-                        'geofence_radius' => $validated_data['geofence_radius'] ?? 100,
-                    ]);
+                    // Update business_data (all detailed information)
+                    if ($existingBusinessLink->business_data) {
+                        $existingBusinessLink->business_data->update([
+                            'business_name' => $validated_data['business_name'],
+                            'business_type' => $validated_data['business_type'] ?? $existingBusinessLink->business_data->business_type,
+                            'phone_number' => $validated_data['phone_number'] ?? $existingBusinessLink->business_data->phone_number,
+                            'address' => $validated_data['business_address'] ?? $validated_data['address'] ?? $existingBusinessLink->business_data->address,
+                            'geofence_enabled' => $validated_data['geofence_enabled'] ?? $existingBusinessLink->business_data->geofence_enabled,
+                            'latitude' => $validated_data['latitude'] ?? $existingBusinessLink->business_data->latitude,
+                            'longitude' => $validated_data['longitude'] ?? $existingBusinessLink->business_data->longitude,
+                            'geofence_radius' => $validated_data['geofence_radius'] ?? $existingBusinessLink->business_data->geofence_radius,
+                        ]);
+                    } else {
+                        // Create business_data if it doesn't exist
+                        $existingBusinessLink->business_data()->create([
+                            'business_name' => $validated_data['business_name'],
+                            'business_type' => $validated_data['business_type'] ?? null,
+                            'phone_number' => $validated_data['phone_number'] ?? null,
+                            'address' => $validated_data['business_address'] ?? $validated_data['address'] ?? null,
+                            'geofence_enabled' => $validated_data['geofence_enabled'] ?? false,
+                            'latitude' => $validated_data['latitude'] ?? null,
+                            'longitude' => $validated_data['longitude'] ?? null,
+                            'geofence_radius' => $validated_data['geofence_radius'] ?? 100,
+                        ]);
+                    }
                 }
 
                 return success('Business information updated successfully', [
                     'user_data' => $existingUserData,
-                    'business_link' => $existingBusinessLink
+                    'business_link' => $existingBusinessLink->fresh('business_data')
                 ], Response::HTTP_OK);
             } else {
                 // Create new records
@@ -268,7 +282,7 @@ class VendorController extends Controller
             $validated_data = $this->validate($request, config('validation.set_business_name'));
 
             $checkBusinessLink = $this->vendorRepository->checkVendorBusinessName($validated_data['business_name']);
-            if (!$checkBusinessLink || $checkBusinessLink->business_name != $validated_data['business_name']) {
+            if (!$checkBusinessLink || $checkBusinessLink->business_data->business_name != $validated_data['business_name']) {
 
                 $userData = $this->vendorRepository->createVendorBusinessLink($validated_data);
                 return success('Business link created successful. ', $userData, ResponseAlias::HTTP_OK);

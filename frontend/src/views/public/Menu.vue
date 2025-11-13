@@ -5,7 +5,7 @@
       <div class="max-w-7xl mx-auto px-4 py-4">
         <div class="flex items-center justify-between">
           <div>
-            <h1 class="text-2xl font-bold text-gray-900">{{ business?.business_name || 'Menu' }}</h1>
+            <h1 class="text-2xl font-bold text-gray-900">{{ business?.business_data?.business_name || business?.business_link || 'Menu' }}</h1>
             <p v-if="table" class="text-sm text-gray-600">Table: {{ table.table_name }}</p>
           </div>
           <button

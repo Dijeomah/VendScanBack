@@ -208,7 +208,7 @@
                     <div v-if="order.vendor?.email" class="text-xs text-gray-500">{{ order.vendor.email }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
-                    <div class="text-sm text-gray-900">{{ order.business_link?.business_name || '-' }}</div>
+                    <div class="text-sm text-gray-900">{{ order.business_link?.business_data?.business_name || order.business_link?.business_link || '-' }}</div>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <div class="text-sm text-gray-900">{{ order.customer_name || 'Guest' }}</div>
@@ -322,7 +322,7 @@
                 </div>
                 <div>
                   <p class="text-sm text-gray-600">Business</p>
-                  <p class="font-medium">{{ selectedOrder.business_link?.business_name || '-' }}</p>
+                  <p class="font-medium">{{ selectedOrder.business_link?.business_data?.business_name || selectedOrder.business_link?.business_link || '-' }}</p>
                 </div>
                 <div>
                   <p class="text-sm text-gray-600">Customer</p>

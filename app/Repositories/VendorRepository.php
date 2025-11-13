@@ -67,7 +67,9 @@ class VendorRepository implements VendorInterface
 
     public function checkVendorBusinessName(string $businessName): ?BusinessLink
     {
-        return BusinessLink::where('business_name', $businessName)->first();
+        return BusinessLink::whereHas('business_data', function ($query) use ($businessName) {
+            $query->where('business_name', $businessName);
+        })->with('business_data')->first();
     }
 
     public function createVendorData(array $payload): UserData
@@ -85,24 +87,32 @@ class VendorRepository implements VendorInterface
 
     public function createVendorBusinessLink(array $payload): BusinessLink
     {
-        $slug = Str::slug($payload['business_name']);
+        $slug = Str::slug($payload['business_name'] ?? $payload['business_link']);
         $count = BusinessLink::where('business_link', $slug)->count();
         $uniqueSlug = $count > 0 ? "{$slug}-{$count}" : $slug;
 
-        return BusinessLink::create([
+        // Create the business link (core identifiers only)
+        $businessLink = BusinessLink::create([
             'uid' => auth()->id(),
             'userid' => auth()->user()->userid,
-            'business_name' => $payload['business_name'],
             'business_link' => $uniqueSlug,
             'subdomain' => $uniqueSlug,
             'business_qr' => $this->qrCodeService->generateForVendor($uniqueSlug),
+        ]);
+
+        // Create the business data (all detailed information)
+        $businessLink->business_data()->create([
+            'business_name' => $payload['business_name'] ?? $uniqueSlug,
             'business_type' => $payload['business_type'] ?? null,
             'phone_number' => $payload['phone_number'] ?? null,
-            'business_address' => $payload['business_address'] ?? null,
-            'city_id' => $payload['city_id'] ?? null,
-            'state_id' => $payload['state_id'] ?? null,
-            'country_id' => $payload['country_id'] ?? null,
+            'address' => $payload['address'] ?? $payload['business_address'] ?? null,
+            'latitude' => $payload['latitude'] ?? null,
+            'longitude' => $payload['longitude'] ?? null,
+            'geofence_radius' => $payload['geofence_radius'] ?? 100,
+            'geofence_enabled' => $payload['geofence_enabled'] ?? false,
         ]);
+
+        return $businessLink->fresh(['business_data']);
     }
 
     public function createVendorMedia(array $payload): VendorMedia
@@ -122,6 +132,10 @@ class VendorRepository implements VendorInterface
                     ->orderBy('price');
             },
             'business_links.items.category',
+            'business_links.business_data',
+            'categories' => function ($query) {
+                $query->orderBy('category_name');
+            },
             'vendor_media'
         ])->where('userid', $userId)->first();
 
@@ -133,7 +147,7 @@ class VendorRepository implements VendorInterface
 
     public function getVendorBusinessLinks(int $userId)
     {
-        return BusinessLink::with(['items'])
+        return BusinessLink::with(['items', 'business_data'])
             ->where('uid', $userId)
             ->latest()
             ->get();
@@ -157,7 +171,8 @@ class VendorRepository implements VendorInterface
 
     public function updateBusinessLink(int $businessId, array $payload): ?BusinessLink
     {
-        $business = BusinessLink::where('id', $businessId)
+        $business = BusinessLink::with('business_data')
+            ->where('id', $businessId)
             ->where('uid', auth()->id())
             ->first();
 
@@ -165,17 +180,32 @@ class VendorRepository implements VendorInterface
             return null;
         }
 
-        $business->update([
-            'business_name' => $payload['business_name'] ?? $business->business_name,
-            'business_type' => $payload['business_type'] ?? $business->business_type,
-            'phone_number' => $payload['phone_number'] ?? $business->phone_number,
-            'address' => $payload['address'] ?? $business->address,
-            'geofence_enabled' => $payload['geofence_enabled'] ?? $business->geofence_enabled,
-            'latitude' => $payload['latitude'] ?? $business->latitude,
-            'longitude' => $payload['longitude'] ?? $business->longitude,
-            'geofence_radius' => $payload['geofence_radius'] ?? $business->geofence_radius,
-        ]);
+        // Update business_data (all detailed information)
+        if ($business->business_data) {
+            $business->business_data->update([
+                'business_name' => $payload['business_name'] ?? $business->business_data->business_name,
+                'business_type' => $payload['business_type'] ?? $business->business_data->business_type,
+                'phone_number' => $payload['phone_number'] ?? $business->business_data->phone_number,
+                'address' => $payload['address'] ?? $business->business_data->address,
+                'geofence_enabled' => $payload['geofence_enabled'] ?? $business->business_data->geofence_enabled,
+                'latitude' => $payload['latitude'] ?? $business->business_data->latitude,
+                'longitude' => $payload['longitude'] ?? $business->business_data->longitude,
+                'geofence_radius' => $payload['geofence_radius'] ?? $business->business_data->geofence_radius,
+            ]);
+        } else {
+            // Create business_data if it doesn't exist
+            $business->business_data()->create([
+                'business_name' => $payload['business_name'] ?? $business->business_link,
+                'business_type' => $payload['business_type'] ?? null,
+                'phone_number' => $payload['phone_number'] ?? null,
+                'address' => $payload['address'] ?? null,
+                'geofence_enabled' => $payload['geofence_enabled'] ?? false,
+                'latitude' => $payload['latitude'] ?? null,
+                'longitude' => $payload['longitude'] ?? null,
+                'geofence_radius' => $payload['geofence_radius'] ?? 100,
+            ]);
+        }
 
-        return $business->fresh(['items']);
+        return $business->fresh(['items', 'business_data']);
     }
 }

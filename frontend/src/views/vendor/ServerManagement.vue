@@ -135,7 +135,7 @@
                       :key="assignment.id"
                       class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800"
                     >
-                      {{ assignment.business?.business_name || 'Business' }}
+                      {{ assignment.business?.business_data?.business_name || assignment.business?.business_link || 'Business' }}
                     </span>
                     <span v-if="!server.assigned_businesses || server.assigned_businesses.length === 0" class="text-xs text-gray-400 italic">
                       None
@@ -319,7 +319,7 @@
                     v-model="serverForm.business_link_ids"
                     class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500"
                   />
-                  <span class="text-sm text-gray-700">{{ business.business_name }}</span>
+                  <span class="text-sm text-gray-700">{{ business.business_data?.business_name || business.business_link }}</span>
                 </label>
                 <p v-if="businesses.length === 0" class="text-sm text-gray-500 italic">
                   No businesses available
@@ -369,7 +369,7 @@
                             <!-- Business Header -->
                             <div class="flex items-center justify-between p-4 hover:bg-gray-50">
                                 <div class="flex-1">
-                                    <p class="font-medium text-gray-900">{{ business.business_name }}</p>
+                                    <p class="font-medium text-gray-900">{{ business.business_data?.business_name || business.business_link }}</p>
                                     <p class="text-sm text-gray-500">{{ business.business_link }}</p>
                                     <p v-if="getBusinessAssignedTablesCount(business.id) > 0" class="text-xs text-primary-600 mt-1">
                                         {{ getBusinessAssignedTablesCount(business.id) }} table(s) assigned

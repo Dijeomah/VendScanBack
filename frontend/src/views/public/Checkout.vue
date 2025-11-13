@@ -13,7 +13,7 @@
           Back to Menu
         </button>
         <h1 class="text-3xl font-bold text-gray-900">Checkout</h1>
-        <p class="text-gray-600">{{ checkoutData?.business?.business_name }}</p>
+        <p class="text-gray-600">{{ checkoutData?.business?.business_data?.business_name || checkoutData?.business?.business_link }}</p>
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">

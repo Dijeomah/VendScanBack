@@ -55,7 +55,7 @@
           <div class="space-y-3 mb-4">
             <div class="flex justify-between text-sm">
               <span class="text-gray-600">Business</span>
-              <span class="font-medium">{{ order.business_link?.business_name }}</span>
+              <span class="font-medium">{{ order.business_link?.business_data?.business_name || order.business_link?.business_link }}</span>
             </div>
             <div v-if="order.table" class="flex justify-between text-sm">
               <span class="text-gray-600">Table</span>

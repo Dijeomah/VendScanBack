@@ -50,7 +50,7 @@ class NewOrderNotification extends Notification
         return [
             'order_id' => $this->order->id,
             'order_number' => $this->order->order_number,
-            'business_name' => $this->order->businessLink->business_name,
+            'business_name' => $this->order->businessLink->business_data->business_name ?? $this->order->businessLink->business_link,
             'table_name' => $this->order->table?->table_name,
             'customer_name' => $this->order->customer_name,
             'total' => $this->order->total,
@@ -85,11 +85,12 @@ class NewOrderNotification extends Notification
         $tableName = $this->order->table?->table_name ?? 'a customer';
         $itemsCount = $this->order->orderItems->count();
         $total = number_format($this->order->total, 2);
+        $businessName = $this->order->businessLink->business_data->business_name ?? $this->order->businessLink->business_link;
 
         if ($this->recipientRole === 'server') {
             return "New order #{$this->order->order_number} from {$tableName} - {$itemsCount} item(s), \${$total}";
         }
 
-        return "New order #{$this->order->order_number} from {$tableName} at {$this->order->businessLink->business_name} - \${$total}";
+        return "New order #{$this->order->order_number} from {$tableName} at {$businessName} - \${$total}";
     }
 }

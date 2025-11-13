@@ -41,7 +41,7 @@
         >
           <option value="">-- Select a business --</option>
           <option v-for="business in businesses" :key="business.id" :value="business.id">
-            {{ business.business_name }}
+            {{ business.business_data?.business_name || business.business_link }}
           </option>
         </select>
       </div>

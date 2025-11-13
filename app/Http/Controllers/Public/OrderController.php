@@ -42,17 +42,17 @@ class OrderController extends Controller
 
             DB::beginTransaction();
 
-            // Get business
-            $business = BusinessLink::where('business_link', $validated['business_link'])->firstOrFail();
+            // Get business with business_data
+            $business = BusinessLink::with('business_data')->where('business_link', $validated['business_link'])->firstOrFail();
 
             // Geofence validation
-            if ($business->geofence_enabled) {
+            if ($business->business_data && $business->business_data->geofence_enabled) {
                 if (empty($validated['customer_latitude']) || empty($validated['customer_longitude'])) {
                     DB::rollBack();
                     return error('Location permission is required to place an order at this business', null, Response::HTTP_FORBIDDEN);
                 }
 
-                if (empty($business->latitude) || empty($business->longitude)) {
+                if (empty($business->business_data->latitude) || empty($business->business_data->longitude)) {
                     DB::rollBack();
                     Log::warning('Business geofence enabled but location not set: ' . $business->id);
                     return error('Business location not configured. Please contact the business.', null, Response::HTTP_BAD_REQUEST);
@@ -62,23 +62,23 @@ class OrderController extends Controller
                 $distance = $this->calculateDistance(
                     $validated['customer_latitude'],
                     $validated['customer_longitude'],
-                    $business->latitude,
-                    $business->longitude
+                    $business->business_data->latitude,
+                    $business->business_data->longitude
                 );
 
                 Log::info('Geofence check', [
-                    'business' => $business->business_name,
+                    'business' => $business->business_data->business_name,
                     'customer_location' => [$validated['customer_latitude'], $validated['customer_longitude']],
-                    'business_location' => [$business->latitude, $business->longitude],
+                    'business_location' => [$business->business_data->latitude, $business->business_data->longitude],
                     'distance' => $distance,
-                    'radius' => $business->geofence_radius
+                    'radius' => $business->business_data->geofence_radius
                 ]);
 
-                if ($distance > $business->geofence_radius) {
+                if ($distance > $business->business_data->geofence_radius) {
                     DB::rollBack();
                     return error(
-                        "You must be within {$business->geofence_radius} meters of the business to place an order. You are currently " . round($distance) . " meters away.",
-                        ['distance' => round($distance), 'required_radius' => $business->geofence_radius],
+                        "You must be within {$business->business_data->geofence_radius} meters of the business to place an order. You are currently " . round($distance) . " meters away.",
+                        ['distance' => round($distance), 'required_radius' => $business->business_data->geofence_radius],
                         Response::HTTP_FORBIDDEN
                     );
                 }

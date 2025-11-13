@@ -18,8 +18,6 @@ return new class extends Migration
             $table->dropColumn([
                 'business_name',
                 'business_type',
-                'phone_number',
-                'address',
                 'latitude',
                 'longitude',
                 'geofence_radius',

@@ -264,8 +264,8 @@
                 :key="business.id"
                 class="border border-gray-200 rounded-lg p-4 hover:border-primary-300 transition-all"
               >
-                <h3 class="font-semibold text-gray-900">{{ business.business_name }}</h3>
-                <p class="text-sm text-gray-500 mt-1">{{ business.business_type || 'Restaurant' }}</p>
+                <h3 class="font-semibold text-gray-900">{{ business.business_data?.business_name || business.business_link }}</h3>
+                <p class="text-sm text-gray-500 mt-1">{{ business.business_data?.business_type || 'Restaurant' }}</p>
                 <div class="mt-3 text-xs text-gray-600">
                   <span class="inline-block px-2 py-1 bg-gray-100 rounded">{{ business.business_link }}</span>
                 </div>

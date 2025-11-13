@@ -111,7 +111,7 @@
                       <div v-if="table.table_name" class="text-sm text-gray-500">{{ table.table_name }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                      <div class="text-sm text-gray-900">{{ table.business_link?.business_name || 'N/A' }}</div>
+                      <div class="text-sm text-gray-900">{{ table.business_link?.business_data?.business_name || table.business_link?.business_link || 'N/A' }}</div>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {{ table.seats || 'N/A' }} seats

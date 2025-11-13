@@ -115,7 +115,7 @@
               <div class="flex items-start justify-between mb-4">
                 <div class="flex-1 min-w-0">
                   <h3 class="text-lg font-semibold text-gray-900 truncate">
-                    {{ business.business_name }}
+                    {{ business.business_data?.business_name || business.business_link }}
                   </h3>
                   <p class="text-sm text-gray-500 truncate">{{ business.business_link }}</p>
                 </div>
@@ -142,24 +142,24 @@
               </div>
 
               <div class="space-y-2 mb-4">
-                <div v-if="business.business_type" class="flex items-center text-sm text-gray-600">
+                <div v-if="business.business_data?.business_type" class="flex items-center text-sm text-gray-600">
                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                   </svg>
-                  {{ business.business_type }}
+                  {{ business.business_data.business_type }}
                 </div>
-                <div v-if="business.phone_number" class="flex items-center text-sm text-gray-600">
+                <div v-if="business.business_data?.phone_number" class="flex items-center text-sm text-gray-600">
                   <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                   </svg>
-                  {{ business.phone_number }}
+                  {{ business.business_data.phone_number }}
                 </div>
-                <div v-if="business.address" class="flex items-start text-sm text-gray-600">
+                <div v-if="business.business_data?.address" class="flex items-start text-sm text-gray-600">
                   <svg class="w-4 h-4 mr-2 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
-                  <span class="flex-1">{{ business.address }}</span>
+                  <span class="flex-1">{{ business.business_data.address }}</span>
                 </div>
               </div>
 
@@ -526,15 +526,15 @@ const openCreateModal = () => {
 const openEditModal = (business) => {
   editingBusiness.value = business
   businessForm.value = {
-    business_name: business.business_name,
+    business_name: business.business_data?.business_name || business.business_link,
     business_link: business.business_link,
-    business_type: business.business_type || '',
-    phone_number: business.phone_number || '',
-    address: business.address || '',
-    geofence_enabled: business.geofence_enabled || false,
-    latitude: business.latitude || null,
-    longitude: business.longitude || null,
-    geofence_radius: business.geofence_radius || 100
+    business_type: business.business_data?.business_type || '',
+    phone_number: business.business_data?.phone_number || '',
+    address: business.business_data?.address || '',
+    geofence_enabled: business.business_data?.geofence_enabled || false,
+    latitude: business.business_data?.latitude || null,
+    longitude: business.business_data?.longitude || null,
+    geofence_radius: business.business_data?.geofence_radius || 100
   }
   showModal.value = true
 }
