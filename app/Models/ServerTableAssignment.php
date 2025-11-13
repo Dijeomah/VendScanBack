@@ -45,4 +45,9 @@ class ServerTableAssignment extends Model
     {
         return $this->belongsTo(BusinessLink::class, 'business_link_id');
     }
+
+    public function business(): BelongsTo
+    {
+        return $this->belongsTo(BusinessLink::class, 'business_link_id');
+    }
 }

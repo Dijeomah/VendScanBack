@@ -343,7 +343,16 @@ const loadDashboard = async () => {
 
     // Wait for next tick to ensure DOM is updated
     await nextTick()
-    initCharts()
+
+    // Additional delay to ensure canvas elements are fully rendered
+    setTimeout(() => {
+      console.log('Initializing charts...')
+      console.log('Revenue chart ref:', revenueChartRef.value)
+      console.log('Top servers chart ref:', topServersChartRef.value)
+      console.log('Revenue by day data:', orderStatistics.value.revenue_by_day)
+      console.log('Top servers data:', orderStatistics.value.top_servers)
+      initCharts()
+    }, 100)
   } catch (error) {
     console.error('Error loading dashboard:', error)
     toast.error('Failed to load dashboard data')
@@ -368,15 +377,30 @@ const destroyCharts = () => {
 }
 
 const createRevenueChart = () => {
-  if (!revenueChartRef.value || !orderStatistics.value.revenue_by_day?.length) return
+  try {
+    console.log('Creating revenue chart...')
+    console.log('Canvas element:', revenueChartRef.value)
+    console.log('Revenue data:', orderStatistics.value.revenue_by_day)
 
-  const ctx = revenueChartRef.value.getContext('2d')
-  const dates = orderStatistics.value.revenue_by_day.map(item => {
-    const date = new Date(item.date)
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  })
+    if (!revenueChartRef.value) {
+      console.warn('Revenue chart canvas not found')
+      return
+    }
 
-  revenueChart = new Chart(ctx, {
+    if (!orderStatistics.value.revenue_by_day?.length) {
+      console.warn('No revenue data available')
+      return
+    }
+
+    const ctx = revenueChartRef.value.getContext('2d')
+    const dates = orderStatistics.value.revenue_by_day.map(item => {
+      const date = new Date(item.date)
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    })
+
+    console.log('Creating chart with dates:', dates)
+
+    revenueChart = new Chart(ctx, {
     type: 'line',
     data: {
       labels: dates,
@@ -409,10 +433,28 @@ const createRevenueChart = () => {
       }
     }
   })
+
+    console.log('Revenue chart created successfully')
+  } catch (error) {
+    console.error('Error creating revenue chart:', error)
+  }
 }
 
 const createTopServersChart = () => {
-  if (!topServersChartRef.value || !orderStatistics.value.top_servers?.length) return
+  try {
+    console.log('Creating top servers chart...')
+    console.log('Canvas element:', topServersChartRef.value)
+    console.log('Top servers data:', orderStatistics.value.top_servers)
+
+    if (!topServersChartRef.value) {
+      console.warn('Top servers chart canvas not found')
+      return
+    }
+
+    if (!orderStatistics.value.top_servers?.length) {
+      console.warn('No top servers data available')
+      return
+    }
 
   const ctx = topServersChartRef.value.getContext('2d')
   const serverData = orderStatistics.value.top_servers.slice(0, 5) // Top 5 servers
@@ -457,6 +499,11 @@ const createTopServersChart = () => {
       }
     }
   })
+
+    console.log('Top servers chart created successfully')
+  } catch (error) {
+    console.error('Error creating top servers chart:', error)
+  }
 }
 
 const createItemGrowthChart = () => {

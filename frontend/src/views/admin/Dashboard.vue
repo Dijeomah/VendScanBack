@@ -342,7 +342,16 @@ const loadDashboard = async () => {
 
     // Wait for next tick to ensure DOM is updated
     await nextTick()
-    initCharts()
+
+    // Additional delay to ensure canvas elements are fully rendered
+    setTimeout(() => {
+      console.log('Initializing admin charts...')
+      console.log('Platform revenue chart ref:', platformRevenueChartRef.value)
+      console.log('Top vendors chart ref:', topVendorsChartRef.value)
+      console.log('Revenue by day data:', orderStatistics.value.revenue_by_day)
+      console.log('Top vendors data:', orderStatistics.value.top_vendors)
+      initCharts()
+    }, 100)
   } catch (error) {
     console.error('Error loading dashboard:', error)
     toast.error('Failed to load dashboard data')
@@ -373,15 +382,30 @@ const destroyCharts = () => {
 }
 
 const createPlatformRevenueChart = () => {
-  if (!platformRevenueChartRef.value || !orderStatistics.value.revenue_by_day?.length) return
+  try {
+    console.log('Creating platform revenue chart...')
+    console.log('Canvas element:', platformRevenueChartRef.value)
+    console.log('Revenue data:', orderStatistics.value.revenue_by_day)
 
-  const ctx = platformRevenueChartRef.value.getContext('2d')
-  const dates = orderStatistics.value.revenue_by_day.map(item => {
-    const date = new Date(item.date)
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  })
+    if (!platformRevenueChartRef.value) {
+      console.warn('Platform revenue chart canvas not found')
+      return
+    }
 
-  platformRevenueChart = new Chart(ctx, {
+    if (!orderStatistics.value.revenue_by_day?.length) {
+      console.warn('No revenue data available')
+      return
+    }
+
+    const ctx = platformRevenueChartRef.value.getContext('2d')
+    const dates = orderStatistics.value.revenue_by_day.map(item => {
+      const date = new Date(item.date)
+      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    })
+
+    console.log('Creating chart with dates:', dates)
+
+    platformRevenueChart = new Chart(ctx, {
     type: 'line',
     data: {
       labels: dates,
@@ -414,15 +438,33 @@ const createPlatformRevenueChart = () => {
       }
     }
   })
+
+    console.log('Platform revenue chart created successfully')
+  } catch (error) {
+    console.error('Error creating platform revenue chart:', error)
+  }
 }
 
 const createTopVendorsChart = () => {
-  if (!topVendorsChartRef.value || !orderStatistics.value.top_vendors?.length) return
+  try {
+    console.log('Creating top vendors chart...')
+    console.log('Canvas element:', topVendorsChartRef.value)
+    console.log('Top vendors data:', orderStatistics.value.top_vendors)
 
-  const ctx = topVendorsChartRef.value.getContext('2d')
-  const vendorData = orderStatistics.value.top_vendors.slice(0, 5) // Top 5 vendors
+    if (!topVendorsChartRef.value) {
+      console.warn('Top vendors chart canvas not found')
+      return
+    }
 
-  topVendorsChart = new Chart(ctx, {
+    if (!orderStatistics.value.top_vendors?.length) {
+      console.warn('No top vendors data available')
+      return
+    }
+
+    const ctx = topVendorsChartRef.value.getContext('2d')
+    const vendorData = orderStatistics.value.top_vendors.slice(0, 5) // Top 5 vendors
+
+    topVendorsChart = new Chart(ctx, {
     type: 'bar',
     data: {
       labels: vendorData.map(vendor => {
@@ -462,6 +504,11 @@ const createTopVendorsChart = () => {
       }
     }
   })
+
+    console.log('Top vendors chart created successfully')
+  } catch (error) {
+    console.error('Error creating top vendors chart:', error)
+  }
 }
 
 const createGrowthChart = () => {
