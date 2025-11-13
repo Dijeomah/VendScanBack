@@ -16,6 +16,7 @@ use App\Http\Controllers\Vendor\OrderController as VendorOrderController;
 use App\Http\Controllers\Admin\Vendor\VendorController as AdminVendorController;
 use App\Http\Controllers\Public\MenuController;
 use App\Http\Controllers\Public\OrderController as PublicOrderController;
+use App\Http\Controllers\Server\ServerController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -195,6 +196,19 @@ Route::group(['middleware' => 'api'], function ($router) {
         'middleware' => ['authCheck', 'role:server'],
         'prefix' => 'server'
     ], function () {
+        // Dashboard
+        Route::get('/dashboard/statistics', [ServerController::class, 'getDashboardStatistics']);
+        Route::get('/profile', [ServerController::class, 'getProfile']);
+
+        // Assigned resources
+        Route::get('/assigned-tables', [ServerController::class, 'getAssignedTables']);
+        Route::get('/assigned-businesses', [ServerController::class, 'getAssignedBusinesses']);
+
+        // Orders
+        Route::get('/orders', [ServerController::class, 'getOrders']);
+        Route::get('/orders/{id}', [ServerController::class, 'getOrder']);
+        Route::patch('/orders/{id}/status', [ServerController::class, 'updateOrderStatus']);
+
         // Notifications
         Route::group(['prefix' => 'notifications'], function () {
             Route::get('/', [\App\Http\Controllers\Vendor\NotificationController::class, 'index']);
@@ -204,11 +218,6 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::post('/mark-all-read', [\App\Http\Controllers\Vendor\NotificationController::class, 'markAllAsRead']);
             Route::delete('/{id}', [\App\Http\Controllers\Vendor\NotificationController::class, 'destroy']);
         });
-
-        // Server can view orders assigned to them
-        Route::get('/orders', [VendorOrderController::class, 'index']);
-        Route::get('/orders/{id}', [VendorOrderController::class, 'show']);
-        Route::patch('/orders/{id}/status', [VendorOrderController::class, 'updateStatus']);
     });
 
     // Public Routes

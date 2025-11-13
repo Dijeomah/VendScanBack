@@ -166,6 +166,14 @@ export function useApi() {
 
     // Server endpoints
     server: {
+      // Dashboard
+      getDashboardStatistics: () => api.get('/server/dashboard/statistics'),
+      getProfile: () => api.get('/server/profile'),
+
+      // Assigned resources
+      getAssignedTables: () => api.get('/server/assigned-tables'),
+      getAssignedBusinesses: () => api.get('/server/assigned-businesses'),
+
       // Orders
       getOrders: (params) => api.get('/server/orders', { params }),
       getOrder: (id) => api.get(`/server/orders/${id}`),
