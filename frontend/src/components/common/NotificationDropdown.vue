@@ -91,13 +91,12 @@
 
         <!-- Footer -->
         <div v-if="notifications.length > 0" class="px-4 py-3 border-t border-gray-200 bg-gray-50">
-          <router-link
-            :to="{ name: 'Notifications' }"
-            class="text-sm text-primary-600 hover:text-primary-700 font-medium block text-center"
-            @click="closeDropdown"
+          <button
+            @click="markAllAsRead"
+            class="text-sm text-primary-600 hover:text-primary-700 font-medium block text-center w-full"
           >
-            View all notifications
-          </router-link>
+            Mark all as read
+          </button>
         </div>
       </div>
     </Transition>
