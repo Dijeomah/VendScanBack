@@ -45,7 +45,7 @@ class OrderController extends Controller
             $table = null;
             $serverId = null;
             if (!empty($validated['table_id'])) {
-                $table = TableLinkQrData::with('serverAssignment')->find($validated['table_id']);
+                $table = TableLinkQrData::with('server_assignments')->find($validated['table_id']);
                 if ($table && $table->serverAssignment) {
                     $serverId = $table->serverAssignment->server_id;
                 }
@@ -57,7 +57,7 @@ class OrderController extends Controller
 
             foreach ($validated['items'] as $itemData) {
                 $item = Item::findOrFail($itemData['item_id']);
-                
+
                 // Verify item belongs to the business
                 if ($item->business_link !== $validated['business_link']) {
                     throw new \Exception('Item does not belong to this business');

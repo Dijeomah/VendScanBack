@@ -287,6 +287,7 @@ const loadMenu = async () => {
     if (categories.value.length > 0) {
       selectedCategory.value = categories.value[0].id
     }
+    console.log('Menu loaded table:', tableId)
 
     // Load table info if tableId is provided
     if (tableId) {

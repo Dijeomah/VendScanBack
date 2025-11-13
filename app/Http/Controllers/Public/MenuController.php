@@ -10,6 +10,7 @@ use App\Models\TableLinkQrData;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
 
 class MenuController extends Controller
 {
@@ -83,8 +84,9 @@ class MenuController extends Controller
      */
     public function getTableInfo(int $tableId): JsonResponse
     {
+
         try {
-            $table = TableLinkQrData::with('businessLink')->find($tableId);
+            $table = TableLinkQrData::with('business_link')->find($tableId);
 
             if (!$table) {
                 return error('Table not found', null, Response::HTTP_NOT_FOUND);
