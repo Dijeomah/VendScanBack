@@ -458,8 +458,8 @@ const loadServers = async () => {
 const loadBusinesses = async () => {
   try {
     const response = await vendor.getBusinessLinks()
-    businesses.value = response.data?.data || [];
-    console.log(businesses.value)
+    businesses.value = response.data?.data?.businesses || [];
+    console.log('Loaded businesses:', businesses.value)
   } catch (error) {
     console.error('Error loading businesses:', error)
   }
