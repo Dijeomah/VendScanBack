@@ -126,7 +126,7 @@
                 </router-link>
               </div>
               <div class="pt-4 border-t border-primary-500">
-                <div class="grid grid-cols-3 gap-4 text-center">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
                   <div>
                     <p class="text-2xl font-bold">{{ statistics.items?.total || 0 }}</p>
                     <p class="text-xs text-primary-100">Items</p>
@@ -138,6 +138,10 @@
                   <div>
                     <p class="text-2xl font-bold">{{ statistics.categories?.total || 0 }}</p>
                     <p class="text-xs text-primary-100">Categories</p>
+                  </div>
+                  <div>
+                    <p class="text-2xl font-bold">{{ statistics.categories?.subcategories || 0 }}</p>
+                    <p class="text-xs text-primary-100">Subcategories</p>
                   </div>
                 </div>
               </div>
