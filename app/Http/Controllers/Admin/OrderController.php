@@ -33,10 +33,10 @@ class OrderController extends Controller
             }
 
             // Filter by date range
-            if ($request->has('from_date')) {
+            if ($request->filled('from_date')) {
                 $query->whereDate('created_at', '>=', $request->from_date);
             }
-            if ($request->has('to_date')) {
+            if ($request->filled('to_date')) {
                 $query->whereDate('created_at', '<=', $request->to_date);
             }
 

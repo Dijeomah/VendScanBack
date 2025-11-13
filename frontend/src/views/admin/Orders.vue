@@ -449,9 +449,10 @@ const filteredOrders = computed(() => {
 const loadOrders = async () => {
   try {
     loading.value = true
-    const params = {
-      ...filters.value
-    }
+    // Filter out empty values
+    const params = Object.fromEntries(
+      Object.entries(filters.value).filter(([_, value]) => value !== '' && value !== null && value !== undefined)
+    )
     const response = await admin.getOrders(params)
     orders.value = response.data.data || response.data
   } catch (error) {
