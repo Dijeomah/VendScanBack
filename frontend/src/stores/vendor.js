@@ -32,7 +32,8 @@ export const useVendorStore = defineStore('vendor', {
 
                 // Extract items from business_links
                 const businessLinks = this.vendor?.business_links || []
-                this.items = businessLinks[0]?.items || []
+                // Flatten items from all business links instead of just the first one
+                this.items = businessLinks.flatMap(link => link?.items || [])
 
                 return this.vendor
             } catch (error) {

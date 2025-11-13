@@ -8,7 +8,7 @@ use App\Http\Requests\ItemUpdateRequest;
 use App\Models\BusinessLink;
 use App\Models\Category;
 use App\Models\Item;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary as CloudinaryStorage;
+use App\Services\CloudinaryStorage;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -52,8 +52,12 @@ class ItemController extends Controller
                 'image' => 'nullable|image|max:5120' // 5MB max
             ]);
 
+            Log::alert('validated data', [$validated]);
+            $business_link = BusinessLink::where(['userid' => authUser()->userid, 'business_link' => $validated['business_link']])->first();
+
             // Verify business belongs to user
-            if (!BusinessLink::where(['userid' => authUser()->userid, 'business_link' => $validated['business_link']])->exists()) {
+//            if (!BusinessLink::where(['userid' => authUser()->userid, 'business_link' => $validated['business_link']])->exists()) {
+            if (!$business_link) {
                 return error('Business not found or access denied', [], Response::HTTP_FORBIDDEN);
             }
 
@@ -67,9 +71,10 @@ class ItemController extends Controller
             }
 
             $item = Item::create([
-                'uid' => authUser()->id,
+                'user_id' => authUser()->id,
                 'userid' => authUser()->userid,
                 'business_link' => $validated['business_link'],
+                'business_link_id' => $business_link->id,
                 'title' => $validated['title'],
                 'category_id' => $validated['category_id'],
                 'sub_category_id' => $validated['sub_category_id'] ?? null,

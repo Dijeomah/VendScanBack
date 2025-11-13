@@ -11,9 +11,10 @@ class Item extends Model
     use HasFactory;
 
     protected $fillable = [
-        'uid',
+        'user_id',
         'userid',
         'business_link',
+        'business_link_id',
         'title',
         'category_id',
         'sub_category_id',
