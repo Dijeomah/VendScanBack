@@ -97,6 +97,7 @@ class ItemController extends Controller
                 'uid' => authUser()->id,
                 'userid' => authUser()->role === 'admin' ? 'ADMIN001' : authUser()->userid,
                 'category_id' => $validated['category_id'],
+                'sub_category_id' => $validated['sub_category_id'] ?? null,
                 'title' => $validated['title'],
                 'description' => $validated['description'],
                 'price' => $validated['price'],

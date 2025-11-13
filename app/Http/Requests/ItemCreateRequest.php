@@ -24,12 +24,12 @@ class ItemCreateRequest extends FormRequest
     public function rules()
     {
         return [
-            'category_id' => 'required|numeric',
-            'sub_category_id' => 'required|numeric',
-            'business_link' => 'required|string:255',
-            'title' => 'required|string:255',
-            'description' => 'required|string:255',
-            'price' => 'required'
+            'category_id' => 'required|numeric|exists:categories,id',
+            'sub_category_id' => 'nullable|numeric|exists:sub_categories,id',
+            'business_link' => 'required|string|max:255',
+            'title' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'price' => 'required|numeric|min:0'
         ];
     }
 }
