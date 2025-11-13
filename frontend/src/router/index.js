@@ -153,6 +153,24 @@ const routes = [
     meta: { requiresAuth: true, role: 'vendor', title: 'Orders & Transactions' }
   },
 
+  // Server routes
+  {
+    path: '/server',
+    redirect: '/server/dashboard',
+  },
+  {
+    path: '/server/dashboard',
+    name: 'server-dashboard',
+    component: () => import('@/views/server/Dashboard.vue'),
+    meta: { requiresAuth: true, role: 'server', title: 'Server Dashboard' }
+  },
+  {
+    path: '/server/orders',
+    name: 'server-orders',
+    component: () => import('@/views/server/Orders.vue'),
+    meta: { requiresAuth: true, role: 'server', title: 'Orders' }
+  },
+
   // Admin routes
   {
     path: '/admin',
