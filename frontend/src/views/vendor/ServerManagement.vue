@@ -307,57 +307,57 @@
     </div>
 
     <!-- Assign to Business Modal -->
-    <div v-if="showAssignModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div class="bg-white rounded-lg max-w-xl w-full max-h-[90vh] overflow-y-auto">
-        <div class="p-6 border-b">
-          <h2 class="text-xl font-bold text-gray-900">
-            Manage Business Assignments
-          </h2>
-          <p class="text-sm text-gray-600 mt-1">
-            {{ selectedServer?.first_name }} {{ selectedServer?.last_name }}
-          </p>
-        </div>
-        <div class="p-6">
-          <div class="space-y-3">
-            <div
-              v-for="business in businesses"
-              :key="business.id"
-              class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
-            >
-              <div>
-                <p class="font-medium text-gray-900">{{ business.business_name }}</p>
-                <p class="text-sm text-gray-500">{{ business.business_link }}</p>
-              </div>
-              <button
-                v-if="isServerAssignedToBusiness(business.id)"
-                @click="unassignFromBusiness(business.id)"
-                class="px-4 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all"
-              >
-                Remove
-              </button>
-              <button
-                v-else
-                @click="assignToBusiness(business.id)"
-                class="px-4 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all"
-              >
-                Assign
-              </button>
+        <div v-if="showAssignModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div class="bg-white rounded-lg max-w-xl w-full max-h-[90vh] overflow-y-auto">
+                <div class="p-6 border-b">
+                    <h2 class="text-xl font-bold text-gray-900">
+                        Manage Business Assignments
+                    </h2>
+                    <p class="text-sm text-gray-600 mt-1">
+                        {{ selectedServer?.first_name }} {{ selectedServer?.last_name }}
+                    </p>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-3">
+                        <div
+                            v-for="business in businesses"
+                            :key="business.id"
+                            class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50"
+                        >
+                            <div>
+                                <p class="font-medium text-gray-900">{{ business.business_name }}</p>
+                                <p class="text-sm text-gray-500">{{ business.business_link }}</p>
+                            </div>
+                            <button
+                                v-if="isServerAssignedToBusiness(business.id)"
+                                @click="unassignFromBusiness(business.id)"
+                                class="px-4 py-2 text-sm bg-red-50 text-red-600 rounded-lg hover:bg-red-100 transition-all"
+                            >
+                                Remove
+                            </button>
+                            <button
+                                v-else
+                                @click="assignToBusiness(business.id)"
+                                class="px-4 py-2 text-sm bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all"
+                            >
+                                Assign
+                            </button>
+                        </div>
+                        <p v-if="businesses.length === 0" class="text-center text-gray-500 py-8">
+                            No businesses available
+                        </p>
+                    </div>
+                    <div class="flex justify-end mt-6">
+                        <button
+                            @click="closeAssignModal"
+                            class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all"
+                        >
+                            Done
+                        </button>
+                    </div>
+                </div>
             </div>
-            <p v-if="businesses.length === 0" class="text-center text-gray-500 py-8">
-              No businesses available
-            </p>
-          </div>
-          <div class="flex justify-end mt-6">
-            <button
-              @click="closeAssignModal"
-              class="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all"
-            >
-              Done
-            </button>
-          </div>
         </div>
-      </div>
-    </div>
 
     <!-- Delete Confirmation Modal -->
     <div v-if="showDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -458,7 +458,8 @@ const loadServers = async () => {
 const loadBusinesses = async () => {
   try {
     const response = await vendor.getBusinessLinks()
-    businesses.value = response.data?.data || []
+    businesses.value = response.data?.data || [];
+    console.log(businesses.value)
   } catch (error) {
     console.error('Error loading businesses:', error)
   }
