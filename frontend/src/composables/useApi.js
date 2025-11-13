@@ -87,6 +87,7 @@ export function useApi() {
     // Vendor endpoints
     vendor: {
       getDashboard: () => api.get('/vendor/dashboard'),
+      getDashboardStatistics: () => api.get('/vendor/dashboard/statistics'),
       getProfile: () => api.get('/vendor/profile'),
       getFullProfile: () => api.get('/vendor/full-profile'),
       updateProfile: (data) => api.put('/vendor/profile/update', data),

@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\BusinessLink;
 use App\Models\Item;
 use App\Models\Category;
+use App\Models\SubCategory;
 use App\Models\TableLinkQrData;
 use App\Models\Server;
 use App\Models\BusinessServer;
@@ -122,6 +123,7 @@ class AdminController extends Controller
 
         // Category statistics
         $totalCategories = Category::count();
+        $totalSubCategories = \App\Models\SubCategory::count();
 
         // Table statistics
         $totalTables = TableLinkQrData::count();
@@ -189,7 +191,8 @@ class AdminController extends Controller
                 'by_category' => $itemsByCategory
             ],
             'categories' => [
-                'total' => $totalCategories
+                'total' => $totalCategories,
+                'subcategories' => $totalSubCategories
             ],
             'tables' => [
                 'total' => $totalTables,

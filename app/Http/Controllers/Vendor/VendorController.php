@@ -35,6 +35,119 @@ class VendorController extends Controller
         return success('Vendor Information ', $user, Response::HTTP_OK);
     }
 
+    /**
+     * Get vendor dashboard statistics
+     *
+     * @return JsonResponse
+     */
+    public function getDashboardStatistics(): JsonResponse
+    {
+        try {
+            $userId = auth()->id();
+
+            // Get all businesses for this vendor
+            $businesses = \App\Models\BusinessLink::where('uid', $userId)->get();
+            $businessIds = $businesses->pluck('id')->toArray();
+            $businessLinks = $businesses->pluck('business_link')->toArray();
+
+            // Get items for this vendor (using business_link)
+            $allItems = \App\Models\Item::whereIn('business_link', $businessLinks)->get();
+            $totalItems = $allItems->count();
+            $activeItems = $allItems->where('status', true)->count();
+
+            // Get categories used by this vendor
+            $categoryIds = $allItems->pluck('category_id')->unique();
+            $totalCategories = $categoryIds->count();
+
+            // Get subcategories used by this vendor
+            $subCategoryIds = $allItems->pluck('sub_category_id')->unique()->filter();
+            $totalSubCategories = $subCategoryIds->count();
+
+            // Get items by category for chart
+            $itemsByCategory = \App\Models\Item::selectRaw('category_id, COUNT(*) as count')
+                ->whereIn('business_link', $businessLinks)
+                ->groupBy('category_id')
+                ->with('category')
+                ->get();
+
+            // Get tables for all businesses
+            $totalTables = \App\Models\TableLinkQrData::whereIn('business_link_id', $businessIds)->count();
+            $activeTables = \App\Models\TableLinkQrData::whereIn('business_link_id', $businessIds)
+                ->where('status', 'active')
+                ->count();
+            $occupiedTables = \App\Models\TableLinkQrData::whereIn('business_link_id', $businessIds)
+                ->where('status', 'occupied')
+                ->count();
+
+            // Get servers for this vendor
+            $totalServers = \App\Models\Server::where('user_id', $userId)->count();
+            $activeServers = \App\Models\Server::where('user_id', $userId)
+                ->where('status', 'active')
+                ->count();
+
+            // Get assigned servers (servers assigned to businesses)
+            $assignedServers = \App\Models\BusinessServer::whereIn('business_link_id', $businessIds)
+                ->where('status', 'active')
+                ->distinct('server_id')
+                ->count();
+
+            // Growth data (last 7 days) - items created
+            $itemGrowth = [];
+            for ($i = 6; $i >= 0; $i--) {
+                $date = now()->subDays($i)->format('Y-m-d');
+                $itemGrowth[] = [
+                    'date' => $date,
+                    'count' => \App\Models\Item::whereIn('business_link', $businessLinks)
+                        ->whereDate('created_at', $date)
+                        ->count()
+                ];
+            }
+
+            // Business type distribution (if vendor has multiple businesses)
+            $businessTypeDistribution = $businesses->groupBy('business_type')
+                ->map(function ($group) {
+                    return $group->count();
+                })
+                ->toArray();
+
+            return success('Dashboard statistics fetched successfully', [
+                'businesses' => [
+                    'total' => $businesses->count(),
+                    'by_type' => $businessTypeDistribution,
+                    'list' => $businesses
+                ],
+                'items' => [
+                    'total' => $totalItems,
+                    'active' => $activeItems,
+                    'inactive' => $totalItems - $activeItems,
+                    'by_category' => $itemsByCategory
+                ],
+                'categories' => [
+                    'total' => $totalCategories,
+                    'subcategories' => $totalSubCategories
+                ],
+                'tables' => [
+                    'total' => $totalTables,
+                    'active' => $activeTables,
+                    'occupied' => $occupiedTables,
+                    'available' => $activeTables - $occupiedTables
+                ],
+                'servers' => [
+                    'total' => $totalServers,
+                    'active' => $activeServers,
+                    'inactive' => $totalServers - $activeServers,
+                    'assigned' => $assignedServers
+                ],
+                'growth' => [
+                    'items' => $itemGrowth
+                ]
+            ], Response::HTTP_OK);
+        } catch (\Exception $exception) {
+            Log::error('Get Vendor Dashboard Statistics exception: ' . $exception->getMessage() . ' on line: ' . $exception->getLine());
+            return error('Error fetching dashboard statistics', [], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
 
     public function profile(): JsonResponse
     {

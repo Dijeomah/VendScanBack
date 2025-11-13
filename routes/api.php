@@ -93,6 +93,7 @@ Route::group(['middleware' => 'api'], function ($router) {
         'prefix' => 'vendor'
     ], function () {
         Route::get('/dashboard', [VendorController::class, 'index']);
+        Route::get('/dashboard/statistics', [VendorController::class, 'getDashboardStatistics']);
         Route::get('/full-profile', [VendorController::class, 'getVendorWithMenu']);
 
         // Profile Section
