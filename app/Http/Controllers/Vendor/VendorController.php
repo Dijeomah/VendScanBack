@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Vendor;
 
 use App\Http\Controllers\Controller;
 use App\Http\Middleware\VendorAccess;
+use App\Models\BusinessLink;
 use App\Models\User;
 use App\Repositories\VendorRepository;
 use App\Services\CloudinaryStorage;
