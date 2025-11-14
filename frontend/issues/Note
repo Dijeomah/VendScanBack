@@ -1,9 +1,1 @@
-Can you now create the server dashboard?
-they should be able to login, and then see the vendor and the Table they are managing/assigned, they should be able to get notification when the table they are assigned to gets an order.
-You should know everything needed as a server.
-
-I want you to go deeper into my project and list what you think is missing, remember we're yet to implement the setting of header and banner for each businesses, that should be done, then every menu should be able to have an image so, in the Menu Management, we should be able to see the menus, edit,.
-
-then all the management and things we have created in the Vendor dashboard, remember we need the management on the admin section, so make sure the Admin Dashboard is updated with our new integrations, the charts and every missing pages should be fixed and created
-
-When a customer makes an order, they should be redirected to a page that has the order ID where they can get/monitor the real time status of the order from confirmation to completion. upon completion, the link should be inactive.
+for the vendor media, I have uploaded the header and logo, can we update the menu views to display them, kindly pull again in the issues folder i have added a menu template that we can use, then we can have the logo at the top left, infront of the header/banner and so on, I believe you understand and can implement what i mean. and can we add a feature, for both the vendor and the server, if the customer wants to pay after being served, there should be a feature that updates the payment to paid and so on on the server or/and vendor section, and if the the order was cancelled, it should still state so

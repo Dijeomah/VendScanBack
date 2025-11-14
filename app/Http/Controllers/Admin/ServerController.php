@@ -17,7 +17,7 @@ class ServerController extends Controller
     public function index()
     {
         try {
-            $servers = Server::with(['business_servers.business_link'])
+            $servers = Server::with(['businessServers.businessLink'])
                 ->latest()
                 ->paginate(50);
 

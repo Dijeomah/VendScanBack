@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Base;
 
 use App\Http\Controllers\Controller;
+use App\Models\BusinessData;
 use App\Models\User;
 use App\Models\BusinessLink;
 use App\Models\Item;
@@ -168,7 +169,7 @@ class AdminController extends Controller
             ->get();
 
         // Business type distribution
-        $businessTypeDistribution = BusinessLink::select('business_type', DB::raw('count(*) as count'))
+        $businessTypeDistribution = BusinessData::select('business_type', DB::raw('count(*) as count'))
             ->whereNotNull('business_type')
             ->groupBy('business_type')
             ->get();
