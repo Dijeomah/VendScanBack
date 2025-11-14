@@ -16,6 +16,7 @@ use App\Http\Controllers\Vendor\OrderController as VendorOrderController;
 use App\Http\Controllers\Admin\Vendor\VendorController as AdminVendorController;
 use App\Http\Controllers\Admin\Subscription\AdminSubscriptionController;
 use App\Http\Controllers\Admin\Payment\AdminPaymentController;
+use App\Http\Controllers\Admin\Payment\AdminPaymentReconciliationController;
 use App\Http\Controllers\Vendor\SubscriptionController;
 use App\Http\Controllers\Vendor\PaymentController;
 use App\Http\Controllers\Public\MenuController;
@@ -118,6 +119,24 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::get('/{id}', [AdminPaymentController::class, 'show']);
             Route::patch('/{id}/complete', [AdminPaymentController::class, 'markAsCompleted']);
             Route::post('/{id}/refund', [AdminPaymentController::class, 'refund']);
+        });
+
+        // Payment Reconciliation & Disputes
+        Route::group(['prefix' => 'reconciliation'], function () {
+            // Reconciliation
+            Route::get('/unreconciled', [AdminPaymentReconciliationController::class, 'getUnreconciledPayments']);
+            Route::get('/disputed', [AdminPaymentReconciliationController::class, 'getDisputedPayments']);
+            Route::get('/statistics', [AdminPaymentReconciliationController::class, 'getReconciliationStats']);
+            Route::post('/payments/{paymentId}/reconcile', [AdminPaymentReconciliationController::class, 'reconcilePayment']);
+            Route::post('/payments/bulk-reconcile', [AdminPaymentReconciliationController::class, 'bulkReconcile']);
+            Route::get('/payments/{paymentId}/verify-paystack', [AdminPaymentReconciliationController::class, 'verifyWithPaystack']);
+            Route::post('/search-discrepancies', [AdminPaymentReconciliationController::class, 'searchDiscrepancies']);
+
+            // Disputes
+            Route::get('/disputes', [AdminPaymentReconciliationController::class, 'getAllDisputes']);
+            Route::get('/disputes/{disputeId}', [AdminPaymentReconciliationController::class, 'getDisputeDetails']);
+            Route::post('/payments/{paymentId}/disputes', [AdminPaymentReconciliationController::class, 'reportDispute']);
+            Route::patch('/disputes/{disputeId}/status', [AdminPaymentReconciliationController::class, 'updateDisputeStatus']);
         });
     });
 
