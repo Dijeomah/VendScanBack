@@ -8,6 +8,7 @@ use App\Models\BusinessLink;
 use App\Models\User;
 use App\Repositories\VendorRepository;
 use App\Services\CloudinaryStorage;
+use App\Traits\ChecksSubscriptionLimits;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -18,6 +19,7 @@ use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
 class VendorController extends Controller
 {
+    use ChecksSubscriptionLimits;
     public $vendorRepository;
 
     public function __construct(VendorRepository $vendorRepository)
@@ -280,6 +282,11 @@ class VendorController extends Controller
     {
         Log::debug('Set Business Link request: ' . json_encode($request->all()));
         try {
+            // Check subscription limits for businesses
+            if ($error = $this->checkLimit('businesses')) {
+                return $error;
+            }
+
             $validated_data = $this->validate($request, config('validation.set_business_name'));
 
             $checkBusinessLink = $this->vendorRepository->checkVendorBusinessName($validated_data['business_name']);

@@ -9,6 +9,7 @@ use App\Models\BusinessLink;
 use App\Models\Category;
 use App\Models\Item;
 use App\Services\CloudinaryStorage;
+use App\Traits\ChecksSubscriptionLimits;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -19,6 +20,7 @@ use Illuminate\Validation\ValidationException;
 
 class ItemController extends Controller
 {
+    use ChecksSubscriptionLimits;
     /**
      * View aall categories.
      *
@@ -41,6 +43,11 @@ class ItemController extends Controller
     public function store(Request $request): JsonResponse
     {
         try {
+            // Check subscription limits for items
+            if ($error = $this->checkLimit('items')) {
+                return $error;
+            }
+
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
                 'description' => 'nullable|string',
@@ -101,6 +108,10 @@ class ItemController extends Controller
      */
     public function addItem(ItemCreateRequest $itemCreateRequest): JsonResponse
     {
+        // Check subscription limits for items
+        if ($error = $this->checkLimit('items')) {
+            return $error;
+        }
 
         if (BusinessLink::where(['userid' => authUser()->userid, 'business_link' => $itemCreateRequest['business_link']])->exists()) {
             $item = new Item();

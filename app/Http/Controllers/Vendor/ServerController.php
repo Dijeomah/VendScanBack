@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\BusinessLink;
 use App\Models\BusinessServer;
+use App\Traits\ChecksSubscriptionLimits;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ServerController extends Controller
 {
+    use ChecksSubscriptionLimits;
     /**
      * Get all servers created by the vendor
      */
@@ -78,6 +80,11 @@ class ServerController extends Controller
     {
         try {
             $vendor = Auth::user();
+
+            // Check subscription limits for servers
+            if ($error = $this->checkLimit('servers')) {
+                return $error;
+            }
 
             $validated = $request->validate([
                 'first_name' => 'required|string|max:100',

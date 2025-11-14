@@ -14,6 +14,10 @@ use App\Http\Controllers\Vendor\VendorController;
 use App\Http\Controllers\Vendor\CategoryController as VendorCategoryController;
 use App\Http\Controllers\Vendor\OrderController as VendorOrderController;
 use App\Http\Controllers\Admin\Vendor\VendorController as AdminVendorController;
+use App\Http\Controllers\Admin\Subscription\AdminSubscriptionController;
+use App\Http\Controllers\Admin\Payment\AdminPaymentController;
+use App\Http\Controllers\Vendor\SubscriptionController;
+use App\Http\Controllers\Vendor\PaymentController;
 use App\Http\Controllers\Public\MenuController;
 use App\Http\Controllers\Public\OrderController as PublicOrderController;
 use App\Http\Controllers\Server\ServerController;
@@ -95,6 +99,26 @@ Route::group(['middleware' => 'api'], function ($router) {
 
         // QR Code Generation
         Route::post('/vendors/{id}/generate-qr', [AdminVendorController::class, 'generateQrCode']);
+
+        // Subscription Management
+        Route::group(['prefix' => 'subscriptions'], function () {
+            Route::get('/', [AdminSubscriptionController::class, 'index']);
+            Route::get('/plans', [AdminSubscriptionController::class, 'getPlans']);
+            Route::put('/plans/{id}', [AdminSubscriptionController::class, 'updatePlan']);
+            Route::get('/revenue', [AdminSubscriptionController::class, 'getRevenueStats']);
+            Route::get('/{id}', [AdminSubscriptionController::class, 'show']);
+            Route::patch('/{id}/status', [AdminSubscriptionController::class, 'updateStatus']);
+            Route::post('/manual-upgrade', [AdminSubscriptionController::class, 'manualUpgrade']);
+        });
+
+        // Payment Management
+        Route::group(['prefix' => 'payments'], function () {
+            Route::get('/', [AdminPaymentController::class, 'index']);
+            Route::get('/statistics', [AdminPaymentController::class, 'getStatistics']);
+            Route::get('/{id}', [AdminPaymentController::class, 'show']);
+            Route::patch('/{id}/complete', [AdminPaymentController::class, 'markAsCompleted']);
+            Route::post('/{id}/refund', [AdminPaymentController::class, 'refund']);
+        });
     });
 
     // Vendor Routes
@@ -191,7 +215,24 @@ Route::group(['middleware' => 'api'], function ($router) {
             Route::delete('/{id}', [\App\Http\Controllers\Vendor\NotificationController::class, 'destroy']);
             Route::delete('/read/all', [\App\Http\Controllers\Vendor\NotificationController::class, 'deleteAllRead']);
         });
+
+        // Subscription Management
+        Route::group(['prefix' => 'subscription'], function () {
+            Route::get('/', [SubscriptionController::class, 'getCurrentSubscription']);
+            Route::get('/plans', [SubscriptionController::class, 'getPlans']);
+            Route::get('/history', [SubscriptionController::class, 'getSubscriptionHistory']);
+            Route::post('/cancel', [SubscriptionController::class, 'cancelSubscription']);
+        });
+
+        // Payment & Upgrade
+        Route::group(['prefix' => 'payment'], function () {
+            Route::post('/initialize', [PaymentController::class, 'initializePayment']);
+            Route::post('/verify', [PaymentController::class, 'verifyPayment']);
+        });
     });
+
+    // Paystack Webhook (public, no auth required)
+    Route::post('/webhook/paystack', [PaymentController::class, 'handleWebhook']);
 
     // Server Routes
     Route::group([

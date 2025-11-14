@@ -7,6 +7,7 @@ use App\Jobs\BulkCreateTablesJob;
 use App\Models\TableLinkQrData;
 use App\Models\BusinessLink;
 use App\Services\QrCodeService;
+use App\Traits\ChecksSubscriptionLimits;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
@@ -15,6 +16,8 @@ use Symfony\Component\HttpFoundation\Response;
 
 class TableController extends Controller
 {
+    use ChecksSubscriptionLimits;
+
     protected $qrCodeService;
 
     public function __construct(QrCodeService $qrCodeService)
@@ -59,6 +62,11 @@ class TableController extends Controller
     {
         try {
             $vendor = Auth::user();
+
+            // Check subscription limits for tables
+            if ($error = $this->checkLimit('tables')) {
+                return $error;
+            }
 
             // Verify business belongs to vendor
             $business = BusinessLink::where('id', $businessId)
@@ -234,13 +242,10 @@ class TableController extends Controller
         try {
             $vendor = Auth::user();
 
-            $business = BusinessLink::where('id', $businessId)
-                ->where('uid', $vendor->id)
-                ->first();
-
-            if (!$business) {
-                return error('Business not found', null, Response::HTTP_NOT_FOUND);
-            }
+            // Check subscription limits for tables (bulk creation)
+            // We need to check if creating this many tables would exceed the limit
+            $user = Auth::user();
+            $plan = $user->subscriptionPlan ?? \App\Models\SubscriptionPlan::where('slug', 'free')->first();
 
             $validated = $request->validate([
                 'count' => 'required|integer|min:1|max:100',
@@ -249,6 +254,37 @@ class TableController extends Controller
             ]);
 
             $count = $validated['count'];
+
+            // Check if user can create this many tables
+            $currentCount = $user->getResourceCount('tables');
+            $limit = $plan->getLimit('tables');
+
+            if ($limit !== null && ($currentCount + $count) > $limit) {
+                $remaining = max(0, $limit - $currentCount);
+                return error(
+                    "Cannot create {$count} tables. You have {$remaining} table slots remaining in your {$plan->name} plan. Upgrade to create more.",
+                    [
+                        'resource' => 'tables',
+                        'current_count' => $currentCount,
+                        'requested_count' => $count,
+                        'limit' => $limit,
+                        'remaining' => $remaining,
+                        'limit_reached' => true,
+                        'upgrade_required' => true,
+                        'available_plans' => $this->getUpgradePlans($plan),
+                    ],
+                    403
+                );
+            }
+
+            $business = BusinessLink::where('id', $businessId)
+                ->where('uid', $vendor->id)
+                ->first();
+
+            if (!$business) {
+                return error('Business not found', null, Response::HTTP_NOT_FOUND);
+            }
+
             $prefix = $validated['prefix'] ?? 'Table';
             $seats = $validated['seats_per_table'] ?? 4;
 
