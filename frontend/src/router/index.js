@@ -218,6 +218,18 @@ const routes = [
     component: () => import('@/views/admin/Orders.vue'),
     meta: { requiresAuth: true, role: 'admin', title: 'Orders & Transactions' }
   },
+  {
+    path: '/admin/reports',
+    name: 'admin-reports',
+    component: () => import('@/views/admin/Reports.vue'),
+    meta: { requiresAuth: true, role: 'admin', title: 'Reports & Analytics' }
+  },
+  {
+    path: '/admin/settings',
+    name: 'admin-settings',
+    component: () => import('@/views/admin/Settings.vue'),
+    meta: { requiresAuth: true, role: 'admin', title: 'Settings' }
+  },
 
   // Subdomain routes for ordering system
   {
