@@ -6,12 +6,17 @@ use App\Models\City;
 use App\Models\Country;
 use App\Models\State;
 use App\Models\User;
+use App\Models\SubscriptionPlan;
+use App\Models\Subscription;
+use App\Mail\WelcomeMail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response as ResponseAlias;
 
@@ -33,15 +38,45 @@ class AuthController extends Controller
 
         $userid = $this->generateUserID();
 
+        // Get free plan
+        $freePlan = SubscriptionPlan::where('slug', 'free')->first();
+
         $userData = new User();
         $userData->userid = $userid;
         $userData->first_name = $request->first_name;
         $userData->last_name = $request->last_name;
-        $userData->role = $request->role;
+        $userData->role = $request->role ?? 'vendor';
         $userData->phone_number = $request->phone_number;
         $userData->email = $request->email;
         $userData->password = Hash::make($request->password);
+        $userData->subscription_plan_id = $freePlan ? $freePlan->id : null;
         $userData->save();
+
+        // Create active subscription for vendor
+        if ($userData->role === 'vendor' && $freePlan) {
+            Subscription::create([
+                'user_id' => $userData->id,
+                'subscription_plan_id' => $freePlan->id,
+                'status' => 'active',
+                'started_at' => now(),
+                'expires_at' => null, // Free plan never expires
+            ]);
+        }
+
+        // Send welcome email
+        try {
+            Mail::to($userData->email)->send(new WelcomeMail($userData));
+        } catch (\Exception $e) {
+            Log::error('Failed to send welcome email: ' . $e->getMessage());
+            // Don't fail registration if email fails
+        }
+
+        Log::info('New user registered', [
+            'user_id' => $userData->id,
+            'email' => $userData->email,
+            'role' => $userData->role,
+        ]);
+
         return success('Registration Successful. ', $userData, Response::HTTP_CREATED);
     }
 

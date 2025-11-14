@@ -6,11 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Models\Subscription;
 use App\Models\SubscriptionPlan;
 use App\Models\SubscriptionPayment;
+use App\Mail\PaymentConfirmedMail;
+use App\Mail\SubscriptionUpgradedMail;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Symfony\Component\HttpFoundation\Response;
 
 class PaymentController extends Controller
@@ -194,6 +197,15 @@ class PaymentController extends Controller
                 'expires_at' => now()->addMonth(), // 1 month subscription
             ]);
 
+            // Send confirmation emails
+            try {
+                Mail::to($user->email)->send(new PaymentConfirmedMail($user, $payment));
+                Mail::to($user->email)->send(new SubscriptionUpgradedMail($user, $newPlan, $oldPlan));
+            } catch (\Exception $e) {
+                Log::error('Failed to send payment emails: ' . $e->getMessage());
+                // Don't fail the payment process if email fails
+            }
+
             Log::info('Subscription upgraded via payment', [
                 'user_id' => $user->id,
                 'old_plan' => $oldPlan->slug ?? 'none',
@@ -290,6 +302,7 @@ class PaymentController extends Controller
             // Upgrade subscription (same logic as verify)
             $user = $payment->user;
             $newPlan = $payment->subscription_plan;
+            $oldPlan = $user->subscriptionPlan;
 
             $oldSubscription = $user->subscription;
             if ($oldSubscription) {
@@ -305,6 +318,14 @@ class PaymentController extends Controller
                 'started_at' => now(),
                 'expires_at' => now()->addMonth(),
             ]);
+
+            // Send confirmation emails
+            try {
+                Mail::to($user->email)->send(new PaymentConfirmedMail($user, $payment));
+                Mail::to($user->email)->send(new SubscriptionUpgradedMail($user, $newPlan, $oldPlan));
+            } catch (\Exception $e) {
+                Log::error('Failed to send webhook emails: ' . $e->getMessage());
+            }
 
             Log::info('Subscription upgraded via webhook', [
                 'user_id' => $user->id,
