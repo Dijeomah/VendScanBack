@@ -24,27 +24,82 @@
 
         <!-- Order Status -->
         <div class="bg-white rounded-xl shadow-sm p-6">
-          <h2 class="text-xl font-semibold text-gray-900 mb-4">Order Status</h2>
-          <div class="flex items-center gap-4">
-            <div class="flex-1">
-              <div class="flex items-center gap-2 mb-2">
-                <span :class="[
-                  'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium',
-                  getStatusClass(order.status)
-                ]">
-                  {{ getStatusText(order.status) }}
-                </span>
-                <span :class="[
-                  'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium',
-                  getPaymentStatusClass(order.payment_status)
-                ]">
-                  {{ getPaymentStatusText(order.payment_status) }}
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-gray-900">Order Status</h2>
+            <div v-if="isActiveOrder" class="flex items-center gap-2 text-sm text-gray-600">
+              <div class="animate-pulse w-2 h-2 bg-green-500 rounded-full"></div>
+              <span>Live tracking</span>
+            </div>
+            <div v-else class="text-sm text-gray-500">
+              <span>Order {{ order.status === 'completed' ? 'completed' : 'inactive' }}</span>
+            </div>
+          </div>
+
+          <!-- Status Progress Timeline -->
+          <div class="mb-6">
+            <div class="flex justify-between items-center">
+              <div
+                v-for="(statusStep, index) in statusSteps"
+                :key="statusStep.key"
+                class="flex flex-col items-center flex-1"
+                :class="{ 'relative': index < statusSteps.length - 1 }"
+              >
+                <!-- Step Circle -->
+                <div class="relative z-10 flex items-center justify-center">
+                  <div
+                    :class="[
+                      'w-10 h-10 rounded-full flex items-center justify-center transition-all',
+                      getStepStatus(statusStep.key) === 'completed'
+                        ? 'bg-green-500 text-white'
+                        : getStepStatus(statusStep.key) === 'current'
+                        ? 'bg-primary-600 text-white ring-4 ring-primary-100'
+                        : 'bg-gray-200 text-gray-400'
+                    ]"
+                  >
+                    <svg v-if="getStepStatus(statusStep.key) === 'completed'" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                    <span v-else class="text-xs font-bold">{{ index + 1 }}</span>
+                  </div>
+                </div>
+
+                <!-- Line connecting to next step -->
+                <div
+                  v-if="index < statusSteps.length - 1"
+                  class="absolute left-1/2 top-5 w-full h-0.5"
+                  :class="getStepStatus(statusSteps[index + 1].key) !== 'pending' ? 'bg-green-500' : 'bg-gray-200'"
+                ></div>
+
+                <!-- Step Label -->
+                <span
+                  class="text-xs mt-2 text-center"
+                  :class="getStepStatus(statusStep.key) !== 'pending' ? 'text-gray-900 font-medium' : 'text-gray-400'"
+                >
+                  {{ statusStep.label }}
                 </span>
               </div>
-              <p class="text-sm text-gray-600">
-                {{ getStatusDescription(order.status) }}
-              </p>
             </div>
+          </div>
+
+          <!-- Current Status Details -->
+          <div class="bg-gray-50 rounded-lg p-4">
+            <div class="flex items-center gap-2 mb-2">
+              <span :class="[
+                'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium',
+                getStatusClass(order.status)
+              ]">
+                {{ getStatusText(order.status) }}
+              </span>
+              <span :class="[
+                'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium',
+                getPaymentStatusClass(order.payment_status)
+              ]">
+                {{ getPaymentStatusText(order.payment_status) }}
+              </span>
+            </div>
+            <p class="text-sm text-gray-600">
+              {{ getStatusDescription(order.status) }}
+            </p>
           </div>
         </div>
 
@@ -179,7 +234,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useApi } from '@/composables/useApi'
 import { useToast } from 'vue-toastification'
@@ -191,20 +246,79 @@ const toast = useToast()
 
 const loading = ref(true)
 const order = ref(null)
+const pollingInterval = ref(null)
+const POLL_INTERVAL = 5000 // Poll every 5 seconds
 
 const orderNumber = route.params.orderNumber
 
-const loadOrder = async () => {
+// Status steps for progress timeline
+const statusSteps = [
+  { key: 'pending', label: 'Received' },
+  { key: 'confirmed', label: 'Confirmed' },
+  { key: 'preparing', label: 'Preparing' },
+  { key: 'served', label: 'Served' },
+  { key: 'completed', label: 'Completed' }
+]
+
+// Check if order is active (should continue polling)
+const isActiveOrder = computed(() => {
+  if (!order.value) return false
+  return !['completed', 'cancelled'].includes(order.value.status)
+})
+
+const loadOrder = async (showLoadingState = true) => {
   try {
-    loading.value = true
+    if (showLoadingState) {
+      loading.value = true
+    }
     const response = await publicApi.getOrder(orderNumber)
-    order.value = response.data.data || response.data
+    const newOrder = response.data.data || response.data
+
+    // Check if status changed
+    if (order.value && newOrder.status !== order.value.status) {
+      toast.info(`Order status updated to: ${getStatusText(newOrder.status)}`)
+    }
+
+    order.value = newOrder
+
+    // Stop polling if order is completed or cancelled
+    if (!isActiveOrder.value && pollingInterval.value) {
+      clearInterval(pollingInterval.value)
+      pollingInterval.value = null
+    }
   } catch (error) {
     console.error('Error loading order:', error)
-    toast.error('Failed to load order')
+    if (showLoadingState) {
+      toast.error('Failed to load order')
+    }
   } finally {
     loading.value = false
   }
+}
+
+// Start polling for order updates
+const startPolling = () => {
+  if (pollingInterval.value) {
+    clearInterval(pollingInterval.value)
+  }
+
+  if (isActiveOrder.value) {
+    pollingInterval.value = setInterval(() => {
+      loadOrder(false) // Don't show loading state for polls
+    }, POLL_INTERVAL)
+  }
+}
+
+// Determine the status of each step in the timeline
+const getStepStatus = (stepKey) => {
+  if (!order.value) return 'pending'
+
+  const currentStatusIndex = statusSteps.findIndex(s => s.key === order.value.status)
+  const stepIndex = statusSteps.findIndex(s => s.key === stepKey)
+
+  if (stepIndex < currentStatusIndex) return 'completed'
+  if (stepIndex === currentStatusIndex) return 'current'
+  return 'pending'
 }
 
 const getStatusClass = (status) => {
@@ -298,8 +412,16 @@ const printReceipt = () => {
   window.print()
 }
 
-onMounted(() => {
-  loadOrder()
+onMounted(async () => {
+  await loadOrder()
+  startPolling()
+})
+
+onUnmounted(() => {
+  if (pollingInterval.value) {
+    clearInterval(pollingInterval.value)
+    pollingInterval.value = null
+  }
 })
 </script>
 
