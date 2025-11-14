@@ -3,13 +3,12 @@
 namespace App\Jobs;
 
 use App\Models\BusinessLink;
-use App\Models\TableLinkQrData;
-use App\Services\QrCodeService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 
 class BulkCreateTablesJob implements ShouldQueue
@@ -27,7 +26,7 @@ class BulkCreateTablesJob implements ShouldQueue
      *
      * @var int
      */
-    public $timeout = 600; // 10 minutes
+    public $timeout = 60; // 1 minute to dispatch jobs
 
     /**
      * Create a new job instance.
@@ -48,10 +47,10 @@ class BulkCreateTablesJob implements ShouldQueue
      *
      * @return void
      */
-    public function handle(QrCodeService $qrCodeService)
+    public function handle()
     {
         try {
-            Log::info("Starting bulk table creation for business {$this->businessId}");
+            Log::info("Starting bulk table creation batch for business {$this->businessId}");
 
             $business = BusinessLink::find($this->businessId);
 
@@ -60,47 +59,31 @@ class BulkCreateTablesJob implements ShouldQueue
                 return;
             }
 
-            $createdCount = 0;
+            // Create an array of jobs for batching
+            $jobs = [];
 
             for ($i = 1; $i <= $this->count; $i++) {
                 $tableNumber = $this->prefix . ' ' . $i;
 
-                // Skip if exists
-                $exists = TableLinkQrData::where('business_link_id', $this->businessId)
-                    ->where('table_number', $tableNumber)
-                    ->exists();
-
-                if ($exists) {
-                    Log::info("Table {$tableNumber} already exists, skipping");
-                    continue;
-                }
-
-                try {
-                    $qrCodeUrl = $business->subdomain . '.localhost:3000?table=' . $tableNumber;
-                    $qrCode = $qrCodeService->generateTableQR($business->subdomain, $tableNumber);
-
-                    TableLinkQrData::create([
-                        'business_link_id' => $this->businessId,
-                        'table_number' => $tableNumber,
-                        'seats' => $this->seats,
-                        'qr_code_url' => $qrCodeUrl,
-                        'table_qr_code' => $qrCode,
-                        'status' => 'active'
-                    ]);
-
-                    $createdCount++;
-                    Log::info("Created table {$tableNumber}");
-
-                } catch (\Exception $e) {
-                    Log::error("Error creating table {$tableNumber}: " . $e->getMessage());
-                    // Continue with next table even if one fails
-                }
+                $jobs[] = new CreateSingleTableJob(
+                    $this->businessId,
+                    $tableNumber,
+                    $this->seats,
+                    $business->subdomain
+                );
             }
 
-            Log::info("Bulk table creation completed. Created {$createdCount} out of {$this->count} tables");
+            // Dispatch jobs as a batch
+            $batch = Bus::batch($jobs)
+                ->name("Bulk Create {$this->count} Tables for Business {$this->businessId}")
+                ->allowFailures() // Continue even if some jobs fail
+                ->onQueue('tables') // Use a dedicated queue for table operations
+                ->dispatch();
+
+            Log::info("Batch {$batch->id} created with {$this->count} table creation jobs");
 
         } catch (\Exception $e) {
-            Log::error('Error in bulk table creation job: ' . $e->getMessage());
+            Log::error('Error creating bulk table batch: ' . $e->getMessage());
             throw $e;
         }
     }
