@@ -482,7 +482,7 @@ const tableForm = ref({
 
 const bulkForm = ref({
   count: 10,
-  prefix: 'Table',
+  prefix: null,
   seats_per_table: 4
 })
 
@@ -538,10 +538,22 @@ const bulkCreateTables = async () => {
   submitting.value = true
   try {
     const response = await vendor.bulkCreateTables(selectedBusinessId.value, bulkForm.value)
-    toast.success(`${response.data?.data?.created_count || bulkForm.value.count} tables created successfully!`)
+    const data = response.data?.data || response.data
+    const count = bulkForm.value.count
+    const estimatedTime = data.estimated_time || Math.ceil(count / 2)
+
+    toast.success(`Creating ${count} tables in the background. This may take ${estimatedTime} seconds. The page will auto-refresh.`)
     showBulkCreateModal.value = false
-    bulkForm.value = { count: 10, prefix: 'Table', seats_per_table: 4 }
-    await loadTables()
+    bulkForm.value = { count: 10, prefix: null, seats_per_table: 4 }
+
+    // Auto-refresh after estimated time + buffer
+    const refreshDelay = (parseInt(estimatedTime) + 3) * 1000 // Add 3 second buffer
+
+    setTimeout(async () => {
+      await loadTables()
+      toast.info('Tables refreshed! Your new tables should now appear.')
+    }, refreshDelay)
+
   } catch (error) {
     console.error('Error bulk creating tables:', error)
     toast.error(error.response?.data?.message || 'Failed to create tables')

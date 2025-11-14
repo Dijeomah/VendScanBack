@@ -100,6 +100,46 @@ class OrderController extends Controller
     }
 
     /**
+     * Update payment status
+     */
+    public function updatePaymentStatus(Request $request, int $id): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'payment_status' => 'required|in:pending,paid,failed',
+            ]);
+
+            $vendorId = authUser()->id;
+
+            $order = Order::forVendor($vendorId)->findOrFail($id);
+            $order->payment_status = $validated['payment_status'];
+
+            // Update payment timestamp if marked as paid
+            if ($validated['payment_status'] === 'paid' && !$order->payment_at) {
+                $order->payment_at = now();
+            }
+
+            $order->save();
+
+            // Also update related payment record if exists
+            if ($order->payment) {
+                $order->payment->payment_status = $validated['payment_status'] === 'paid' ? 'completed' : $validated['payment_status'];
+                if ($validated['payment_status'] === 'paid' && !$order->payment->payment_at) {
+                    $order->payment->payment_at = now();
+                }
+                $order->payment->save();
+            }
+
+            $order->load(['orderItems.item', 'table', 'businessLink', 'server', 'payment']);
+
+            return success('Payment status updated successfully', $order, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error('Error updating payment status: ' . $e->getMessage());
+            return error('Error updating payment status', null, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
      * Get order statistics
      */
     public function getStatistics(Request $request): JsonResponse

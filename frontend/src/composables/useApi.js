@@ -167,6 +167,7 @@ export function useApi() {
       getOrder: (id) => api.get(`/vendor/orders/${id}`),
       getOrderStatistics: () => api.get('/vendor/orders/statistics'),
       updateOrderStatus: (id, data) => api.patch(`/vendor/orders/${id}/status`, data),
+      updatePaymentStatus: (id, data) => api.patch(`/vendor/orders/${id}/payment-status`, data),
 
       // Notifications
       getNotifications: (params) => api.get('/vendor/notifications', { params }),
@@ -192,6 +193,7 @@ export function useApi() {
       getOrders: (params) => api.get('/server/orders', { params }),
       getOrder: (id) => api.get(`/server/orders/${id}`),
       updateOrderStatus: (id, data) => api.patch(`/server/orders/${id}/status`, data),
+      updatePaymentStatus: (id, data) => api.patch(`/server/orders/${id}/payment-status`, data),
 
       // Notifications
       getNotifications: (params) => api.get('/server/notifications', { params }),

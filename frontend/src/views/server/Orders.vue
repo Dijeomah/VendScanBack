@@ -124,6 +124,15 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
+                    <button
+                      @click="openPaymentStatusModal(order)"
+                      class="text-green-600 hover:text-green-700"
+                      title="Update Payment"
+                    >
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -256,6 +265,42 @@
         </div>
       </div>
     </div>
+
+    <!-- Payment Status Update Modal -->
+    <div v-if="showPaymentStatusModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-lg max-w-md w-full">
+        <div class="p-6 border-b border-gray-200">
+          <h2 class="text-xl font-bold text-gray-900">Update Payment Status</h2>
+          <p class="text-sm text-gray-600 mt-1">#{{ selectedOrder?.order_number }}</p>
+        </div>
+        <div class="p-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">New Payment Status</label>
+          <select
+            v-model="newPaymentStatus"
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+          >
+            <option value="pending">Pending</option>
+            <option value="paid">Paid</option>
+            <option value="failed">Failed</option>
+          </select>
+        </div>
+        <div class="p-6 border-t border-gray-200 flex justify-end gap-3">
+          <button
+            @click="closePaymentStatusModal"
+            class="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-all"
+          >
+            Cancel
+          </button>
+          <button
+            @click="updatePaymentStatus"
+            :disabled="updatingPaymentStatus"
+            class="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-all disabled:opacity-50"
+          >
+            {{ updatingPaymentStatus ? 'Updating...' : 'Update Payment Status' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </ServerLayout>
 </template>
 
@@ -274,8 +319,11 @@ const updating = ref(false)
 const orders = ref([])
 const showDetailsModal = ref(false)
 const showStatusModal = ref(false)
+const showPaymentStatusModal = ref(false)
 const selectedOrder = ref(null)
 const newStatus = ref('')
+const newPaymentStatus = ref('')
+const updatingPaymentStatus = ref(false)
 
 const filters = ref({
   status: 'all',
@@ -328,6 +376,18 @@ const closeStatusModal = () => {
   newStatus.value = ''
 }
 
+const openPaymentStatusModal = (order) => {
+  selectedOrder.value = order
+  newPaymentStatus.value = order.payment_status
+  showPaymentStatusModal.value = true
+}
+
+const closePaymentStatusModal = () => {
+  showPaymentStatusModal.value = false
+  selectedOrder.value = null
+  newPaymentStatus.value = ''
+}
+
 const updateOrderStatus = async () => {
   try {
     updating.value = true
@@ -340,6 +400,21 @@ const updateOrderStatus = async () => {
     toast.error('Failed to update order status')
   } finally {
     updating.value = false
+  }
+}
+
+const updatePaymentStatus = async () => {
+  try {
+    updatingPaymentStatus.value = true
+    await server.updatePaymentStatus(selectedOrder.value.id, { payment_status: newPaymentStatus.value })
+    toast.success('Payment status updated successfully')
+    closePaymentStatusModal()
+    await loadOrders()
+  } catch (error) {
+    console.error('Error updating payment status:', error)
+    toast.error('Failed to update payment status')
+  } finally {
+    updatingPaymentStatus.value = false
   }
 }
 

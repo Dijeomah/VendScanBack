@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Vendor;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\BulkCreateTablesJob;
 use App\Models\TableLinkQrData;
 use App\Models\BusinessLink;
 use App\Services\QrCodeService;
@@ -226,7 +227,7 @@ class TableController extends Controller
     }
 
     /**
-     * Bulk create tables
+     * Bulk create tables (dispatches job for async processing)
      */
     public function bulkCreate(Request $request, $businessId): JsonResponse
     {
@@ -251,38 +252,22 @@ class TableController extends Controller
             $prefix = $validated['prefix'] ?? 'Table';
             $seats = $validated['seats_per_table'] ?? 4;
 
-            $tables = [];
-            for ($i = 1; $i <= $count; $i++) {
-                $tableNumber = $prefix . ' ' . $i;
+            // Dispatch the job to handle table creation asynchronously
+            BulkCreateTablesJob::dispatch($businessId, $count, $prefix, $seats, $vendor->id);
 
-                // Skip if exists
-                $exists = TableLinkQrData::where('business_link_id', $businessId)
-                    ->where('table_number', $tableNumber)
-                    ->exists();
+            Log::info("Bulk table creation job dispatched for business {$businessId}, creating {$count} tables");
 
-                if ($exists) continue;
+            return success('Bulk table creation started. Tables are being created in the background. Please refresh the page in a few moments.', [
+                'message' => 'Tables are being created in the background',
+                'count' => $count,
+                'estimated_time' => ceil($count / 2) . ' seconds'
+            ], Response::HTTP_ACCEPTED);
 
-                $qrCodeUrl = $business->subdomain . '.localhost:3000?table=' . $tableNumber;
-                $qrCode = $this->qrCodeService->generateTableQR($business->subdomain, $tableNumber);
-
-                $tables[] = TableLinkQrData::create([
-                    'business_link_id' => $businessId,
-                    'table_number' => $tableNumber,
-                    'seats' => $seats,
-                    'qr_code_url' => $qrCodeUrl,
-                    'table_qr_code' => $qrCode,
-                    'status' => 'active'
-                ]);
-            }
-
-            return success('Tables created successfully', [
-                'created_count' => count($tables),
-                'tables' => $tables
-            ], Response::HTTP_CREATED);
-
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return error('Validation failed', $e->errors(), Response::HTTP_UNPROCESSABLE_ENTITY);
         } catch (\Exception $e) {
-            Log::error('Error bulk creating tables: ' . $e->getMessage());
-            return error('Failed to create tables', null, Response::HTTP_INTERNAL_SERVER_ERROR);
+            Log::error('Error dispatching bulk table creation: ' . $e->getMessage());
+            return error('Failed to start table creation', null, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 }

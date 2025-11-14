@@ -215,6 +215,51 @@ class ServerController extends Controller
     }
 
     /**
+     * Update payment status
+     */
+    public function updatePaymentStatus(Request $request, $orderId): JsonResponse
+    {
+        try {
+            $validated = $request->validate([
+                'payment_status' => 'required|in:pending,paid,failed',
+            ]);
+
+            $server = Auth::user();
+
+            // Get server's assigned table IDs
+            $tableIds = ServerTableAssignment::where('server_id', $server->id)
+                ->where('status', 'active')
+                ->pluck('table_id');
+
+            $order = Order::whereIn('table_id', $tableIds)->findOrFail($orderId);
+            $order->payment_status = $validated['payment_status'];
+
+            // Update payment timestamp if marked as paid
+            if ($validated['payment_status'] === 'paid' && !$order->payment_at) {
+                $order->payment_at = now();
+            }
+
+            $order->save();
+
+            // Also update related payment record if exists
+            if ($order->payment) {
+                $order->payment->payment_status = $validated['payment_status'] === 'paid' ? 'completed' : $validated['payment_status'];
+                if ($validated['payment_status'] === 'paid' && !$order->payment->payment_at) {
+                    $order->payment->payment_at = now();
+                }
+                $order->payment->save();
+            }
+
+            $order->load(['orderItems.item', 'table', 'businessLink.business_data', 'payment']);
+
+            return success('Payment status updated successfully', $order, Response::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error('Error updating payment status: ' . $e->getMessage());
+            return error('Error updating payment status', null, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
      * Get server profile
      */
     public function getProfile(): JsonResponse

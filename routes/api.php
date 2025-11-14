@@ -179,6 +179,7 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::get('/orders/statistics', [VendorOrderController::class, 'getStatistics']);
         Route::get('/orders/{id}', [VendorOrderController::class, 'show']);
         Route::patch('/orders/{id}/status', [VendorOrderController::class, 'updateStatus']);
+        Route::patch('/orders/{id}/payment-status', [VendorOrderController::class, 'updatePaymentStatus']);
 
         // Notifications
         Route::group(['prefix' => 'notifications'], function () {
@@ -209,6 +210,7 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::get('/orders', [ServerController::class, 'getOrders']);
         Route::get('/orders/{id}', [ServerController::class, 'getOrder']);
         Route::patch('/orders/{id}/status', [ServerController::class, 'updateOrderStatus']);
+        Route::patch('/orders/{id}/payment-status', [ServerController::class, 'updatePaymentStatus']);
 
         // Notifications
         Route::group(['prefix' => 'notifications'], function () {

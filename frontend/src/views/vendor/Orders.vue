@@ -228,9 +228,15 @@
                     </button>
                     <button
                       @click="updateOrderStatus(order)"
-                      class="text-green-600 hover:text-green-900"
+                      class="text-green-600 hover:text-green-900 mr-3"
                     >
-                      Update
+                      Status
+                    </button>
+                    <button
+                      @click="updateOrderPaymentStatus(order)"
+                      class="text-blue-600 hover:text-blue-900"
+                    >
+                      Payment
                     </button>
                   </td>
                 </tr>
@@ -419,6 +425,59 @@
         </div>
       </div>
     </Teleport>
+
+    <!-- Update Payment Status Modal -->
+    <Teleport to="body">
+      <div
+        v-if="paymentStatusUpdateOrder"
+        class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4"
+        @click="paymentStatusUpdateOrder = null"
+      >
+        <div
+          @click.stop
+          class="bg-white rounded-xl shadow-xl max-w-md w-full p-6"
+        >
+          <h2 class="text-xl font-bold text-gray-900 mb-4">Update Payment Status</h2>
+
+          <div class="space-y-3 mb-6">
+            <label
+              v-for="status in paymentStatuses"
+              :key="status.value"
+              class="flex items-center p-3 border-2 rounded-lg cursor-pointer transition-all"
+              :class="newPaymentStatus === status.value ? 'border-primary-600 bg-primary-50' : 'border-gray-200 hover:border-gray-300'"
+            >
+              <input
+                type="radio"
+                v-model="newPaymentStatus"
+                :value="status.value"
+                class="w-4 h-4 text-primary-600"
+              />
+              <div class="ml-3">
+                <div class="font-medium text-gray-900">{{ status.label }}</div>
+                <div class="text-sm text-gray-600">{{ status.description }}</div>
+              </div>
+            </label>
+          </div>
+
+          <div class="flex gap-3">
+            <button
+              @click="paymentStatusUpdateOrder = null"
+              class="flex-1 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              Cancel
+            </button>
+            <button
+              @click="confirmPaymentStatusUpdate"
+              :disabled="updatingPaymentStatus"
+              class="flex-1 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 disabled:opacity-50"
+            >
+              <span v-if="updatingPaymentStatus">Updating...</span>
+              <span v-else>Update</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </Teleport>
   </VendorLayout>
 </template>
 
@@ -440,6 +499,9 @@ const selectedOrder = ref(null)
 const statusUpdateOrder = ref(null)
 const newStatus = ref('')
 const updatingStatus = ref(false)
+const paymentStatusUpdateOrder = ref(null)
+const newPaymentStatus = ref('')
+const updatingPaymentStatus = ref(false)
 
 const filters = ref({
   status: 'all',
@@ -455,6 +517,12 @@ const orderStatuses = [
   { value: 'served', label: 'Served', description: 'Food has been served' },
   { value: 'completed', label: 'Completed', description: 'Order completed' },
   { value: 'cancelled', label: 'Cancelled', description: 'Order cancelled' }
+]
+
+const paymentStatuses = [
+  { value: 'pending', label: 'Pending', description: 'Payment not yet received' },
+  { value: 'paid', label: 'Paid', description: 'Payment completed' },
+  { value: 'failed', label: 'Failed', description: 'Payment failed' }
 ]
 
 const loadOrders = async () => {
@@ -506,6 +574,11 @@ const updateOrderStatus = (order) => {
   newStatus.value = order.status
 }
 
+const updateOrderPaymentStatus = (order) => {
+  paymentStatusUpdateOrder.value = order
+  newPaymentStatus.value = order.payment_status
+}
+
 const confirmStatusUpdate = async () => {
   try {
     updatingStatus.value = true
@@ -520,6 +593,23 @@ const confirmStatusUpdate = async () => {
     toast.error('Failed to update status')
   } finally {
     updatingStatus.value = false
+  }
+}
+
+const confirmPaymentStatusUpdate = async () => {
+  try {
+    updatingPaymentStatus.value = true
+    await vendor.updatePaymentStatus(paymentStatusUpdateOrder.value.id, {
+      payment_status: newPaymentStatus.value
+    })
+    toast.success('Payment status updated')
+    paymentStatusUpdateOrder.value = null
+    await loadOrders()
+  } catch (error) {
+    console.error('Error updating payment status:', error)
+    toast.error('Failed to update payment status')
+  } finally {
+    updatingPaymentStatus.value = false
   }
 }
 

@@ -1,1 +1,13 @@
-for the vendor media, I have uploaded the header and logo, can we update the menu views to display them, kindly pull again in the issues folder i have added a menu template that we can use, then we can have the logo at the top left, infront of the header/banner and so on, I believe you understand and can implement what i mean. and can we add a feature, for both the vendor and the server, if the customer wants to pay after being served, there should be a feature that updates the payment to paid and so on on the server or/and vendor section, and if the the order was cancelled, it should still state so
+when creating Bulk tables, i get this error:
+[2025-11-14 12:25:49] local.INFO: Table QR code uploaded to Cloudinary successfully
+[2025-11-14 12:25:55] local.INFO: Table QR code uploaded to Cloudinary successfully
+[2025-11-14 12:25:57] local.INFO: Table QR code uploaded to Cloudinary successfully
+[2025-11-14 12:25:59] local.INFO: Table QR code uploaded to Cloudinary successfully
+[2025-11-14 12:26:02] local.INFO: Table QR code uploaded to Cloudinary successfully
+[2025-11-14 12:26:05] local.INFO: Table QR code uploaded to Cloudinary successfully
+[2025-11-14 12:26:05] local.ERROR: Maximum execution time of 30 seconds exceeded {"userId":3,"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 30 seconds exceeded at /Users/dramesuccess/Documents/Laravel/qr-app/vendor/guzzlehttp/guzzle/src/Handler/CurlMultiHandler.php:175)
+[stacktrace]
+#0 {main}
+"}
+
+can we resolve it, i guess its timing out because its handling much upload to the server making a memory leak, and we can handle this with a job and then it should refresh the Table management page when its done creating.
