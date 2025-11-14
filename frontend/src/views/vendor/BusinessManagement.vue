@@ -311,6 +311,55 @@
                             ></textarea>
                         </div>
 
+                        <!-- Location Fields -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Country *</label>
+                                <select
+                                    v-model="businessForm.country_id"
+                                    @change="onCountryChange"
+                                    required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500"
+                                >
+                                    <option value="">Select Country</option>
+                                    <option v-for="country in countries" :key="country.id" :value="country.id">
+                                        {{ country.name }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">State *</label>
+                                <select
+                                    v-model="businessForm.state_id"
+                                    @change="onStateChange"
+                                    :disabled="!businessForm.country_id || loadingStates"
+                                    required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                >
+                                    <option value="">{{ loadingStates ? 'Loading...' : 'Select State' }}</option>
+                                    <option v-for="state in states" :key="state.id" :value="state.id">
+                                        {{ state.name }}
+                                    </option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                                <select
+                                    v-model="businessForm.city_id"
+                                    :disabled="!businessForm.state_id || loadingCities"
+                                    required
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
+                                >
+                                    <option value="">{{ loadingCities ? 'Loading...' : 'Select City' }}</option>
+                                    <option v-for="city in cities" :key="city.id" :value="city.id">
+                                        {{ city.name }}
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
                         <!-- Business Media -->
                         <div v-if="editingBusiness" class="border-t pt-4">
                             <h3 class="text-sm font-medium text-gray-900 mb-4">Business Media</h3>
@@ -579,7 +628,7 @@ import VendorLayout from '@/components/layouts/VendorLayout.vue'
 
 const authStore = useAuthStore()
 const vendorStore = useVendorStore()
-const {vendor} = useApi()
+const {vendor, auth} = useApi()
 const toast = useToast()
 
 const loading = ref(false)
@@ -591,12 +640,22 @@ const showDeleteModal = ref(false)
 const editingBusiness = ref(null)
 const businessToDelete = ref(null)
 
+// Location data
+const countries = ref([])
+const states = ref([])
+const cities = ref([])
+const loadingStates = ref(false)
+const loadingCities = ref(false)
+
 const businessForm = ref({
     business_name: '',
     business_link: '',
     business_type: '',
     phone_number: '',
     business_address: '',
+    country_id: '',
+    state_id: '',
+    city_id: '',
     geofence_enabled: false,
     latitude: null,
     longitude: null,
@@ -656,6 +715,72 @@ const loadBusinesses = async () => {
     }
 }
 
+const loadCountries = async () => {
+    try {
+        const response = await auth.getCountries()
+        countries.value = response.data?.data || response.data || []
+    } catch (error) {
+        console.error('Error loading countries:', error)
+        toast.error('Failed to load countries')
+    }
+}
+
+const loadStates = async (countryId) => {
+    if (!countryId) {
+        states.value = []
+        return
+    }
+
+    try {
+        loadingStates.value = true
+        const response = await auth.getStates(countryId)
+        states.value = response.data?.data || response.data || []
+    } catch (error) {
+        console.error('Error loading states:', error)
+        toast.error('Failed to load states')
+        states.value = []
+    } finally {
+        loadingStates.value = false
+    }
+}
+
+const loadCities = async (stateId) => {
+    if (!stateId) {
+        cities.value = []
+        return
+    }
+
+    try {
+        loadingCities.value = true
+        const response = await auth.getCities(stateId)
+        cities.value = response.data?.data || response.data || []
+    } catch (error) {
+        console.error('Error loading cities:', error)
+        toast.error('Failed to load cities')
+        cities.value = []
+    } finally {
+        loadingCities.value = false
+    }
+}
+
+const onCountryChange = async () => {
+    businessForm.value.state_id = ''
+    businessForm.value.city_id = ''
+    states.value = []
+    cities.value = []
+    if (businessForm.value.country_id) {
+        await loadStates(businessForm.value.country_id)
+    }
+}
+
+const onStateChange = async () => {
+    businessForm.value.city_id = ''
+    cities.value = []
+    if (businessForm.value.state_id) {
+        await loadCities(businessForm.value.state_id)
+    }
+}
+
 const validateBusinessLink = (event) => {
     // Only allow lowercase letters, numbers, and hyphens
     event.target.value = event.target.value.toLowerCase().replace(/[^a-z0-9-]/g, '')
@@ -674,15 +799,20 @@ const openCreateModal = () => {
         business_type: '',
         phone_number: '',
         business_address: '',
+        country_id: '',
+        state_id: '',
+        city_id: '',
         geofence_enabled: false,
         latitude: null,
         longitude: null,
         geofence_radius: 100
     }
+    states.value = []
+    cities.value = []
     showModal.value = true
 }
 
-const openEditModal = (business) => {
+const openEditModal = async (business) => {
     editingBusiness.value = business
     businessForm.value = {
         business_name: business.business_data?.business_name || business.business_link,
@@ -690,11 +820,23 @@ const openEditModal = (business) => {
         business_type: business.business_data?.business_type || '',
         phone_number: business.business_data?.phone_number || '',
         business_address: business.business_data?.address || '',
+        country_id: business.business_data?.country_id || '',
+        state_id: business.business_data?.state_id || '',
+        city_id: business.business_data?.city_id || '',
         geofence_enabled: business.business_data?.geofence_enabled || false,
         latitude: business.business_data?.latitude || null,
         longitude: business.business_data?.longitude || null,
         geofence_radius: business.business_data?.geofence_radius || 100
     }
+
+    // Load states and cities if editing existing business with location data
+    if (businessForm.value.country_id) {
+        await loadStates(businessForm.value.country_id)
+        if (businessForm.value.state_id) {
+            await loadCities(businessForm.value.state_id)
+        }
+    }
+
     showModal.value = true
 }
 
@@ -847,5 +989,6 @@ const uploadBusinessMedia = async () => {
 
 onMounted(async () => {
     await loadBusinesses()
+    await loadCountries()
 })
 </script>
