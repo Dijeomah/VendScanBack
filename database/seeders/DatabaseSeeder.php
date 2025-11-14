@@ -26,6 +26,7 @@ class DatabaseSeeder extends Seeder
                 StatesTableSeeder::class,
                 CitiesTableSeeder::class,
                 SubscriptionPlansSeeder::class,
+                AdminSeeder::class,
                 CategoriesSeeder::class,
                 ItemSeeder::class
             ]);

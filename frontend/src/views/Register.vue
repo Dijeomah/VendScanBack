@@ -107,53 +107,18 @@
             </div>
           </div>
 
-          <!-- Role Selection -->
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-2">
-              I am a *
-            </label>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-primary-300"
-                :class="form.role === 'vendor' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'">
-                <input
-                  v-model="form.role"
-                  type="radio"
-                  value="vendor"
-                  class="sr-only"
-                />
-                <div class="flex items-center">
-                  <div class="flex-shrink-0 mr-3">
-                    <svg class="w-6 h-6" :class="form.role === 'vendor' ? 'text-primary-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p class="font-medium text-gray-900">Restaurant Owner</p>
-                    <p class="text-sm text-gray-500">Manage my menu</p>
-                  </div>
-                </div>
-              </label>
-
-              <label class="relative flex items-center p-4 border-2 rounded-lg cursor-pointer transition-all hover:border-primary-300"
-                :class="form.role === 'admin' ? 'border-primary-500 bg-primary-50' : 'border-gray-200'">
-                <input
-                  v-model="form.role"
-                  type="radio"
-                  value="admin"
-                  class="sr-only"
-                />
-                <div class="flex items-center">
-                  <div class="flex-shrink-0 mr-3">
-                    <svg class="w-6 h-6" :class="form.role === 'admin' ? 'text-primary-600' : 'text-gray-400'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p class="font-medium text-gray-900">Administrator</p>
-                    <p class="text-sm text-gray-500">Manage system</p>
-                  </div>
-                </div>
-              </label>
+          <!-- Role Selection - Vendor Only -->
+          <div class="p-4 bg-primary-50 border-2 border-primary-500 rounded-lg">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 mr-3">
+                <svg class="w-6 h-6 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+              </div>
+              <div>
+                <p class="font-medium text-gray-900">Restaurant/Business Owner Account</p>
+                <p class="text-sm text-gray-600">You're registering as a vendor to manage your menu</p>
+              </div>
             </div>
           </div>
 
