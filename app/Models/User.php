@@ -110,18 +110,27 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Check if user can create more businesses based on their tier
+     * Get the user's subscription plan
      */
-    public function canCreateBusiness(): bool
+    public function subscriptionPlan()
     {
-        $currentCount = $this->business_links()->count();
+        return $this->belongsTo(SubscriptionPlan::class);
+    }
 
-        return match ($this->subscription_tier) {
-            'free' => $currentCount < 3,
-            'pro' => $currentCount < 5,
-            'max' => true, // unlimited
-            default => $currentCount < 3
-        };
+    /**
+     * Get the user's active subscription
+     */
+    public function subscription()
+    {
+        return $this->hasOne(Subscription::class)->where('status', 'active');
+    }
+
+    /**
+     * Get all user's subscriptions
+     */
+    public function subscriptions()
+    {
+        return $this->hasMany(Subscription::class);
     }
 
     public function business_links(): HasMany
@@ -135,18 +144,123 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * Get remaining business slots
+     * Check if user can create more of a specific resource
      */
-    public function getRemainingBusinessSlotsAttribute(): int
+    public function canCreate($resource): bool
     {
-        $currentCount = $this->business_links()->count();
+        $plan = $this->subscriptionPlan;
 
-        return match ($this->subscription_tier) {
-            'free' => max(0, 3 - $currentCount),
-            'pro' => max(0, 5 - $currentCount),
-            'max' => PHP_INT_MAX, // unlimited
-            default => max(0, 3 - $currentCount)
+        if (!$plan) {
+            // No plan assigned, default to free tier limits
+            $plan = SubscriptionPlan::where('slug', 'free')->first();
+        }
+
+        $limit = $plan->getLimit($resource);
+
+        // Unlimited
+        if ($limit === null) {
+            return true;
+        }
+
+        $currentCount = $this->getResourceCount($resource);
+
+        return $currentCount < $limit;
+    }
+
+    /**
+     * Get current count of a resource
+     */
+    public function getResourceCount($resource): int
+    {
+        return match ($resource) {
+            'businesses' => $this->business_links()->count(),
+            'tables' => TableLinkQrData::whereIn('business_link_id',
+                $this->business_links()->pluck('id'))->count(),
+            'servers' => User::where('created_by', $this->id)
+                ->where('role', 'server')->count(),
+            'items' => Item::whereIn('business_link_id',
+                $this->business_links()->pluck('id'))->count(),
+            default => 0,
         };
+    }
+
+    /**
+     * Get remaining slots for a resource
+     */
+    public function getRemainingSlots($resource): int|string
+    {
+        $plan = $this->subscriptionPlan;
+
+        if (!$plan) {
+            $plan = SubscriptionPlan::where('slug', 'free')->first();
+        }
+
+        $limit = $plan->getLimit($resource);
+
+        // Unlimited
+        if ($limit === null) {
+            return 'unlimited';
+        }
+
+        $currentCount = $this->getResourceCount($resource);
+
+        return max(0, $limit - $currentCount);
+    }
+
+    /**
+     * Check if user has access to a feature
+     */
+    public function hasFeature($feature): bool
+    {
+        $plan = $this->subscriptionPlan;
+
+        if (!$plan) {
+            return false;
+        }
+
+        return $plan->hasFeature($feature);
+    }
+
+    /**
+     * Check if user is on free plan
+     */
+    public function isOnFreePlan(): bool
+    {
+        return $this->subscriptionPlan && $this->subscriptionPlan->isFree();
+    }
+
+    /**
+     * Check if user is on pro plan
+     */
+    public function isOnProPlan(): bool
+    {
+        return $this->subscriptionPlan && $this->subscriptionPlan->isPro();
+    }
+
+    /**
+     * Check if user is on enterprise plan
+     */
+    public function isOnEnterprisePlan(): bool
+    {
+        return $this->subscriptionPlan && $this->subscriptionPlan->isEnterprise();
+    }
+
+    /**
+     * Legacy method - kept for backward compatibility
+     * @deprecated Use canCreate('businesses') instead
+     */
+    public function canCreateBusiness(): bool
+    {
+        return $this->canCreate('businesses');
+    }
+
+    /**
+     * Legacy method - kept for backward compatibility
+     * @deprecated Use getRemainingSlots('businesses') instead
+     */
+    public function getRemainingBusinessSlotsAttribute(): int|string
+    {
+        return $this->getRemainingSlots('businesses');
     }
 
 }
