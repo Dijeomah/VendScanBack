@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
                 CountriesTableSeeder::class,
                 StatesTableSeeder::class,
                 CitiesTableSeeder::class,
+                SubscriptionPlansSeeder::class,
                 CategoriesSeeder::class,
                 ItemSeeder::class
             ]);
