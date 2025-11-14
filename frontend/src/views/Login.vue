@@ -202,6 +202,8 @@ const handleLogin = async () => {
       router.push('/admin/dashboard')
     } else if (user.role === 'vendor') {
       router.push('/vendor/dashboard')
+    } else if (user.role === 'server') {
+      router.push('/server/dashboard')
     } else {
       router.push('/')
     }

@@ -11,6 +11,7 @@ export const useAuthStore = defineStore('auth', {
     getters: {
         isVendor: (state) => state.user?.role === 'vendor',
         isAdmin: (state) => state.user?.role === 'admin',
+        isServer: (state) => state.user?.role === 'server',
         userName: (state) => state.user
             ? `${state.user.first_name} ${state.user.last_name}`
             : '',

@@ -316,18 +316,22 @@ router.beforeEach((to, from, next) => {
       next('/admin/dashboard')
     } else if (authStore.isVendor) {
       next('/vendor/dashboard')
+    } else if (authStore.isServer) {
+      next('/server/dashboard')
     } else {
       next('/')
     }
   } else if (requiredRole && authStore.user?.role !== requiredRole) {
     // Role-based access control
     console.warn(`Access denied. Required role: ${requiredRole}, User role: ${authStore.user?.role}`)
-    
+
     // Redirect to appropriate dashboard
     if (authStore.isAdmin) {
       next('/admin/dashboard')
     } else if (authStore.isVendor) {
       next('/vendor/dashboard')
+    } else if (authStore.isServer) {
+      next('/server/dashboard')
     } else {
       next('/login')
     }
