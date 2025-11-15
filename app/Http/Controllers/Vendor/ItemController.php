@@ -22,16 +22,123 @@ class ItemController extends Controller
 {
     use ChecksSubscriptionLimits;
     /**
-     * View aall categories.
+     * Get all items for vendor with advanced filtering, sorting, and pagination
      *
      * @return JsonResponse
      * @throws ValidationException
      */
-    public function index()
+    public function index(Request $request): JsonResponse
     {
-        // dd('Hello');
-        $item = Item::where('userid', authUser()->userid)->paginate(10);
-        return success('Item: ', $item, 200);
+        try {
+            $user = authUser();
+            $query = Item::where('user_id', $user->id)
+                ->with(['category', 'subCategory', 'businessLink']);
+
+            // Search functionality
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('title', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('description', 'LIKE', "%{$searchTerm}%");
+                });
+            }
+
+            // Filter by category
+            if ($request->filled('category_id')) {
+                $query->where('category_id', $request->category_id);
+            }
+
+            // Filter by subcategory
+            if ($request->filled('sub_category_id')) {
+                $query->where('sub_category_id', $request->sub_category_id);
+            }
+
+            // Filter by business
+            if ($request->filled('business_link_id')) {
+                $query->where('business_link_id', $request->business_link_id);
+            }
+
+            // Filter by business link string
+            if ($request->filled('business_link')) {
+                $query->where('business_link', $request->business_link);
+            }
+
+            // Filter by status
+            if ($request->filled('status')) {
+                $query->where('status', $request->status === 'true' || $request->status === '1');
+            }
+
+            // Filter by price range
+            if ($request->filled('min_price')) {
+                $query->where('price', '>=', $request->min_price);
+            }
+            if ($request->filled('max_price')) {
+                $query->where('price', '<=', $request->max_price);
+            }
+
+            // Filter by date range
+            if ($request->filled('from_date')) {
+                $query->whereDate('created_at', '>=', $request->from_date);
+            }
+            if ($request->filled('to_date')) {
+                $query->whereDate('created_at', '<=', $request->to_date);
+            }
+
+            // Sorting
+            $sortField = $request->get('sort_by', 'created_at');
+            $sortOrder = $request->get('sort_order', 'desc');
+
+            $allowedSortFields = ['title', 'price', 'created_at', 'updated_at', 'status'];
+            if (in_array($sortField, $allowedSortFields)) {
+                $query->orderBy($sortField, $sortOrder);
+            } else {
+                $query->orderBy('created_at', 'desc');
+            }
+
+            $perPage = $request->get('per_page', 15);
+            $items = $query->paginate($perPage);
+
+            return success('Items fetched successfully', $items, Response::HTTP_OK);
+        } catch (Exception $e) {
+            Log::error('Error fetching vendor items: ' . $e->getMessage());
+            return error('Error fetching items', null, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Get item statistics for vendor
+     */
+    public function getStatistics(): JsonResponse
+    {
+        try {
+            $user = authUser();
+
+            $stats = [
+                'total_items' => Item::where('user_id', $user->id)->count(),
+                'active_items' => Item::where('user_id', $user->id)->where('status', true)->count(),
+                'inactive_items' => Item::where('user_id', $user->id)->where('status', false)->count(),
+                'average_price' => round(Item::where('user_id', $user->id)->avg('price'), 2),
+                'highest_price' => Item::where('user_id', $user->id)->max('price'),
+                'lowest_price' => Item::where('user_id', $user->id)->min('price'),
+                'items_by_category' => Category::where('user_id', $user->id)
+                    ->withCount(['items' => function ($q) use ($user) {
+                        $q->where('user_id', $user->id);
+                    }])
+                    ->orderBy('items_count', 'desc')
+                    ->limit(5)
+                    ->get(['id', 'category_name', 'items_count']),
+                'recent_items' => Item::where('user_id', $user->id)
+                    ->with(['category'])
+                    ->latest()
+                    ->limit(5)
+                    ->get(['id', 'title', 'price', 'category_id', 'status', 'created_at']),
+            ];
+
+            return success('Item statistics fetched successfully', $stats, Response::HTTP_OK);
+        } catch (Exception $e) {
+            Log::error('Error fetching item statistics: ' . $e->getMessage());
+            return error('Error fetching statistics', null, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
