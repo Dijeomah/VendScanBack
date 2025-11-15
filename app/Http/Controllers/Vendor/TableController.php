@@ -26,7 +26,7 @@ class TableController extends Controller
     }
 
     /**
-     * Get all tables for a specific business
+     * Get all tables for a specific business with filtering and sorting
      */
     public function index(Request $request, $businessId): JsonResponse
     {
@@ -42,16 +42,165 @@ class TableController extends Controller
                 return error('Business not found', null, Response::HTTP_NOT_FOUND);
             }
 
-            $tables = TableLinkQrData::where('business_link_id', $businessId)
-                ->with('server_assignments.server')
-                ->orderBy('table_number')
-                ->get();
+            $query = TableLinkQrData::where('business_link_id', $businessId)
+                ->with('server_assignments.server');
+
+            // Search functionality
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('table_number', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('table_name', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('notes', 'LIKE', "%{$searchTerm}%");
+                });
+            }
+
+            // Filter by status
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            // Filter by seats
+            if ($request->filled('min_seats')) {
+                $query->where('seats', '>=', $request->min_seats);
+            }
+            if ($request->filled('max_seats')) {
+                $query->where('seats', '<=', $request->max_seats);
+            }
+
+            // Filter by assigned server
+            if ($request->filled('has_server')) {
+                if ($request->has_server === 'true' || $request->has_server === '1') {
+                    $query->has('server_assignments');
+                } else {
+                    $query->doesntHave('server_assignments');
+                }
+            }
+
+            // Sorting
+            $sortField = $request->get('sort_by', 'table_number');
+            $sortOrder = $request->get('sort_order', 'asc');
+
+            $allowedSortFields = ['table_number', 'table_name', 'seats', 'status', 'created_at', 'updated_at'];
+            if (in_array($sortField, $allowedSortFields)) {
+                $query->orderBy($sortField, $sortOrder);
+            } else {
+                $query->orderBy('table_number', 'asc');
+            }
+
+            // Check if pagination is requested
+            if ($request->filled('paginate') && $request->paginate === 'true') {
+                $perPage = $request->get('per_page', 15);
+                $tables = $query->paginate($perPage);
+            } else {
+                $tables = $query->get();
+            }
 
             return success('Tables fetched successfully', $tables, Response::HTTP_OK);
 
         } catch (\Exception $e) {
             Log::error('Error fetching tables: ' . $e->getMessage());
             return error('Failed to fetch tables', null, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Get all tables across all vendor businesses with filtering
+     */
+    public function getAllTables(Request $request): JsonResponse
+    {
+        try {
+            $vendor = Auth::user();
+
+            $query = TableLinkQrData::whereHas('business_link', function ($q) use ($vendor) {
+                $q->where('uid', $vendor->id);
+            })->with(['business_link', 'server_assignments.server']);
+
+            // Search functionality
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('table_number', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('table_name', 'LIKE', "%{$searchTerm}%");
+                });
+            }
+
+            // Filter by business
+            if ($request->filled('business_id')) {
+                $query->where('business_link_id', $request->business_id);
+            }
+
+            // Filter by status
+            if ($request->filled('status')) {
+                $query->where('status', $request->status);
+            }
+
+            // Sorting
+            $sortField = $request->get('sort_by', 'created_at');
+            $sortOrder = $request->get('sort_order', 'desc');
+
+            $allowedSortFields = ['table_number', 'seats', 'status', 'created_at'];
+            if (in_array($sortField, $allowedSortFields)) {
+                $query->orderBy($sortField, $sortOrder);
+            }
+
+            $perPage = $request->get('per_page', 15);
+            $tables = $query->paginate($perPage);
+
+            return success('Tables fetched successfully', $tables, Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            Log::error('Error fetching all tables: ' . $e->getMessage());
+            return error('Failed to fetch tables', null, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Get table statistics for vendor
+     */
+    public function getStatistics(Request $request): JsonResponse
+    {
+        try {
+            $vendor = Auth::user();
+
+            // Get business ID if provided, otherwise aggregate all businesses
+            $businessId = $request->get('business_id');
+
+            $query = TableLinkQrData::query();
+
+            if ($businessId) {
+                // Verify business belongs to vendor
+                $business = BusinessLink::where('id', $businessId)
+                    ->where('uid', $vendor->id)
+                    ->first();
+
+                if (!$business) {
+                    return error('Business not found', null, Response::HTTP_NOT_FOUND);
+                }
+
+                $query->where('business_link_id', $businessId);
+            } else {
+                // All tables for all vendor's businesses
+                $query->whereHas('business_link', function ($q) use ($vendor) {
+                    $q->where('uid', $vendor->id);
+                });
+            }
+
+            $stats = [
+                'total_tables' => $query->count(),
+                'active_tables' => (clone $query)->where('status', 'active')->count(),
+                'occupied_tables' => (clone $query)->where('status', 'occupied')->count(),
+                'reserved_tables' => (clone $query)->where('status', 'reserved')->count(),
+                'inactive_tables' => (clone $query)->where('status', 'inactive')->count(),
+                'total_seats' => $query->sum('seats'),
+                'average_seats' => round($query->avg('seats'), 2),
+            ];
+
+            return success('Table statistics fetched successfully', $stats, Response::HTTP_OK);
+
+        } catch (\Exception $e) {
+            Log::error('Error fetching table statistics: ' . $e->getMessage());
+            return error('Failed to fetch statistics', null, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
