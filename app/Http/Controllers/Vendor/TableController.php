@@ -78,7 +78,7 @@ class TableController extends Controller
             }
 
             $validated = $request->validate([
-                'table_number' => 'required|string|max:50',
+                'table_number' => 'required|integer|min:1|max:50',
                 'table_name' => 'nullable|string|max:100',
                 'seats' => 'nullable|integer|min:1|max:50',
                 'notes' => 'nullable|string|max:500'
@@ -249,7 +249,7 @@ class TableController extends Controller
 
             $validated = $request->validate([
                 'count' => 'required|integer|min:1|max:100',
-                'prefix' => 'nullable|string|max:10',
+//                'prefix' => 'nullable|string|max:10',
                 'seats_per_table' => 'nullable|integer|min:1|max:50'
             ]);
 
@@ -285,7 +285,8 @@ class TableController extends Controller
                 return error('Business not found', null, Response::HTTP_NOT_FOUND);
             }
 
-            $prefix = $validated['prefix'] ?? 'Table';
+//            $prefix = $validated['prefix'] ?? 'Table';
+            $prefix = null;
             $seats = $validated['seats_per_table'] ?? 4;
 
             // Dispatch the job to handle table creation asynchronously

@@ -214,7 +214,7 @@ class VendorController extends Controller
             $userIdString = auth()->user()->userid;
 
             // Check if user already has business data
-            $existingUserData = \App\Models\UserData::where('user_id', $userId)->first();
+            $existingUserData = \App\Models\UserData::where('uid', $userId)->first();
             $existingBusinessLink = \App\Models\BusinessLink::with('business_data')->where('uid', $userId)->first();
 
             if ($existingUserData || $existingBusinessLink) {
@@ -268,7 +268,7 @@ class VendorController extends Controller
                 return success('Business data created successfully', [$userData, $userBusinessData], Response::HTTP_CREATED);
             }
         } catch (\Exception $exception) {
-            Log::error('Set Business Info exception: ' . $exception->getMessage() . ' on line: ' . $exception->getLine());
+            Log::error('Set Business Info exception: ' . $exception->getMessage() . ' on line: ' . $exception->getLine().' on file '.$exception->getFile());
             return error('Error saving business data: ' . $exception->getMessage(), [], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }

@@ -282,11 +282,11 @@ const searchQuery = ref('')
 const vendorToDelete = ref(null)
 
 const filteredVendors = computed(() => {
-    if (!Array.isArray(vendors.value)) return []
-    if (!searchQuery.value) return vendors.value
+    if (!Array.isArray(vendors.value.data)) return []
+    if (!searchQuery.value) return vendors.value.data
 
     const query = searchQuery.value.toLowerCase()
-    return vendors.value.filter(vendor =>
+    return vendors.value.data.filter(vendor =>
         vendor.first_name?.toLowerCase().includes(query) ||
         vendor.last_name?.toLowerCase().includes(query) ||
         vendor.email?.toLowerCase().includes(query) ||
@@ -296,13 +296,13 @@ const filteredVendors = computed(() => {
 })
 
 const activeVendors = computed(() => {
-    if (!Array.isArray(vendors.value)) return 0
-    return vendors.value.filter(v => v.business_links?.length > 0).length
+    if (!Array.isArray(vendors.value.data)) return 0
+    return vendors.value.data.filter(v => v.business_links?.length > 0).length
 })
 
 const totalItems = computed(() => {
-    if (!Array.isArray(vendors.value)) return 0
-    return vendors.value.reduce((total, vendor) => total + (vendor.items_count || 0), 0)
+    if (!Array.isArray(vendors.value.data)) return 0
+    return vendors.value.data.reduce((total, vendor) => total + (vendor.items_count || 0), 0)
 })
 
 const loadVendors = async () => {

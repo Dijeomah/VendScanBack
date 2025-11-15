@@ -25,7 +25,8 @@ class VendorController extends Controller
     public function index()
     {
         //
-        $vendors = User::where('role', 'vendor')->paginate(20);
+        $vendors = User::where('role', 'vendor')->with('business_links.business_data')->paginate(20);
+        Log::info('vendor list', ['vendors' => $vendors]);
         return success('Vendors', $vendors, 200);
     }
 

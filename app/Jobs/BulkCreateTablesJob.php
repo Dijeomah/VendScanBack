@@ -63,7 +63,8 @@ class BulkCreateTablesJob implements ShouldQueue
             $jobs = [];
 
             for ($i = 1; $i <= $this->count; $i++) {
-                $tableNumber = $this->prefix . ' ' . $i;
+//                $tableNumber = $this->prefix . ' ' . $i;
+                $tableNumber = $this->prefix . $i;
 
                 $jobs[] = new CreateSingleTableJob(
                     $this->businessId,
