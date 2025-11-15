@@ -118,7 +118,7 @@ class ServerController extends Controller
     }
 
     /**
-     * Get server's orders
+     * Get server's orders with advanced filtering, sorting, and pagination
      */
     public function getOrders(Request $request): JsonResponse
     {
@@ -131,8 +131,18 @@ class ServerController extends Controller
                 ->pluck('table_id');
 
             $query = Order::whereIn('table_id', $tableIds)
-                ->with(['orderItems.item', 'table', 'businessLink.business_data', 'payment'])
-                ->orderBy('created_at', 'desc');
+                ->with(['orderItems.item', 'table', 'businessLink.business_data', 'payment']);
+
+            // Search functionality
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('order_number', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('customer_name', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('customer_phone', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('notes', 'LIKE', "%{$searchTerm}%");
+                });
+            }
 
             // Filter by status
             if ($request->filled('status') && $request->status !== 'all') {
@@ -152,7 +162,42 @@ class ServerController extends Controller
                 $query->whereDate('created_at', '<=', $request->to_date);
             }
 
-            $orders = $query->paginate($request->get('per_page', 15));
+            // Filter by specific table
+            if ($request->filled('table_id')) {
+                $query->where('table_id', $request->table_id);
+            }
+
+            // Filter by business
+            if ($request->filled('business_link_id')) {
+                $query->where('business_link_id', $request->business_link_id);
+            }
+
+            // Filter by total amount range
+            if ($request->filled('min_total')) {
+                $query->where('total', '>=', $request->min_total);
+            }
+            if ($request->filled('max_total')) {
+                $query->where('total', '<=', $request->max_total);
+            }
+
+            // Filter by order type
+            if ($request->filled('order_type')) {
+                $query->where('order_type', $request->order_type);
+            }
+
+            // Sorting
+            $sortField = $request->get('sort_by', 'created_at');
+            $sortOrder = $request->get('sort_order', 'desc');
+
+            $allowedSortFields = ['order_number', 'total', 'status', 'payment_status', 'created_at', 'updated_at'];
+            if (in_array($sortField, $allowedSortFields)) {
+                $query->orderBy($sortField, $sortOrder);
+            } else {
+                $query->orderBy('created_at', 'desc');
+            }
+
+            $perPage = $request->get('per_page', 15);
+            $orders = $query->paginate($perPage);
 
             return success('Orders fetched successfully', $orders, Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -256,6 +301,137 @@ class ServerController extends Controller
         } catch (\Exception $e) {
             Log::error('Error updating payment status: ' . $e->getMessage());
             return error('Error updating payment status', null, Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * Get enhanced order statistics for server
+     */
+    public function getOrderStatistics(Request $request): JsonResponse
+    {
+        try {
+            $server = Auth::user();
+
+            // Get server's assigned table IDs
+            $tableIds = ServerTableAssignment::where('server_id', $server->id)
+                ->where('status', 'active')
+                ->pluck('table_id');
+
+            $query = Order::whereIn('table_id', $tableIds);
+
+            // Filter by business if provided
+            if ($request->filled('business_link_id')) {
+                $query->where('business_link_id', $request->business_link_id);
+            }
+
+            // Total orders
+            $totalOrders = (clone $query)->count();
+
+            // Orders by status
+            $ordersByStatus = (clone $query)
+                ->select('status', DB::raw('count(*) as count'))
+                ->groupBy('status')
+                ->get();
+
+            // Orders by payment status
+            $ordersByPaymentStatus = (clone $query)
+                ->select('payment_status', DB::raw('count(*) as count'))
+                ->groupBy('payment_status')
+                ->get();
+
+            // Total revenue (paid orders only)
+            $totalRevenue = (clone $query)
+                ->where('payment_status', 'paid')
+                ->sum('total');
+
+            // Pending revenue
+            $pendingRevenue = (clone $query)
+                ->where('payment_status', 'pending')
+                ->sum('total');
+
+            // Today's orders
+            $todayOrders = (clone $query)
+                ->whereDate('created_at', today())
+                ->count();
+
+            // Today's revenue
+            $todayRevenue = (clone $query)
+                ->whereDate('created_at', today())
+                ->where('payment_status', 'paid')
+                ->sum('total');
+
+            // This week's orders
+            $weekOrders = (clone $query)
+                ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+                ->count();
+
+            // This week's revenue
+            $weekRevenue = (clone $query)
+                ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+                ->where('payment_status', 'paid')
+                ->sum('total');
+
+            // This month's orders
+            $monthOrders = (clone $query)
+                ->whereYear('created_at', now()->year)
+                ->whereMonth('created_at', now()->month)
+                ->count();
+
+            // This month's revenue
+            $monthRevenue = (clone $query)
+                ->whereYear('created_at', now()->year)
+                ->whereMonth('created_at', now()->month)
+                ->where('payment_status', 'paid')
+                ->sum('total');
+
+            // Average order value
+            $averageOrderValue = $totalOrders > 0 ? round($totalRevenue / $totalOrders, 2) : 0;
+
+            // Top tables by orders
+            $topTables = (clone $query)
+                ->select('table_id', DB::raw('count(*) as order_count'), DB::raw('sum(total) as total_sales'))
+                ->where('payment_status', 'paid')
+                ->groupBy('table_id')
+                ->with('table:id,table_number,table_name')
+                ->orderBy('order_count', 'desc')
+                ->limit(5)
+                ->get();
+
+            // Last 7 days orders
+            $ordersByDay = (clone $query)
+                ->select(DB::raw('DATE(created_at) as date'), DB::raw('sum(total) as revenue'), DB::raw('count(*) as orders'))
+                ->where('created_at', '>=', now()->subDays(7))
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->orderBy('date', 'desc')
+                ->get();
+
+            // Recent orders
+            $recentOrders = (clone $query)
+                ->with(['table:id,table_number', 'businessLink:id,business_link'])
+                ->latest()
+                ->limit(5)
+                ->get(['id', 'order_number', 'total', 'status', 'payment_status', 'table_id', 'business_link_id', 'created_at']);
+
+            return success('Order statistics fetched successfully', [
+                'total_orders' => $totalOrders,
+                'orders_by_status' => $ordersByStatus,
+                'orders_by_payment_status' => $ordersByPaymentStatus,
+                'total_revenue' => $totalRevenue,
+                'pending_revenue' => $pendingRevenue,
+                'average_order_value' => $averageOrderValue,
+                'today_orders' => $todayOrders,
+                'today_revenue' => $todayRevenue,
+                'week_orders' => $weekOrders,
+                'week_revenue' => $weekRevenue,
+                'month_orders' => $monthOrders,
+                'month_revenue' => $monthRevenue,
+                'top_tables' => $topTables,
+                'orders_by_day' => $ordersByDay,
+                'recent_orders' => $recentOrders,
+            ], Response::HTTP_OK);
+        } catch (\Exception $e) {
+            Log::error('Server statistics fetch error: ' . $e->getMessage());
+            return error('Error fetching statistics', null, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 

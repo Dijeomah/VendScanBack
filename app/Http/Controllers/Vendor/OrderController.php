@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Log;
 class OrderController extends Controller
 {
     /**
-     * Get all orders for vendor
+     * Get all orders for vendor with advanced filtering, sorting, and pagination
      */
     public function index(Request $request): JsonResponse
     {
@@ -22,16 +22,26 @@ class OrderController extends Controller
             $vendorId = authUser()->id;
 
             $query = Order::forVendor($vendorId)
-                ->with(['orderItems.item', 'table', 'businessLink', 'server', 'payment'])
-                ->orderBy('created_at', 'desc');
+                ->with(['orderItems.item', 'table', 'businessLink', 'server', 'payment']);
+
+            // Search functionality
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+                $query->where(function ($q) use ($searchTerm) {
+                    $q->where('order_number', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('customer_name', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('customer_phone', 'LIKE', "%{$searchTerm}%")
+                        ->orWhere('notes', 'LIKE', "%{$searchTerm}%");
+                });
+            }
 
             // Filter by status
-            if ($request->has('status') && $request->status !== 'all') {
+            if ($request->filled('status') && $request->status !== 'all') {
                 $query->where('status', $request->status);
             }
 
             // Filter by payment status
-            if ($request->has('payment_status') && $request->payment_status !== 'all') {
+            if ($request->filled('payment_status') && $request->payment_status !== 'all') {
                 $query->where('payment_status', $request->payment_status);
             }
 
@@ -44,11 +54,46 @@ class OrderController extends Controller
             }
 
             // Filter by business
-            if ($request->has('business_link_id')) {
+            if ($request->filled('business_link_id')) {
                 $query->where('business_link_id', $request->business_link_id);
             }
 
-            $orders = $query->paginate($request->get('per_page', 15));
+            // Filter by table
+            if ($request->filled('table_id')) {
+                $query->where('table_id', $request->table_id);
+            }
+
+            // Filter by server
+            if ($request->filled('server_id')) {
+                $query->where('server_id', $request->server_id);
+            }
+
+            // Filter by total amount range
+            if ($request->filled('min_total')) {
+                $query->where('total', '>=', $request->min_total);
+            }
+            if ($request->filled('max_total')) {
+                $query->where('total', '<=', $request->max_total);
+            }
+
+            // Filter by order type
+            if ($request->filled('order_type')) {
+                $query->where('order_type', $request->order_type);
+            }
+
+            // Sorting
+            $sortField = $request->get('sort_by', 'created_at');
+            $sortOrder = $request->get('sort_order', 'desc');
+
+            $allowedSortFields = ['order_number', 'total', 'status', 'payment_status', 'created_at', 'updated_at'];
+            if (in_array($sortField, $allowedSortFields)) {
+                $query->orderBy($sortField, $sortOrder);
+            } else {
+                $query->orderBy('created_at', 'desc');
+            }
+
+            $perPage = $request->get('per_page', 15);
+            $orders = $query->paginate($perPage);
 
             return success('Orders fetched successfully', $orders, Response::HTTP_OK);
         } catch (\Exception $e) {
@@ -140,51 +185,108 @@ class OrderController extends Controller
     }
 
     /**
-     * Get order statistics
+     * Get enhanced order statistics for vendor
      */
     public function getStatistics(Request $request): JsonResponse
     {
         try {
             $vendorId = authUser()->id;
 
+            // Filter by business if provided
+            $businessId = $request->get('business_link_id');
+
+            $query = Order::forVendor($vendorId);
+            if ($businessId) {
+                $query->where('business_link_id', $businessId);
+            }
+
             // Total orders
-            $totalOrders = Order::forVendor($vendorId)->count();
+            $totalOrders = (clone $query)->count();
 
             // Orders by status
-            $ordersByStatus = Order::forVendor($vendorId)
+            $ordersByStatus = (clone $query)
                 ->select('status', DB::raw('count(*) as count'))
                 ->groupBy('status')
                 ->get();
 
-            // Total revenue
-            $totalRevenue = Order::forVendor($vendorId)
+            // Orders by payment status
+            $ordersByPaymentStatus = (clone $query)
+                ->select('payment_status', DB::raw('count(*) as count'))
+                ->groupBy('payment_status')
+                ->get();
+
+            // Total revenue (paid orders only)
+            $totalRevenue = (clone $query)
                 ->where('payment_status', 'paid')
                 ->sum('total');
 
+            // Pending revenue
+            $pendingRevenue = (clone $query)
+                ->where('payment_status', 'pending')
+                ->sum('total');
+
             // Today's orders
-            $todayOrders = Order::forVendor($vendorId)
+            $todayOrders = (clone $query)
                 ->whereDate('created_at', today())
                 ->count();
 
             // Today's revenue
-            $todayRevenue = Order::forVendor($vendorId)
+            $todayRevenue = (clone $query)
                 ->whereDate('created_at', today())
                 ->where('payment_status', 'paid')
                 ->sum('total');
 
+            // This week's orders
+            $weekOrders = (clone $query)
+                ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+                ->count();
+
+            // This week's revenue
+            $weekRevenue = (clone $query)
+                ->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])
+                ->where('payment_status', 'paid')
+                ->sum('total');
+
+            // This month's orders
+            $monthOrders = (clone $query)
+                ->whereYear('created_at', now()->year)
+                ->whereMonth('created_at', now()->month)
+                ->count();
+
+            // This month's revenue
+            $monthRevenue = (clone $query)
+                ->whereYear('created_at', now()->year)
+                ->whereMonth('created_at', now()->month)
+                ->where('payment_status', 'paid')
+                ->sum('total');
+
+            // Average order value
+            $averageOrderValue = $totalOrders > 0 ? round($totalRevenue / $totalOrders, 2) : 0;
+
             // Top servers by sales
-            $topServers = Order::forVendor($vendorId)
+            $topServers = (clone $query)
                 ->select('server_id', DB::raw('count(*) as order_count'), DB::raw('sum(total) as total_sales'))
                 ->where('payment_status', 'paid')
                 ->whereNotNull('server_id')
                 ->groupBy('server_id')
-                ->with('server')
+                ->with('server:id,first_name,last_name,email')
                 ->orderBy('total_sales', 'desc')
                 ->limit(5)
                 ->get();
 
+            // Top tables by orders
+            $topTables = (clone $query)
+                ->select('table_id', DB::raw('count(*) as order_count'), DB::raw('sum(total) as total_sales'))
+                ->where('payment_status', 'paid')
+                ->whereNotNull('table_id')
+                ->groupBy('table_id')
+                ->with('table:id,table_number,table_name')
+                ->orderBy('order_count', 'desc')
+                ->limit(5)
+                ->get();
+
             // Last 7 days revenue
-            $revenueByDay = Order::forVendor($vendorId)
+            $revenueByDay = (clone $query)
                 ->select(DB::raw('DATE(created_at) as date'), DB::raw('sum(total) as revenue'), DB::raw('count(*) as orders'))
                 ->where('payment_status', 'paid')
                 ->where('created_at', '>=', now()->subDays(7))
@@ -193,25 +295,44 @@ class OrderController extends Controller
                 ->get();
 
             // Top selling items
-            $topItems = OrderItem::whereHas('order', function ($query) use ($vendorId) {
-                    $query->forVendor($vendorId)->where('payment_status', 'paid');
+            $topItems = OrderItem::whereHas('order', function ($q) use ($vendorId, $businessId) {
+                    $q->forVendor($vendorId)->where('payment_status', 'paid');
+                    if ($businessId) {
+                        $q->where('business_link_id', $businessId);
+                    }
                 })
                 ->select('item_id', DB::raw('sum(quantity) as total_quantity'), DB::raw('sum(subtotal) as total_revenue'))
                 ->groupBy('item_id')
-                ->with('item.category')
+                ->with('item:id,title,price,category_id')
                 ->orderBy('total_revenue', 'desc')
                 ->limit(10)
                 ->get();
 
+            // Recent orders
+            $recentOrders = (clone $query)
+                ->with(['table:id,table_number', 'server:id,first_name,last_name'])
+                ->latest()
+                ->limit(5)
+                ->get(['id', 'order_number', 'total', 'status', 'payment_status', 'table_id', 'server_id', 'created_at']);
+
             return success('Statistics fetched successfully', [
                 'total_orders' => $totalOrders,
                 'orders_by_status' => $ordersByStatus,
+                'orders_by_payment_status' => $ordersByPaymentStatus,
                 'total_revenue' => $totalRevenue,
+                'pending_revenue' => $pendingRevenue,
+                'average_order_value' => $averageOrderValue,
                 'today_orders' => $todayOrders,
                 'today_revenue' => $todayRevenue,
+                'week_orders' => $weekOrders,
+                'week_revenue' => $weekRevenue,
+                'month_orders' => $monthOrders,
+                'month_revenue' => $monthRevenue,
                 'top_servers' => $topServers,
+                'top_tables' => $topTables,
                 'revenue_by_day' => $revenueByDay,
                 'top_items' => $topItems,
+                'recent_orders' => $recentOrders,
             ], Response::HTTP_OK);
         } catch (\Exception $e) {
             Log::error('Statistics fetch error: ' . $e->getMessage());
