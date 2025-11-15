@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\Base\AdminController;
 use App\Http\Controllers\Admin\Base\AdminProfileController;
 use App\Http\Controllers\Admin\Business\BusinessController;
 use App\Http\Controllers\Admin\Category\CategoryController;
+use App\Http\Controllers\Admin\Item\ItemController as AdminItemController;
 use App\Http\Controllers\Admin\TableController as AdminTableController;
 use App\Http\Controllers\Admin\ServerController as AdminServerController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
@@ -72,9 +73,14 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::delete('/business-links/{id}', [BusinessController::class, 'deleteBusinessLink']);
 
         // Items
-        Route::apiResource('/items', ItemController::class)->except(['store', 'update']);
-        Route::post('/items/create', [ItemController::class, 'addItem']);
-        Route::put('/items/update/{id}', [ItemController::class, 'updateItem']);
+        Route::get('/items', [AdminItemController::class, 'index']);
+        Route::get('/items/statistics', [AdminItemController::class, 'getStatistics']);
+        Route::get('/items/{id}', [AdminItemController::class, 'showFood']);
+        Route::post('/items', [AdminItemController::class, 'addFood']);
+        Route::put('/items/{id}', [AdminItemController::class, 'updateFood']);
+        Route::delete('/items/{id}', [AdminItemController::class, 'deleteFood']);
+        Route::post('/items/bulk-update-status', [AdminItemController::class, 'bulkUpdateStatus']);
+        Route::post('/items/bulk-delete', [AdminItemController::class, 'bulkDelete']);
 
         // Categories
         Route::get('/categories', [CategoryController::class, 'categories']);
@@ -86,11 +92,18 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::get('/tables', [AdminTableController::class, 'index']);
         Route::get('/tables/statistics', [AdminTableController::class, 'statistics']);
         Route::get('/tables/business/{businessId}', [AdminTableController::class, 'getBusinessTables']);
+        Route::get('/tables/{id}', [AdminTableController::class, 'show']);
+        Route::patch('/tables/{id}/status', [AdminTableController::class, 'updateStatus']);
+        Route::post('/tables/bulk-update-status', [AdminTableController::class, 'bulkUpdateStatus']);
+        Route::post('/tables/bulk-delete', [AdminTableController::class, 'bulkDelete']);
         Route::delete('/tables/{id}', [AdminTableController::class, 'destroy']);
 
         // Servers
         Route::get('/servers', [AdminServerController::class, 'index']);
         Route::get('/servers/statistics', [AdminServerController::class, 'statistics']);
+        Route::get('/servers/{id}', [AdminServerController::class, 'show']);
+        Route::get('/servers/vendor/{vendorId}', [AdminServerController::class, 'getServersByVendor']);
+        Route::post('/servers/bulk-delete', [AdminServerController::class, 'bulkDelete']);
         Route::delete('/servers/{id}', [AdminServerController::class, 'destroy']);
 
         // Orders & Transactions
@@ -176,6 +189,7 @@ Route::group(['middleware' => 'api'], function ($router) {
         });
 
         // Items
+        Route::get('/items/statistics', [ItemController::class, 'getStatistics']);
         Route::apiResource('/items', ItemController::class);
         Route::get('/items/by-category/{categoryId}', [ItemController::class, 'itemsByCategory']);
 
@@ -185,6 +199,8 @@ Route::group(['middleware' => 'api'], function ($router) {
         Route::post('/businesses/{businessId}/media', [VendorController::class, 'uploadBusinessMedia']);
 
         // Table Management
+        Route::get('/tables', [\App\Http\Controllers\Vendor\TableController::class, 'getAllTables']);
+        Route::get('/tables/statistics', [\App\Http\Controllers\Vendor\TableController::class, 'getStatistics']);
         Route::group(['prefix' => 'businesses/{businessId}/tables'], function () {
             Route::get('/', [\App\Http\Controllers\Vendor\TableController::class, 'index']);
             Route::post('/', [\App\Http\Controllers\Vendor\TableController::class, 'store']);
@@ -268,6 +284,7 @@ Route::group(['middleware' => 'api'], function ($router) {
 
         // Orders
         Route::get('/orders', [ServerController::class, 'getOrders']);
+        Route::get('/orders/statistics', [ServerController::class, 'getOrderStatistics']);
         Route::get('/orders/{id}', [ServerController::class, 'getOrder']);
         Route::patch('/orders/{id}/status', [ServerController::class, 'updateOrderStatus']);
         Route::patch('/orders/{id}/payment-status', [ServerController::class, 'updatePaymentStatus']);
