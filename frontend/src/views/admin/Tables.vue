@@ -78,7 +78,9 @@
             <h2 class="text-lg font-semibold text-gray-900 mb-4">All Tables</h2>
 
             <div v-if="tables.length === 0" class="text-center py-12">
-              <div class="text-6xl mb-4">📋</div>
+              <div class="flex justify-center mb-4">
+                <ClipboardIcon :size="96" class="text-gray-400" />
+              </div>
               <h3 class="text-xl font-semibold text-gray-900 mb-2">No tables yet</h3>
               <p class="text-gray-600">Tables will appear here once vendors create them</p>
             </div>
@@ -198,6 +200,7 @@ import { useApi } from '@/composables/useApi'
 import { useToast } from 'vue-toastification'
 import AdminLayout from '@/components/layouts/AdminLayout.vue'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
+import ClipboardIcon from '@/components/icons/ClipboardIcon.vue'
 
 const { admin } = useApi()
 const toast = useToast()

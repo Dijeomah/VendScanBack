@@ -53,7 +53,9 @@
 
       <!-- No Business Selected -->
       <div v-else-if="!selectedBusinessId" class="bg-white rounded-lg shadow-sm p-12 text-center">
-        <div class="text-6xl mb-4">🏢</div>
+        <div class="flex justify-center mb-4">
+          <BuildingIcon :size="96" class="text-gray-400" />
+        </div>
         <h3 class="text-xl font-semibold text-gray-900 mb-2">Select a Business</h3>
         <p class="text-gray-600">Please select a business to manage its tables</p>
       </div>
@@ -454,6 +456,7 @@ import { useApi } from '@/composables/useApi'
 import { useToast } from 'vue-toastification'
 import LoadingSpinner from '@/components/common/LoadingSpinner.vue'
 import VendorLayout from '@/components/layouts/VendorLayout.vue'
+import BuildingIcon from '@/components/icons/BuildingIcon.vue'
 
 const { vendor } = useApi()
 const toast = useToast()
