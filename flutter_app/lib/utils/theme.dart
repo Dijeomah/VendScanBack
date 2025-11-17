@@ -92,7 +92,6 @@ class AppTheme {
         primary: primaryColor,
         secondary: secondaryColor,
         error: errorColor,
-        background: backgroundColor,
         surface: surfaceColor,
       ),
       scaffoldBackgroundColor: backgroundColor,
@@ -103,11 +102,11 @@ class AppTheme {
         titleTextStyle: titleLarge,
         iconTheme: const IconThemeData(color: textPrimaryColor),
       ),
-      cardTheme: CardTheme(
-        color: cardColor,
+      cardTheme: const CardTheme(
         elevation: 2,
+        margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.all(Radius.circular(12)),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
