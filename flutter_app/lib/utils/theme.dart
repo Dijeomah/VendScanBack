@@ -102,11 +102,11 @@ class AppTheme {
         titleTextStyle: titleLarge,
         iconTheme: const IconThemeData(color: textPrimaryColor),
       ),
-      cardTheme: const CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
-        margin: EdgeInsets.zero,
+        margin: const EdgeInsets.all(0),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)),
+          borderRadius: BorderRadius.circular(12),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
