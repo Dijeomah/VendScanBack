@@ -6,6 +6,7 @@ import '../../providers/server_provider.dart';
 import '../../utils/helpers.dart';
 import '../../utils/theme.dart';
 import '../../widgets/stat_card.dart';
+import 'server_orders_screen.dart';
 
 class ServerDashboardScreen extends StatefulWidget {
   const ServerDashboardScreen({super.key});
@@ -78,7 +79,7 @@ class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
       case 0:
         return _buildDashboard();
       case 1:
-        return _buildOrdersPlaceholder();
+        return const ServerOrdersScreen();
       case 2:
         return _buildTablesView();
       default:
@@ -200,33 +201,6 @@ class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildOrdersPlaceholder() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.receipt_long,
-            size: 64,
-            color: AppTheme.textSecondaryColor,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Orders Management',
-            style: AppTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Feature under development',
-            style: AppTheme.bodyMedium.copyWith(
-              color: AppTheme.textSecondaryColor,
-            ),
-          ),
-        ],
-      ),
     );
   }
 

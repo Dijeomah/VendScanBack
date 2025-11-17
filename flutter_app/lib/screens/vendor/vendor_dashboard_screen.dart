@@ -6,6 +6,10 @@ import '../../providers/vendor_provider.dart';
 import '../../utils/helpers.dart';
 import '../../utils/theme.dart';
 import '../../widgets/stat_card.dart';
+import 'menu_management_screen.dart';
+import 'order_management_screen.dart';
+import 'table_management_screen.dart';
+import 'server_management_screen.dart';
 
 class VendorDashboardScreen extends StatefulWidget {
   const VendorDashboardScreen({super.key});
@@ -86,13 +90,13 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
       case 0:
         return _buildDashboard();
       case 1:
-        return _buildMenuPlaceholder();
+        return const MenuManagementScreen();
       case 2:
-        return _buildOrdersPlaceholder();
+        return const OrderManagementScreen();
       case 3:
-        return _buildTablesPlaceholder();
+        return const TableManagementScreen();
       case 4:
-        return _buildServersPlaceholder();
+        return const ServerManagementScreen();
       default:
         return _buildDashboard();
     }
@@ -242,113 +246,6 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
     );
   }
 
-  Widget _buildMenuPlaceholder() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.restaurant_menu,
-            size: 64,
-            color: AppTheme.textSecondaryColor,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Menu Management',
-            style: AppTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Feature under development',
-            style: AppTheme.bodyMedium.copyWith(
-              color: AppTheme.textSecondaryColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildOrdersPlaceholder() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.receipt_long,
-            size: 64,
-            color: AppTheme.textSecondaryColor,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Orders Management',
-            style: AppTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Feature under development',
-            style: AppTheme.bodyMedium.copyWith(
-              color: AppTheme.textSecondaryColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildTablesPlaceholder() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.table_bar,
-            size: 64,
-            color: AppTheme.textSecondaryColor,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Tables Management',
-            style: AppTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Feature under development',
-            style: AppTheme.bodyMedium.copyWith(
-              color: AppTheme.textSecondaryColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildServersPlaceholder() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.people,
-            size: 64,
-            color: AppTheme.textSecondaryColor,
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Servers Management',
-            style: AppTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Feature under development',
-            style: AppTheme.bodyMedium.copyWith(
-              color: AppTheme.textSecondaryColor,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Future<void> _handleLogout(BuildContext context) async {
     final confirmed = await Helpers.showConfirmDialog(
