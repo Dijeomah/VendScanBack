@@ -20,11 +20,24 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
+    // Handle both 'name' and 'first_name/last_name' formats
+    String name;
+    if (json.containsKey('name') && json['name'] != null) {
+      name = json['name'];
+    } else {
+      final firstName = json['first_name'] ?? '';
+      final lastName = json['last_name'] ?? '';
+      name = '$firstName $lastName'.trim();
+    }
+
+    // Handle both 'phone' and 'phone_number' formats
+    final phone = json['phone'] ?? json['phone_number'];
+
     return User(
       id: json['id'] ?? 0,
-      name: json['name'] ?? '',
+      name: name.isNotEmpty ? name : 'User',
       email: json['email'] ?? '',
-      phone: json['phone'],
+      phone: phone,
       role: json['role'] ?? '',
       status: json['status'],
       createdAt: json['created_at'],

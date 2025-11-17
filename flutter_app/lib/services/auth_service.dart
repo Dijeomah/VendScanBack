@@ -22,7 +22,11 @@ class AuthService {
       );
 
       if (response.success && response.data != null) {
-        final token = response.data['token'];
+        // Extract access_token from nested token object
+        final tokenData = response.data['token'];
+        final token = tokenData is Map
+            ? tokenData['access_token']
+            : tokenData;
         final userData = response.data['user'];
 
         await _storage.saveToken(token);
@@ -71,7 +75,11 @@ class AuthService {
       );
 
       if (response.success && response.data != null) {
-        final token = response.data['token'];
+        // Extract access_token from nested token object
+        final tokenData = response.data['token'];
+        final token = tokenData is Map
+            ? tokenData['access_token']
+            : tokenData;
         final userData = response.data['user'];
 
         await _storage.saveToken(token);
@@ -131,7 +139,11 @@ class AuthService {
     try {
       final response = await _api.post(ApiEndpoints.refresh);
       if (response.success && response.data != null) {
-        final token = response.data['token'];
+        // Extract access_token from nested token object
+        final tokenData = response.data['token'];
+        final token = tokenData is Map
+            ? tokenData['access_token']
+            : tokenData;
         await _storage.saveToken(token);
         return true;
       }
