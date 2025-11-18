@@ -1,0 +1,384 @@
+Code:  Future<DashboardStatistics?> getDashboardStatistics() async {
+         try {
+           final response = await _api.get('${ApiEndpoints.vendorDashboard}/statistics');
+           final orderStatics = await _api.get('${ApiEndpoints.vendorOrders}/statistics');
+           if (response.success && response.data != null) {
+             print({'main_response':response.data, 'order_statics':orderStatics.data});
+
+             return DashboardStatistics.fromJson({'main_response':response.data['data'], 'order_statics':orderStatics.data['data']});
+           }
+         } catch (e) {
+           print('Error getting dashboard statistics: $e');
+         }
+         return null;
+       }
+
+Data:
+
+https://qr-app.dev/api/vendor/orders/statistics
+{
+    "code": 200,
+    "status": "success",
+    "message": "Statistics fetched successfully",
+    "data": {
+        "total_orders": 12,
+        "orders_by_status": [
+            {
+                "status": "confirmed",
+                "count": 6
+            },
+            {
+                "status": "served",
+                "count": 1
+            },
+            {
+                "status": "completed",
+                "count": 5
+            }
+        ],
+        "total_revenue": "4665.33",
+        "today_orders": 0,
+        "today_revenue": 0,
+        "top_servers": [
+            {
+                "server_id": 5,
+                "order_count": 2,
+                "total_sales": "9.33",
+                "server": {
+                    "id": 5,
+                    "uuid": "778e9c00-c08c-11f0-9bba-9edc72a9f6d7",
+                    "userid": "SRV-0916667F3E",
+                    "first_name": "Success",
+                    "last_name": "Drame",
+                    "email": "server@gmail.com",
+                    "role": "server",
+                    "subscription_plan_id": null,
+                    "status": "active",
+                    "created_by": 3,
+                    "subscription_tier": "free",
+                    "business_limit": 3,
+                    "phone_number": "+2348130373719",
+                    "email_verified_at": null,
+                    "created_at": "2025-11-13T12:29:58.000000Z",
+                    "updated_at": "2025-11-13T12:30:53.000000Z"
+                }
+            }
+        ],
+        "revenue_by_day": [
+            {
+                "date": "2025-11-14",
+                "revenue": "4420.87",
+                "orders": 4
+            },
+            {
+                "date": "2025-11-13",
+                "revenue": "244.46",
+                "orders": 8
+            }
+        ],
+        "top_items": [
+            {
+                "item_id": 137,
+                "total_quantity": "1",
+                "total_revenue": "4000.00",
+                "item": {
+                    "id": 137,
+                    "user_id": 3,
+                    "category_id": 21,
+                    "sub_category_id": 12,
+                    "business_link": "drame-one-01",
+                    "business_link_id": 1,
+                    "userid": "YLROCZ",
+                    "title": "Yam",
+                    "description": "Roasted",
+                    "image": "https:\/\/res.cloudinary.com\/secure-id\/image\/upload\/v1763073622\/vendscan\/2025-11-13_224021__test_image.jpg",
+                    "price": "4000.00",
+                    "status": 1,
+                    "created_at": "2025-11-13T22:40:22.000000Z",
+                    "updated_at": "2025-11-13T22:40:22.000000Z",
+                    "category": {
+                        "id": 21,
+                        "user_id": 3,
+                        "category_name": "Main Courses",
+                        "category_code": "3-main-courses",
+                        "created_at": "2025-11-13T10:21:09.000000Z",
+                        "updated_at": "2025-11-13T10:21:09.000000Z"
+                    }
+                }
+            },
+            {
+                "item_id": 113,
+                "total_quantity": "10",
+                "total_revenue": "59.90",
+                "item": {
+                    "id": 113,
+                    "user_id": 3,
+                    "category_id": 20,
+                    "sub_category_id": 33,
+                    "business_link": "airvend3",
+                    "business_link_id": 4,
+                    "userid": "YLROCZ",
+                    "title": "Onion Rings",
+                    "description": "Crispy beer-battered onion rings",
+                    "image": "https:\/\/res.cloudinary.com\/secure-id\/image\/upload\/v1763075449\/vendscan\/2025-11-13_231048__test_image.jpg",
+                    "price": "5.99",
+                    "status": 1,
+                    "created_at": "2025-11-13T10:23:37.000000Z",
+                    "updated_at": "2025-11-13T23:10:49.000000Z",
+                    "category": {
+                        "id": 20,
+                        "user_id": 3,
+                        "category_name": "Appetizers",
+                        "category_code": "3-appetizers",
+                        "created_at": "2025-11-13T10:21:09.000000Z",
+                        "updated_at": "2025-11-13T10:21:09.000000Z"
+                    }
+                }
+            },
+            {
+                "item_id": 115,
+                "total_quantity": "3",
+                "total_revenue": "44.97",
+                "item": {
+                    "id": 115,
+                    "user_id": 3,
+                    "category_id": 21,
+                    "sub_category_id": 35,
+                    "business_link": "airvend3",
+                    "business_link_id": 4,
+                    "userid": "YLROCZ",
+                    "title": "Spaghetti Carbonara",
+                    "description": "Classic Italian pasta with bacon, eggs, and parmesan cheese",
+                    "image": null,
+                    "price": "14.99",
+                    "status": 1,
+                    "created_at": "2025-11-13T10:23:37.000000Z",
+                    "updated_at": "2025-11-13T10:23:37.000000Z",
+                    "category": {
+                        "id": 21,
+                        "user_id": 3,
+                        "category_name": "Main Courses",
+                        "category_code": "3-main-courses",
+                        "created_at": "2025-11-13T10:21:09.000000Z",
+                        "updated_at": "2025-11-13T10:21:09.000000Z"
+                    }
+                }
+            },
+            {
+                "item_id": 116,
+                "total_quantity": "2",
+                "total_revenue": "27.98",
+                "item": {
+                    "id": 116,
+                    "user_id": 3,
+                    "category_id": 21,
+                    "sub_category_id": 35,
+                    "business_link": "airvend3",
+                    "business_link_id": 4,
+                    "userid": "YLROCZ",
+                    "title": "Fettuccine Alfredo",
+                    "description": "Creamy pasta with parmesan cheese sauce",
+                    "image": null,
+                    "price": "13.99",
+                    "status": 1,
+                    "created_at": "2025-11-13T10:23:37.000000Z",
+                    "updated_at": "2025-11-13T10:23:37.000000Z",
+                    "category": {
+                        "id": 21,
+                        "user_id": 3,
+                        "category_name": "Main Courses",
+                        "category_code": "3-main-courses",
+                        "created_at": "2025-11-13T10:21:09.000000Z",
+                        "updated_at": "2025-11-13T10:21:09.000000Z"
+                    }
+                }
+            },
+            {
+                "item_id": 112,
+                "total_quantity": "3",
+                "total_revenue": "20.97",
+                "item": {
+                    "id": 112,
+                    "user_id": 3,
+                    "category_id": 20,
+                    "sub_category_id": 33,
+                    "business_link": "airvend3",
+                    "business_link_id": 4,
+                    "userid": "YLROCZ",
+                    "title": "Mozzarella Sticks",
+                    "description": "Golden fried mozzarella sticks with marinara sauce",
+                    "image": null,
+                    "price": "6.99",
+                    "status": 1,
+                    "created_at": "2025-11-13T10:23:37.000000Z",
+                    "updated_at": "2025-11-13T10:23:37.000000Z",
+                    "category": {
+                        "id": 20,
+                        "user_id": 3,
+                        "category_name": "Appetizers",
+                        "category_code": "3-appetizers",
+                        "created_at": "2025-11-13T10:21:09.000000Z",
+                        "updated_at": "2025-11-13T10:21:09.000000Z"
+                    }
+                }
+            },
+            {
+                "item_id": 111,
+                "total_quantity": "2",
+                "total_revenue": "17.98",
+                "item": {
+                    "id": 111,
+                    "user_id": 3,
+                    "category_id": 20,
+                    "sub_category_id": 33,
+                    "business_link": "airvend3",
+                    "business_link_id": 4,
+                    "userid": "YLROCZ",
+                    "title": "Chicken Wings",
+                    "description": "Crispy buffalo chicken wings served with blue cheese dip",
+                    "image": null,
+                    "price": "8.99",
+                    "status": 1,
+                    "created_at": "2025-11-13T10:23:37.000000Z",
+                    "updated_at": "2025-11-13T10:23:37.000000Z",
+                    "category": {
+                        "id": 20,
+                        "user_id": 3,
+                        "category_name": "Appetizers",
+                        "category_code": "3-appetizers",
+                        "created_at": "2025-11-13T10:21:09.000000Z",
+                        "updated_at": "2025-11-13T10:21:09.000000Z"
+                    }
+                }
+            },
+            {
+                "item_id": 133,
+                "total_quantity": "2",
+                "total_revenue": "17.98",
+                "item": {
+                    "id": 133,
+                    "user_id": 3,
+                    "category_id": 24,
+                    "sub_category_id": 43,
+                    "business_link": "airvend3",
+                    "business_link_id": 4,
+                    "userid": "YLROCZ",
+                    "title": "Caesar Salad",
+                    "description": "Classic Caesar salad with croutons and parmesan",
+                    "image": null,
+                    "price": "8.99",
+                    "status": 1,
+                    "created_at": "2025-11-13T10:23:37.000000Z",
+                    "updated_at": "2025-11-13T10:23:37.000000Z",
+                    "category": {
+                        "id": 24,
+                        "user_id": 3,
+                        "category_name": "Salads",
+                        "category_code": "3-salads",
+                        "created_at": "2025-11-13T10:21:09.000000Z",
+                        "updated_at": "2025-11-13T10:21:09.000000Z"
+                    }
+                }
+            },
+            {
+                "item_id": 117,
+                "total_quantity": "1",
+                "total_revenue": "12.99",
+                "item": {
+                    "id": 117,
+                    "user_id": 3,
+                    "category_id": 21,
+                    "sub_category_id": 35,
+                    "business_link": "airvend3",
+                    "business_link_id": 4,
+                    "userid": "YLROCZ",
+                    "title": "Penne Arrabbiata",
+                    "description": "Penne pasta in spicy tomato sauce",
+                    "image": null,
+                    "price": "12.99",
+                    "status": 1,
+                    "created_at": "2025-11-13T10:23:37.000000Z",
+                    "updated_at": "2025-11-13T10:23:37.000000Z",
+                    "category": {
+                        "id": 21,
+                        "user_id": 3,
+                        "category_name": "Main Courses",
+                        "category_code": "3-main-courses",
+                        "created_at": "2025-11-13T10:21:09.000000Z",
+                        "updated_at": "2025-11-13T10:21:09.000000Z"
+                    }
+                }
+            },
+            {
+                "item_id": 136,
+                "total_quantity": "1",
+                "total_revenue": "9.99",
+                "item": {
+                    "id": 136,
+                    "user_id": 3,
+                    "category_id": 24,
+                    "sub_category_id": 44,
+                    "business_link": "airvend3",
+                    "business_link_id": 4,
+                    "userid": "YLROCZ",
+                    "title": "Greek Salad",
+                    "description": "Tomatoes, cucumbers, olives, and feta cheese",
+                    "image": null,
+                    "price": "9.99",
+                    "status": 1,
+                    "created_at": "2025-11-13T10:23:37.000000Z",
+                    "updated_at": "2025-11-13T10:23:37.000000Z",
+                    "category": {
+                        "id": 24,
+                        "user_id": 3,
+                        "category_name": "Salads",
+                        "category_code": "3-salads",
+                        "created_at": "2025-11-13T10:21:09.000000Z",
+                        "updated_at": "2025-11-13T10:21:09.000000Z"
+                    }
+                }
+            },
+            {
+                "item_id": 135,
+                "total_quantity": "1",
+                "total_revenue": "7.99",
+                "item": {
+                    "id": 135,
+                    "user_id": 3,
+                    "category_id": 24,
+                    "sub_category_id": 44,
+                    "business_link": "airvend3",
+                    "business_link_id": 4,
+                    "userid": "YLROCZ",
+                    "title": "Garden Salad",
+                    "description": "Mixed greens with vegetables and vinaigrette",
+                    "image": null,
+                    "price": "7.99",
+                    "status": 1,
+                    "created_at": "2025-11-13T10:23:37.000000Z",
+                    "updated_at": "2025-11-13T10:23:37.000000Z",
+                    "category": {
+                        "id": 24,
+                        "user_id": 3,
+                        "category_name": "Salads",
+                        "category_code": "3-salads",
+                        "created_at": "2025-11-13T10:21:09.000000Z",
+                        "updated_at": "2025-11-13T10:21:09.000000Z"
+                    }
+                }
+            }
+        ]
+    }
+}
+
+
+
+Error:
+flutter: DashboardStatistics.fromJson: {main_response: null, order_statics: null}
+flutter: Error getting dashboard statistics: NoSuchMethodError: The method '[]' was called on null.
+Receiver: null
+Tried calling: []("total")
+
+flutter: Error getting business links: NoSuchMethodError: The method '[]' was called on null.
+Receiver: null
+Tried calling: []("businesses")

@@ -42,7 +42,7 @@ class _ServerManagementScreenState extends State<ServerManagementScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.people_outline,
                     size: 64,
                     color: AppTheme.textSecondaryColor,

@@ -37,7 +37,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Vendor Dashboard'),
+        title: const Text('Vendscan - Vendor'),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined),
@@ -177,7 +177,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                     ),
                     StatCard(
                       title: 'Tables',
-                      value: '${stats?.totalTables ?? 0}',
+                      value: '${stats?.totalTables??0}',
                       icon: Icons.table_bar,
                       color: AppTheme.infoColor,
                     ),

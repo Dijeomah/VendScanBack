@@ -217,7 +217,7 @@ class _MenuItemFormScreenState extends State<MenuItemFormScreen> {
             Consumer<VendorProvider>(
               builder: (context, provider, _) {
                 return DropdownButtonFormField<int>(
-                  value: _selectedCategoryId,
+                  initialValue: _selectedCategoryId,
                   decoration: const InputDecoration(
                     labelText: 'Category',
                     hintText: 'Select a category',
@@ -254,7 +254,7 @@ class _MenuItemFormScreenState extends State<MenuItemFormScreen> {
                   return Column(
                     children: [
                       DropdownButtonFormField<int>(
-                        value: _selectedSubCategoryId,
+                        initialValue: _selectedSubCategoryId,
                         decoration: const InputDecoration(
                           labelText: 'Subcategory',
                           hintText: 'Select a subcategory',

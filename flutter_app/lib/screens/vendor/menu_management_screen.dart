@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/category.dart';
@@ -8,7 +6,6 @@ import '../../providers/vendor_provider.dart';
 import '../../services/vendor_service.dart';
 import '../../utils/helpers.dart';
 import '../../utils/theme.dart';
-import '../../widgets/loading_overlay.dart';
 import 'menu_item_form_screen.dart';
 
 class MenuManagementScreen extends StatefulWidget {
@@ -140,7 +137,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                           },
                         ),
                       );
-                    }).toList(),
+                    }),
                   ],
                 ),
               );
@@ -162,7 +159,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
+                        const Icon(
                           Icons.restaurant_menu,
                           size: 64,
                           color: AppTheme.textSecondaryColor,

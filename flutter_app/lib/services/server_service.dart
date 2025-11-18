@@ -64,28 +64,32 @@ class ServerService {
   }
 
   // Orders
-  Future<List<Order>> getOrders({
-    String? status,
-    int? tableId,
-  }) async {
-    try {
-      final queryParams = <String, dynamic>{};
-      if (status != null) queryParams['status'] = status;
-      if (tableId != null) queryParams['table_id'] = tableId;
+Future<List<Order>> getOrders({
+  String? status,
+  int? tableId,
+}) async {
+  try {
+    final queryParams = <String, dynamic>{};
+    if (status != null) queryParams['status'] = status;
+    if (tableId != null) queryParams['table_id'] = tableId;
 
-      final response = await _api.get(
-        ApiEndpoints.serverOrders,
-        queryParameters: queryParams.isNotEmpty ? queryParams : null,
-      );
+    final response = await _api.get(
+      ApiEndpoints.serverOrders,
+      queryParameters: queryParams.isNotEmpty ? queryParams : null,
+    );
 
-      if (response.success && response.data != null) {
-        return (response.data as List).map((e) => Order.fromJson(e)).toList();
-      }
-    } catch (e) {
-      print('Error getting orders: $e');
+    print('Drame Log: $response.success');
+    if (response.success && response.data != null) {
+      // Extract the actual orders list from the pagination structure
+      final data = response.data['data'] as List;
+      return data.map((e) => Order.fromJson(e)).toList();
     }
-    return [];
+  } catch (e) {
+    print('Error getting orders: $e');
   }
+  return [];
+}
+
 
   Future<Order?> getOrder(int id) async {
     try {

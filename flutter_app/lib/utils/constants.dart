@@ -1,6 +1,7 @@
 class AppConstants {
   // API Configuration
-  static const String baseUrl = 'http://localhost:8000/api';
+  // static const String baseUrl = 'https://qr-app.dev/api';
+  static const String baseUrl = 'http://127.0.0.1:8000/api';
 
   // Storage Keys
   static const String tokenKey = 'auth_token';

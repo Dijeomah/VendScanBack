@@ -85,7 +85,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.receipt_long_outlined,
                   size: 64,
                   color: AppTheme.textSecondaryColor,
@@ -241,7 +241,7 @@ class _OrderCard extends StatelessWidget {
               // Order Info
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.access_time,
                     size: 16,
                     color: AppTheme.textSecondaryColor,
@@ -253,7 +253,7 @@ class _OrderCard extends StatelessWidget {
                   ),
                   const SizedBox(width: 16),
                   if (order.table != null) ...[
-                    Icon(
+                    const Icon(
                       Icons.table_bar,
                       size: 16,
                       color: AppTheme.textSecondaryColor,

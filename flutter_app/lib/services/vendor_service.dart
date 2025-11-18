@@ -13,24 +13,31 @@ class VendorService {
   final _api = ApiService();
 
   // Dashboard
-  Future<DashboardStatistics?> getDashboardStatistics() async {
-    try {
-      final response = await _api.get('${ApiEndpoints.vendorDashboard}/statistics');
-      if (response.success && response.data != null) {
-        return DashboardStatistics.fromJson(response.data);
-      }
-    } catch (e) {
-      print('Error getting dashboard statistics: $e');
+Future<DashboardStatistics?> getDashboardStatistics() async {
+  try {
+    final response = await _api.get('${ApiEndpoints.vendorDashboard}/statistics');
+    final orderStatics = await _api.get('${ApiEndpoints.vendorOrders}/statistics');
+
+    if (response.success && response.data != null && orderStatics.success && orderStatics.data != null) {
+
+      // Merge the two responses into a single data structure for DashboardStatistics
+      final mergedData = Map<String, dynamic>.from(response.data);
+      mergedData.addAll(orderStatics.data);
+      return DashboardStatistics.fromJson(mergedData);
     }
-    return null;
+  } catch (e) {
+    print('Error getting dashboard statistics: $e');
   }
+  return null;
+}
+
 
   // Business Management
   Future<List<Business>> getBusinessLinks() async {
     try {
       final response = await _api.get(ApiEndpoints.vendorBusinessLinks);
       if (response.success && response.data != null) {
-        return (response.data as List)
+        return (response.data['businesses'] as List)
             .map((e) => Business.fromJson(e))
             .toList();
       }
@@ -110,7 +117,7 @@ class VendorService {
             : null,
       );
       if (response.success && response.data != null) {
-        return (response.data as List)
+        return (response.data['data'] as List)
             .map((e) => MenuItem.fromJson(e))
             .toList();
       }
@@ -124,7 +131,7 @@ class VendorService {
     try {
       final response = await _api.get('${ApiEndpoints.vendorItems}/$id');
       if (response.success && response.data != null) {
-        return MenuItem.fromJson(response.data);
+        return MenuItem.fromJson(response.data['data']);
       }
     } catch (e) {
       print('Error getting menu item: $e');
@@ -206,7 +213,7 @@ class VendorService {
             : null,
       );
       if (response.success && response.data != null) {
-        return (response.data as List)
+        return (response.data['data'] as List)
             .map((e) => Category.fromJson(e))
             .toList();
       }
@@ -251,7 +258,7 @@ class VendorService {
       );
 
       if (response.success && response.data != null) {
-        return (response.data as List).map((e) => Order.fromJson(e)).toList();
+        return (response.data['data'] as List).map((e) => Order.fromJson(e)).toList();
       }
     } catch (e) {
       print('Error getting orders: $e');

@@ -99,7 +99,7 @@ class _ServerOrdersScreenState extends State<ServerOrdersScreen>
                       value: table.id,
                       child: Text('Table ${table.tableNumber}'),
                     );
-                  }).toList(),
+                  }),
                 ],
               );
             },
@@ -125,7 +125,7 @@ class _ServerOrdersScreenState extends State<ServerOrdersScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.receipt_long_outlined,
                   size: 64,
                   color: AppTheme.textSecondaryColor,
@@ -307,7 +307,7 @@ class _ServerOrderCard extends StatelessWidget {
               // Time
               Row(
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.access_time,
                     size: 16,
                     color: AppTheme.textSecondaryColor,

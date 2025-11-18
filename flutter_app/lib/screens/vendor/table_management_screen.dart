@@ -53,7 +53,7 @@ class _TableManagementScreenState extends State<TableManagementScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.business_outlined,
                     size: 64,
                     color: AppTheme.textSecondaryColor,
@@ -80,7 +80,7 @@ class _TableManagementScreenState extends State<TableManagementScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
+                  const Icon(
                     Icons.table_bar,
                     size: 64,
                     color: AppTheme.textSecondaryColor,

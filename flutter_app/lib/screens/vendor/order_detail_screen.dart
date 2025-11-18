@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../models/order.dart';
+import '../../services/server_service.dart';
 import '../../services/vendor_service.dart';
 import '../../utils/helpers.dart';
 import '../../utils/theme.dart';
@@ -16,6 +17,7 @@ class OrderDetailScreen extends StatefulWidget {
 
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   final _vendorService = VendorService();
+  final _serverService = ServerService();
   Order? _order;
   bool _isLoading = true;
 
@@ -113,7 +115,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  'Order #${_order!.orderNumber}',
+                  '#${_order!.orderNumber}',
                   style: AppTheme.headlineSmall.copyWith(
                     color: AppTheme.primaryColor,
                   ),
@@ -140,7 +142,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             const SizedBox(height: 12),
             Row(
               children: [
-                Icon(
+                const Icon(
                   Icons.access_time,
                   size: 16,
                   color: AppTheme.textSecondaryColor,
@@ -266,7 +268,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   ],
                 ),
               );
-            }).toList(),
+            }),
           ],
         ),
       ),

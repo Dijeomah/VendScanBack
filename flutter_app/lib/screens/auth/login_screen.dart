@@ -62,7 +62,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Logo/Icon
-                  Icon(
+                  const Icon(
                     Icons.qr_code_scanner,
                     size: 80,
                     color: AppTheme.primaryColor,

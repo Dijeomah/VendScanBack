@@ -50,7 +50,8 @@ class Order {
       tableId: json['table_id'] ?? json['tableId'],
       total: _parsePrice(json['total']),
       status: json['status'] ?? 'pending',
-      paymentStatus: json['payment_status'] ?? json['paymentStatus'] ?? 'pending',
+      paymentStatus:
+          json['payment_status'] ?? json['paymentStatus'] ?? 'pending',
       paymentMethod: json['payment_method'] ?? json['paymentMethod'],
       customerName: json['customer_name'] ?? json['customerName'],
       customerPhone: json['customer_phone'] ?? json['customerPhone'],
@@ -58,8 +59,8 @@ class Order {
       notes: json['notes'],
       createdAt: json['created_at'] ?? json['createdAt'],
       updatedAt: json['updated_at'] ?? json['updatedAt'],
-      items: json['items'] != null
-          ? (json['items'] as List).map((e) => OrderItem.fromJson(e)).toList()
+      items: json['order_items'] != null
+          ? (json['order_items'] as List).map((e) => OrderItem.fromJson(e)).toList()
           : null,
       table: json['table'] != null ? TableInfo.fromJson(json['table']) : null,
       business: json['business'] != null
@@ -124,11 +125,14 @@ class OrderItem {
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
+
+    print(json);
+
     return OrderItem(
       id: json['id'] ?? 0,
       orderId: json['order_id'] ?? json['orderId'] ?? 0,
       itemId: json['item_id'] ?? json['itemId'] ?? 0,
-      itemName: json['item_name'] ?? json['itemName'] ?? '',
+      itemName: json['item_name'] ?? json['itemName'] ?? json['item']['title'] ?? '',
       quantity: json['quantity'] ?? 1,
       price: _parsePrice(json['price']),
       subtotal: _parsePrice(json['subtotal']),

@@ -174,9 +174,9 @@ class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
                       return Card(
                         margin: const EdgeInsets.only(bottom: 8),
                         child: ListTile(
-                          leading: CircleAvatar(
+                          leading: const CircleAvatar(
                             backgroundColor: AppTheme.primaryColor,
-                            child: const Icon(
+                            child: Icon(
                               Icons.table_bar,
                               color: Colors.white,
                             ),
@@ -216,7 +216,7 @@ class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.table_bar,
                   size: 64,
                   color: AppTheme.textSecondaryColor,

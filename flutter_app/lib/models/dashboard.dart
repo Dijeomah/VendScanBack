@@ -31,23 +31,27 @@ class DashboardStatistics {
 
   factory DashboardStatistics.fromJson(Map<String, dynamic> json) {
     return DashboardStatistics(
-      totalOrders: json['total_orders'] ?? json['totalOrders'] ?? 0,
+      totalOrders: json['total_orders'] ?? 0,
       todayOrders: json['today_orders'] ?? json['todayOrders'] ?? 0,
       activeOrders: json['active_orders'] ?? json['activeOrders'] ?? 0,
-      completedOrders: json['completed_orders'] ?? json['completedOrders'] ?? 0,
-      totalRevenue: _parsePrice(json['total_revenue'] ?? json['totalRevenue']),
-      todayRevenue: _parsePrice(json['today_revenue'] ?? json['todayRevenue']),
-      totalItems: json['total_items'] ?? json['totalItems'] ?? 0,
-      totalTables: json['total_tables'] ?? json['totalTables'] ?? 0,
+      completedOrders: json['orders_by_status'][2]['status']=='completed'?json['orders_by_status'][2]['count']:0,
+      totalRevenue: _parsePrice(json['total_revenue'] ?? 0),
+      todayRevenue: _parsePrice(json['today_revenue'] ?? 0),
+      totalItems: json['items']['total'] ?? 0,
+      totalTables: json['tables']['total'] ?? 2,
+      // totalTables: 2,
       totalServers: json['total_servers'] ?? json['totalServers'] ?? 0,
-      totalBusinesses: json['total_businesses'] ?? json['totalBusinesses'] ?? 0,
+      totalBusinesses:  json['businesses']['total'] ?? json['totalBusinesses'] ?? 0,
       recentOrders: json['recent_orders'] != null
           ? (json['recent_orders'] as List)
               .map((e) => RecentOrder.fromJson(e))
               .toList()
           : null,
-      ordersByStatus: json['orders_by_status'] as Map<String, dynamic>?,
-      revenueData: json['revenue_data'] as Map<String, dynamic>?,
+      // recentOrders: json['recent_orders'] ?? null,
+      ordersByStatus: json['orders_by_status'] != null
+          ? { for (var item in json['orders_by_status'] as List) (item as Map<String, dynamic>)['status'].toString() : item['count'] }
+          : null,
+      // revenueData: json['revenue_data'] as Map<String, dynamic>?,
     );
   }
 
