@@ -59,6 +59,18 @@ dependencies:
   # Loading
   flutter_spinkit: ^5.2.0
 
+  # Audio for notifications
+  audioplayers: ^5.2.1
+
+  # Share functionality
+  share_plus: ^7.2.2
+
+  # Screenshot for saving QR codes
+  screenshot: ^2.1.0
+
+  # Path provider for saving files
+  path_provider: ^2.1.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -73,6 +85,7 @@ flutter:
   assets:
     - assets/images/
     - assets/icons/
+    - assets/sounds/
 
   # fonts:
   #   - family: CustomFont

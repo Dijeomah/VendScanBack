@@ -11,6 +11,10 @@ class ApiService {
 
   late Dio _dio;
   final _storage = StorageService();
+  bool _isRefreshing = false;
+
+  // Callback to notify when auth fails completely
+  Function? onAuthenticationFailed;
 
   void init() {
     _dio = Dio(
@@ -62,14 +66,40 @@ class ApiService {
 
           // Handle 401 Unauthorized - token expired
           if (error.response?.statusCode == 401) {
-            // Try to refresh token
-            final refreshed = await _refreshToken();
-            if (refreshed) {
-              // Retry the request
-              return handler.resolve(await _retry(error.requestOptions));
-            } else {
-              // Logout user
+            final requestPath = error.requestOptions.path;
+
+            // Don't try to refresh if this is already the refresh endpoint
+            // or if we're already in the process of refreshing
+            if (requestPath.contains('refresh') ||
+                requestPath.contains('login') ||
+                requestPath.contains('register')) {
+              // Clear auth and notify
               await _storage.clearAuth();
+              onAuthenticationFailed?.call();
+              return handler.next(error);
+            }
+
+            // Prevent multiple simultaneous refresh attempts
+            if (_isRefreshing) {
+              return handler.next(error);
+            }
+
+            _isRefreshing = true;
+
+            try {
+              // Try to refresh token
+              final refreshed = await _refreshToken();
+              if (refreshed) {
+                // Retry the request
+                _isRefreshing = false;
+                return handler.resolve(await _retry(error.requestOptions));
+              } else {
+                // Refresh failed - logout user
+                await _storage.clearAuth();
+                onAuthenticationFailed?.call();
+              }
+            } finally {
+              _isRefreshing = false;
             }
           }
 

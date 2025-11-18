@@ -1,11 +1,15 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
 import '../../providers/server_provider.dart';
+import '../../providers/settings_provider.dart';
+import '../../services/notification_service.dart';
 import '../../utils/helpers.dart';
 import '../../utils/theme.dart';
 import '../../widgets/stat_card.dart';
+import '../settings/settings_screen.dart';
 import 'server_orders_screen.dart';
 
 class ServerDashboardScreen extends StatefulWidget {
@@ -17,17 +21,52 @@ class ServerDashboardScreen extends StatefulWidget {
 
 class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
   int _selectedIndex = 0;
+  Timer? _refreshTimer;
+  int _lastOrderCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _startAutoRefresh();
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startAutoRefresh() {
+    final settings = context.read<SettingsProvider>();
+    if (settings.autoRefreshEnabled) {
+      _refreshTimer = Timer.periodic(
+        Duration(seconds: settings.refreshIntervalSeconds),
+        (_) => _checkForNewOrders(),
+      );
+    }
+  }
+
+  Future<void> _checkForNewOrders() async {
+    final serverProvider = context.read<ServerProvider>();
+    await serverProvider.loadOrders();
+
+    final currentCount = serverProvider.orders.length;
+    if (currentCount > _lastOrderCount && _lastOrderCount > 0) {
+      // New orders detected - play notification
+      NotificationService().notifyNewOrder();
+    }
+    _lastOrderCount = currentCount;
   }
 
   Future<void> _loadData() async {
     final serverProvider = context.read<ServerProvider>();
     await serverProvider.loadDashboardStatistics();
     await serverProvider.loadAssignments();
+
+    // Initialize order count for notifications
+    await serverProvider.loadOrders();
+    _lastOrderCount = serverProvider.orders.length;
   }
 
   @override
@@ -37,9 +76,14 @@ class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
         title: const Text('Server Dashboard'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
+            icon: const Icon(Icons.settings_outlined),
             onPressed: () {
-              Helpers.showToast('Notifications feature coming soon');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
             },
           ),
           IconButton(

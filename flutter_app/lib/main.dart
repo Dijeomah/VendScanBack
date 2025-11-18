@@ -4,10 +4,12 @@ import 'package:provider/provider.dart';
 import 'providers/auth_provider.dart';
 import 'providers/vendor_provider.dart';
 import 'providers/server_provider.dart';
+import 'providers/settings_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/vendor/vendor_dashboard_screen.dart';
 import 'screens/server/server_dashboard_screen.dart';
 import 'services/api_service.dart';
+import 'services/notification_service.dart';
 import 'services/storage_service.dart';
 import 'utils/constants.dart';
 import 'utils/theme.dart';
@@ -32,6 +34,15 @@ class VendScanApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
         ChangeNotifierProvider(create: (_) => VendorProvider()),
         ChangeNotifierProvider(create: (_) => ServerProvider()),
+        ChangeNotifierProvider(create: (_) {
+          final settingsProvider = SettingsProvider();
+          settingsProvider.loadSettings().then((_) {
+            // Sync notification service with settings
+            NotificationService().setSoundEnabled(settingsProvider.notificationSoundEnabled);
+            NotificationService().setVibrationEnabled(settingsProvider.vibrationEnabled);
+          });
+          return settingsProvider;
+        }),
       ],
       child: MaterialApp(
         title: AppConstants.appName,

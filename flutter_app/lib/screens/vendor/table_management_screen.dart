@@ -1,10 +1,17 @@
+import 'dart:io';
+import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../models/table.dart';
 import '../../providers/vendor_provider.dart';
 import '../../services/vendor_service.dart';
+import '../../utils/constants.dart';
 import '../../utils/helpers.dart';
 import '../../utils/theme.dart';
 
@@ -447,13 +454,98 @@ class _TableCard extends StatelessWidget {
   }
 }
 
-class _TableDetailsSheet extends StatelessWidget {
+class _TableDetailsSheet extends StatefulWidget {
   final RestaurantTable table;
 
   const _TableDetailsSheet({required this.table});
 
   @override
+  State<_TableDetailsSheet> createState() => _TableDetailsSheetState();
+}
+
+class _TableDetailsSheetState extends State<_TableDetailsSheet> {
+  final GlobalKey _qrKey = GlobalKey();
+  bool _isProcessing = false;
+
+  // Generate QR data URL for the table
+  String _getQrData() {
+    // Use qrCode if available, otherwise generate a menu URL
+    if (widget.table.qrCode != null && widget.table.qrCode!.isNotEmpty) {
+      return widget.table.qrCode!;
+    }
+    // Generate a default QR URL for the table
+    // This should match your backend's expected format
+    return '${AppConstants.baseUrl.replaceAll('/api', '')}/menu/${widget.table.businessLinkId}/table/${widget.table.id}';
+  }
+
+  Future<Uint8List?> _captureQrCode() async {
+    try {
+      final boundary = _qrKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) return null;
+
+      final image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      return byteData?.buffer.asUint8List();
+    } catch (e) {
+      return null;
+    }
+  }
+
+  Future<void> _shareQrCode() async {
+    if (_isProcessing) return;
+    setState(() => _isProcessing = true);
+
+    try {
+      final imageBytes = await _captureQrCode();
+      if (imageBytes == null) {
+        Helpers.showToast('Failed to capture QR code', isError: true);
+        return;
+      }
+
+      final tempDir = await getTemporaryDirectory();
+      final file = File('${tempDir.path}/table_${widget.table.tableNumber}_qr.png');
+      await file.writeAsBytes(imageBytes);
+
+      await Share.shareXFiles(
+        [XFile(file.path)],
+        text: 'QR Code for Table ${widget.table.tableNumber}',
+        subject: 'Table ${widget.table.tableNumber} QR Code',
+      );
+    } catch (e) {
+      Helpers.showToast('Failed to share QR code', isError: true);
+    } finally {
+      setState(() => _isProcessing = false);
+    }
+  }
+
+  Future<void> _downloadQrCode() async {
+    if (_isProcessing) return;
+    setState(() => _isProcessing = true);
+
+    try {
+      final imageBytes = await _captureQrCode();
+      if (imageBytes == null) {
+        Helpers.showToast('Failed to capture QR code', isError: true);
+        return;
+      }
+
+      final directory = await getApplicationDocumentsDirectory();
+      final fileName = 'table_${widget.table.tableNumber}_qr_${DateTime.now().millisecondsSinceEpoch}.png';
+      final file = File('${directory.path}/$fileName');
+      await file.writeAsBytes(imageBytes);
+
+      Helpers.showToast('QR code saved to $fileName');
+    } catch (e) {
+      Helpers.showToast('Failed to download QR code', isError: true);
+    } finally {
+      setState(() => _isProcessing = false);
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final qrData = _getQrData();
+
     return Container(
       decoration: const BoxDecoration(
         color: Colors.white,
@@ -479,64 +571,69 @@ class _TableDetailsSheet extends StatelessWidget {
 
               // Title
               Text(
-                'Table ${table.tableNumber}',
+                'Table ${widget.table.tableNumber}',
                 style: AppTheme.headlineMedium,
               ),
               const SizedBox(height: 24),
 
               // QR Code
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.borderColor),
-                ),
-                child: table.qrCode != null
-                    ? QrImageView(
-                        data: table.qrCode!,
+              RepaintBoundary(
+                key: _qrKey,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppTheme.borderColor),
+                  ),
+                  child: Column(
+                    children: [
+                      QrImageView(
+                        data: qrData,
                         version: QrVersions.auto,
-                        size: 250,
-                      )
-                    : const SizedBox(
-                        width: 250,
-                        height: 250,
-                        child: Center(
-                          child: Text('No QR Code'),
-                        ),
+                        size: 220,
+                        backgroundColor: Colors.white,
                       ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Table ${widget.table.tableNumber}',
+                        style: AppTheme.titleMedium,
+                      ),
+                    ],
+                  ),
+                ),
               ),
               const SizedBox(height: 24),
 
               // Table Info
-              if (table.capacity != null ||
-                  table.location != null) ...[
+              if (widget.table.capacity != null ||
+                  widget.table.location != null) ...[
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
-                        if (table.capacity != null)
+                        if (widget.table.capacity != null)
                           Row(
                             children: [
                               const Icon(Icons.people_outline),
                               const SizedBox(width: 12),
                               Text(
-                                'Capacity: ${table.capacity} seats',
+                                'Capacity: ${widget.table.capacity} seats',
                                 style: AppTheme.bodyLarge,
                               ),
                             ],
                           ),
-                        if (table.capacity != null && table.location != null)
+                        if (widget.table.capacity != null && widget.table.location != null)
                           const Divider(height: 24),
-                        if (table.location != null)
+                        if (widget.table.location != null)
                           Row(
                             children: [
                               const Icon(Icons.location_on_outlined),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  'Location: ${table.location}',
+                                  'Location: ${widget.table.location}',
                                   style: AppTheme.bodyLarge,
                                 ),
                               ),
@@ -554,22 +651,31 @@ class _TableDetailsSheet extends StatelessWidget {
                 children: [
                   Expanded(
                     child: OutlinedButton.icon(
-                      onPressed: () {
-                        // Download QR code logic
-                        Helpers.showToast('Download feature coming soon');
-                      },
-                      icon: const Icon(Icons.download),
+                      onPressed: _isProcessing ? null : _downloadQrCode,
+                      icon: _isProcessing
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            )
+                          : const Icon(Icons.download),
                       label: const Text('Download'),
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton.icon(
-                      onPressed: () {
-                        // Share QR code logic
-                        Helpers.showToast('Share feature coming soon');
-                      },
-                      icon: const Icon(Icons.share),
+                      onPressed: _isProcessing ? null : _shareQrCode,
+                      icon: _isProcessing
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Icon(Icons.share),
                       label: const Text('Share'),
                     ),
                   ),

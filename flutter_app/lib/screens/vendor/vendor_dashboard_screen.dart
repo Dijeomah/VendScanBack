@@ -1,11 +1,15 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
+import '../../providers/settings_provider.dart';
 import '../../providers/vendor_provider.dart';
+import '../../services/notification_service.dart';
 import '../../utils/helpers.dart';
 import '../../utils/theme.dart';
 import '../../widgets/stat_card.dart';
+import '../settings/settings_screen.dart';
 import 'menu_management_screen.dart';
 import 'order_management_screen.dart';
 import 'table_management_screen.dart';
@@ -20,17 +24,52 @@ class VendorDashboardScreen extends StatefulWidget {
 
 class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
   int _selectedIndex = 0;
+  Timer? _refreshTimer;
+  int _lastOrderCount = 0;
 
   @override
   void initState() {
     super.initState();
     _loadData();
+    _startAutoRefresh();
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startAutoRefresh() {
+    final settings = context.read<SettingsProvider>();
+    if (settings.autoRefreshEnabled) {
+      _refreshTimer = Timer.periodic(
+        Duration(seconds: settings.refreshIntervalSeconds),
+        (_) => _checkForNewOrders(),
+      );
+    }
+  }
+
+  Future<void> _checkForNewOrders() async {
+    final vendorProvider = context.read<VendorProvider>();
+    await vendorProvider.loadOrders();
+
+    final currentCount = vendorProvider.orders.length;
+    if (currentCount > _lastOrderCount && _lastOrderCount > 0) {
+      // New orders detected - play notification
+      NotificationService().notifyNewOrder();
+    }
+    _lastOrderCount = currentCount;
   }
 
   Future<void> _loadData() async {
     final vendorProvider = context.read<VendorProvider>();
     await vendorProvider.loadDashboardStatistics();
     await vendorProvider.loadBusinesses();
+
+    // Initialize order count for notifications
+    await vendorProvider.loadOrders();
+    _lastOrderCount = vendorProvider.orders.length;
   }
 
   @override
@@ -40,9 +79,14 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
         title: const Text('Vendscan - Vendor'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_outlined),
+            icon: const Icon(Icons.settings_outlined),
             onPressed: () {
-              Helpers.showToast('Notifications feature coming soon');
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SettingsScreen(),
+                ),
+              );
             },
           ),
           IconButton(

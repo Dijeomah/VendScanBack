@@ -26,7 +26,7 @@ class Category {
   factory Category.fromJson(Map<String, dynamic> json) {
     return Category(
       id: json['id'] ?? 0,
-      name: json['category_name'] ?? '',
+      name: json['name'] ?? json['category_name'] ?? '',
       description: json['description'],
       businessLinkId: json['business_link_id'] ?? json['businessLinkId'],
       order: json['order'],
@@ -141,7 +141,7 @@ class MenuItem {
   factory MenuItem.fromJson(Map<String, dynamic> json) {
     return MenuItem(
       id: json['id'] ?? 0,
-      name: json['title'] ?? '',
+      name: json['name'] ?? json['title'] ?? '',
       description: json['description'],
       price: _parsePrice(json['price']),
       image: json['image'],
