@@ -324,7 +324,7 @@ class AppTheme {
       ),
 
       // Tabs
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelColor: primaryColor,
         unselectedLabelColor: textSecondaryColor,
         labelStyle: GoogleFonts.inter(
@@ -355,7 +355,7 @@ class AppTheme {
       ),
 
       // Dialog
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: Colors.white,
         elevation: 8,
         shape: RoundedRectangleBorder(

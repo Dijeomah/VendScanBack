@@ -141,7 +141,7 @@ class SettingsScreen extends StatelessWidget {
                   children: [
                     Consumer<AuthProvider>(
                       builder: (context, auth, _) {
-                        final user = auth.currentUser;
+                        final user = auth.user;
                         return ListTile(
                           title: Text(user?.name ?? 'User'),
                           subtitle: Text(user?.email ?? ''),
