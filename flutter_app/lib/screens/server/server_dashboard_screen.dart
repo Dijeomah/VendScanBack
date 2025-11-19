@@ -230,10 +230,14 @@ class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
                           trailing: const Icon(Icons.arrow_forward_ios,
                               size: 16),
                           onTap: () {
-                            // Navigate to table orders
-                            Helpers.showToast(
-                              'View orders for Table ${table.tableNumber}',
+                            // Load orders filtered by this table first
+                            context.read<ServerProvider>().loadOrders(
+                              tableId: table.id,
                             );
+                            // Then navigate to Orders tab
+                            setState(() {
+                              _selectedIndex = 1;
+                            });
                           },
                         ),
                       );
@@ -303,8 +307,14 @@ class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
                   subtitle: Text(table.businessName ?? 'Business'),
                   trailing: ElevatedButton(
                     onPressed: () {
-                      // View orders for this table
-                      Helpers.showToast('View orders for Table ${table.tableNumber}');
+                      // Load orders filtered by this table first
+                      context.read<ServerProvider>().loadOrders(
+                        tableId: table.id,
+                      );
+                      // Then navigate to Orders tab
+                      setState(() {
+                        _selectedIndex = 1;
+                      });
                     },
                     child: const Text('View Orders'),
                   ),

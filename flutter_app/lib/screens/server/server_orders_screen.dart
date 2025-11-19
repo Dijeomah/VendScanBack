@@ -35,7 +35,22 @@ class _ServerOrdersScreenState extends State<ServerOrdersScreen>
     super.initState();
     _tabController = TabController(length: _statusTabs.length, vsync: this);
     _tabController.addListener(_handleTabChange);
-    _loadOrders();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Sync with provider's current filter
+    final provider = context.read<ServerProvider>();
+    if (_selectedTableId != provider.currentTableFilter) {
+      setState(() {
+        _selectedTableId = provider.currentTableFilter;
+      });
+      _loadOrders();
+    } else if (_selectedTableId == null && provider.orders.isEmpty) {
+      // Initial load
+      _loadOrders();
+    }
   }
 
   @override

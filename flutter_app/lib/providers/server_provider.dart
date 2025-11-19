@@ -33,9 +33,26 @@ class ServerProvider with ChangeNotifier {
   // Orders
   List<Order> _orders = [];
   bool _isLoadingOrders = false;
+  int? _currentTableFilter;
+  String? _currentStatusFilter;
 
   List<Order> get orders => _orders;
   bool get isLoadingOrders => _isLoadingOrders;
+  int? get currentTableFilter => _currentTableFilter;
+  String? get currentStatusFilter => _currentStatusFilter;
+
+  // Set table filter (used by dashboard to pre-filter orders)
+  void setTableFilter(int? tableId) {
+    _currentTableFilter = tableId;
+    notifyListeners();
+  }
+
+  // Clear filters
+  void clearFilters() {
+    _currentTableFilter = null;
+    _currentStatusFilter = null;
+    notifyListeners();
+  }
 
   // Dashboard Methods
   Future<void> loadDashboardStatistics() async {
@@ -72,8 +89,15 @@ class ServerProvider with ChangeNotifier {
   }
 
   // Order Methods
-  Future<void> loadOrders({String? status, int? tableId}) async {
+  Future<void> loadOrders({String? status, int? tableId, bool updateFilters = true}) async {
     _isLoadingOrders = true;
+
+    // Update stored filters if requested
+    if (updateFilters) {
+      _currentTableFilter = tableId;
+      _currentStatusFilter = status;
+    }
+
     notifyListeners();
 
     _orders = await _serverService.getOrders(status: status, tableId: tableId);
