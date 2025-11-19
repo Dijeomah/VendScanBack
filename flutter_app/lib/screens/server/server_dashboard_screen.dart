@@ -6,6 +6,7 @@ import '../../providers/auth_provider.dart';
 import '../../providers/server_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../services/notification_service.dart';
+import '../../utils/constants.dart';
 import '../../utils/helpers.dart';
 import '../../utils/theme.dart';
 import '../../widgets/stat_card.dart';
@@ -75,6 +76,34 @@ class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
       appBar: AppBar(
         title: const Text('Server Dashboard'),
         actions: [
+          // Notification Bell with Badge
+          Consumer<ServerProvider>(
+            builder: (context, provider, _) {
+              final pendingCount = provider.orders
+                  .where((o) =>
+                      o.status == AppConstants.orderStatusPending ||
+                      o.status == AppConstants.orderStatusConfirmed)
+                  .length;
+
+              return IconButton(
+                icon: Badge(
+                  isLabelVisible: pendingCount > 0,
+                  label: Text(
+                    pendingCount > 99 ? '99+' : pendingCount.toString(),
+                    style: const TextStyle(fontSize: 10),
+                  ),
+                  child: const Icon(Icons.notifications_outlined),
+                ),
+                onPressed: () {
+                  // Navigate to Orders tab
+                  setState(() {
+                    _selectedIndex = 1;
+                  });
+                },
+                tooltip: 'Pending Orders',
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             onPressed: () {
