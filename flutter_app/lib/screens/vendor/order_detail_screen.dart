@@ -145,7 +145,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 const Icon(
                   Icons.access_time,
                   size: 16,
-                  color: AppTheme.textSecondaryColor,
+                  color: AppTheme.getTextSecondary(context),
                 ),
                 const SizedBox(width: 4),
                 Text(
@@ -416,7 +416,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                               ? AppTheme.primaryColor
                               : isCompleted
                                   ? AppTheme.textPrimaryColor
-                                  : AppTheme.textSecondaryColor,
+                                  : AppTheme.getTextSecondary(context),
                           fontWeight:
                               isCurrent ? FontWeight.bold : FontWeight.normal,
                         ),
@@ -438,13 +438,13 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         Icon(
           icon,
           size: 20,
-          color: AppTheme.textSecondaryColor,
+          color: AppTheme.getTextSecondary(context),
         ),
         const SizedBox(width: 8),
         Text(
           '$label: ',
           style: AppTheme.bodyMedium.copyWith(
-            color: AppTheme.textSecondaryColor,
+            color: AppTheme.getTextSecondary(context),
           ),
         ),
         Expanded(

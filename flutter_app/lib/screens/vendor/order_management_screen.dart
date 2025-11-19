@@ -88,7 +88,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
                 const Icon(
                   Icons.receipt_long_outlined,
                   size: 64,
-                  color: AppTheme.textSecondaryColor,
+                  color: AppTheme.getTextSecondary(context),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -99,7 +99,7 @@ class _OrderManagementScreenState extends State<OrderManagementScreen>
                 Text(
                   'Orders will appear here',
                   style: AppTheme.bodyMedium.copyWith(
-                    color: AppTheme.textSecondaryColor,
+                    color: AppTheme.getTextSecondary(context),
                   ),
                 ),
               ],
@@ -244,7 +244,7 @@ class _OrderCard extends StatelessWidget {
                   const Icon(
                     Icons.access_time,
                     size: 16,
-                    color: AppTheme.textSecondaryColor,
+                    color: AppTheme.getTextSecondary(context),
                   ),
                   const SizedBox(width: 4),
                   Text(
@@ -256,7 +256,7 @@ class _OrderCard extends StatelessWidget {
                     const Icon(
                       Icons.table_bar,
                       size: 16,
-                      color: AppTheme.textSecondaryColor,
+                      color: AppTheme.getTextSecondary(context),
                     ),
                     const SizedBox(width: 4),
                     Text(

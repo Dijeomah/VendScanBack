@@ -25,7 +25,7 @@ class StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.getCardColor(context),
         borderRadius: BorderRadius.circular(20),
         boxShadow: AppTheme.cardShadow,
       ),
@@ -46,7 +46,7 @@ class StatCard extends StatelessWidget {
                       Text(
                         title,
                         style: AppTheme.labelMedium.copyWith(
-                          color: AppTheme.textSecondaryColor,
+                          color: AppTheme.getTextSecondary(context),
                           fontWeight: FontWeight.w500,
                         ),
                         maxLines: 1,
@@ -56,7 +56,7 @@ class StatCard extends StatelessWidget {
                       Text(
                         value,
                         style: AppTheme.headlineSmall.copyWith(
-                          color: AppTheme.textPrimaryColor,
+                          color: AppTheme.getTextPrimary(context),
                           fontWeight: FontWeight.w700,
                         ),
                         maxLines: 1,
@@ -127,7 +127,7 @@ class StatCard extends StatelessWidget {
                       child: Text(
                         subtitle!,
                         style: AppTheme.bodySmall.copyWith(
-                          color: AppTheme.textSecondaryColor,
+                          color: AppTheme.getTextSecondary(context),
                           fontSize: 11,
                         ),
                         maxLines: 1,

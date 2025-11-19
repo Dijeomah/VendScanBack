@@ -63,7 +63,7 @@ class _TableManagementScreenState extends State<TableManagementScreen> {
                   const Icon(
                     Icons.business_outlined,
                     size: 64,
-                    color: AppTheme.textSecondaryColor,
+                    color: AppTheme.getTextSecondary(context),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -74,7 +74,7 @@ class _TableManagementScreenState extends State<TableManagementScreen> {
                   Text(
                     'Please select a business first',
                     style: AppTheme.bodyMedium.copyWith(
-                      color: AppTheme.textSecondaryColor,
+                      color: AppTheme.getTextSecondary(context),
                     ),
                   ),
                 ],
@@ -90,7 +90,7 @@ class _TableManagementScreenState extends State<TableManagementScreen> {
                   const Icon(
                     Icons.table_bar,
                     size: 64,
-                    color: AppTheme.textSecondaryColor,
+                    color: AppTheme.getTextSecondary(context),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -101,7 +101,7 @@ class _TableManagementScreenState extends State<TableManagementScreen> {
                   Text(
                     'Create your first table',
                     style: AppTheme.bodyMedium.copyWith(
-                      color: AppTheme.textSecondaryColor,
+                      color: AppTheme.getTextSecondary(context),
                     ),
                   ),
                   const SizedBox(height: 24),
@@ -406,7 +406,7 @@ class _TableCard extends StatelessWidget {
                     const Icon(
                       Icons.people_outline,
                       size: 16,
-                      color: AppTheme.textSecondaryColor,
+                      color: AppTheme.getTextSecondary(context),
                     ),
                     const SizedBox(width: 4),
                     Text(
@@ -423,7 +423,7 @@ class _TableCard extends StatelessWidget {
                     const Icon(
                       Icons.location_on_outlined,
                       size: 16,
-                      color: AppTheme.textSecondaryColor,
+                      color: AppTheme.getTextSecondary(context),
                     ),
                     const SizedBox(width: 4),
                     Expanded(

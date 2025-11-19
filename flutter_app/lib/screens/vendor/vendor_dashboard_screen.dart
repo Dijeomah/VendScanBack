@@ -175,7 +175,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                 Text(
                   'Here\'s an overview of your business',
                   style: AppTheme.bodyMedium.copyWith(
-                    color: AppTheme.textSecondaryColor,
+                    color: AppTheme.getTextSecondary(context),
                   ),
                 ),
                 const SizedBox(height: 24),

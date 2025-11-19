@@ -95,7 +95,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Text(
                   'Create your account to get started',
                   style: AppTheme.bodyLarge.copyWith(
-                    color: AppTheme.textSecondaryColor,
+                    color: AppTheme.getTextSecondary(context),
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -363,7 +363,7 @@ class _RoleCard extends StatelessWidget {
               size: 32,
               color: isSelected
                   ? AppTheme.primaryColor
-                  : AppTheme.textSecondaryColor,
+                  : AppTheme.getTextSecondary(context),
             ),
             const SizedBox(height: 8),
             Text(

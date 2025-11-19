@@ -29,8 +29,8 @@ class Helpers {
     );
   }
 
-  // Format currency
-  static String formatCurrency(dynamic amount, {String symbol = '\$'}) {
+  // Format currency - Default to Naira (₦) for Nigerian currency
+  static String formatCurrency(dynamic amount, {String symbol = '₦'}) {
     if (amount == null) return '$symbol 0.00';
     final formatter = NumberFormat('#,##0.00');
     return '$symbol ${formatter.format(amount)}';

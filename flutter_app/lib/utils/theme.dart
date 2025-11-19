@@ -33,6 +33,49 @@ class AppTheme {
   static const Color borderColor = Color(0xFFE2E8F0);
   static const Color dividerColor = Color(0xFFEDF2F7);
 
+  // Context-aware color getters for dark mode support
+  static Color getTextPrimary(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? darkTextPrimaryColor
+        : textPrimaryColor;
+  }
+
+  static Color getTextSecondary(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? darkTextSecondaryColor
+        : textSecondaryColor;
+  }
+
+  static Color getBackground(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? darkBackgroundColor
+        : backgroundColor;
+  }
+
+  static Color getSurface(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? darkSurfaceColor
+        : surfaceColor;
+  }
+
+  static Color getCardColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? darkCardColor
+        : cardColor;
+  }
+
+  static Color getBorderColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? darkBorderColor
+        : borderColor;
+  }
+
+  static Color getDividerColor(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? darkDividerColor
+        : dividerColor;
+  }
+
   // Gradient Colors
   static const LinearGradient primaryGradient = LinearGradient(
     colors: [Color(0xFF667EEA), Color(0xFF764BA2)],
