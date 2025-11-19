@@ -583,7 +583,7 @@ class AppTheme {
       ),
 
       // Tabs
-      tabBarTheme: TabBarTheme(
+      tabBarTheme: TabBarThemeData(
         labelColor: primaryLight,
         unselectedLabelColor: darkTextSecondaryColor,
         labelStyle: GoogleFonts.inter(
@@ -594,7 +594,7 @@ class AppTheme {
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
-        indicator: BoxDecoration(
+        indicator: const BoxDecoration(
           border: Border(
             bottom: BorderSide(color: primaryLight, width: 2.5),
           ),
@@ -617,7 +617,7 @@ class AppTheme {
       ),
 
       // Dialog
-      dialogTheme: DialogTheme(
+      dialogTheme: DialogThemeData(
         backgroundColor: darkSurfaceColor,
         elevation: 8,
         shape: RoundedRectangleBorder(
