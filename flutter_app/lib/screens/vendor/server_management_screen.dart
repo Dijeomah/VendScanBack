@@ -277,7 +277,7 @@ class _ServerCard extends StatelessWidget {
                   CircleAvatar(
                     backgroundColor: AppTheme.primaryColor,
                     child: Text(
-                      server.name[0].toUpperCase(),
+                      server.name.isNotEmpty ? server.name[0].toUpperCase() : 'S',
                       style: const TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -389,7 +389,7 @@ class _ServerDetailsSheet extends StatelessWidget {
                     radius: 32,
                     backgroundColor: AppTheme.primaryColor,
                     child: Text(
-                      server.name[0].toUpperCase(),
+                      server.name.isNotEmpty ? server.name[0].toUpperCase() : 'S',
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 28,

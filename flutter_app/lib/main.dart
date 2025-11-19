@@ -44,11 +44,17 @@ class VendScanApp extends StatelessWidget {
           return settingsProvider;
         }),
       ],
-      child: MaterialApp(
-        title: AppConstants.appName,
-        theme: AppTheme.lightTheme,
-        debugShowCheckedModeBanner: false,
-        home: const AuthWrapper(),
+      child: Consumer<SettingsProvider>(
+        builder: (context, settingsProvider, _) {
+          return MaterialApp(
+            title: AppConstants.appName,
+            theme: AppTheme.lightTheme,
+            darkTheme: AppTheme.darkTheme,
+            themeMode: settingsProvider.themeMode,
+            debugShowCheckedModeBanner: false,
+            home: const AuthWrapper(),
+          );
+        },
       ),
     );
   }

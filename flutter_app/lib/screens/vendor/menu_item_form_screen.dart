@@ -216,8 +216,15 @@ class _MenuItemFormScreenState extends State<MenuItemFormScreen> {
             // Category Dropdown
             Consumer<VendorProvider>(
               builder: (context, provider, _) {
+                // Validate that selected category exists in the list
+                final categoryIds = provider.categories.map((c) => c.id).toList();
+                final validCategoryId = _selectedCategoryId != null &&
+                    categoryIds.contains(_selectedCategoryId)
+                    ? _selectedCategoryId
+                    : null;
+
                 return DropdownButtonFormField<int>(
-                  initialValue: _selectedCategoryId,
+                  value: validCategoryId,
                   decoration: const InputDecoration(
                     labelText: 'Category',
                     hintText: 'Select a category',
@@ -243,18 +250,31 @@ class _MenuItemFormScreenState extends State<MenuItemFormScreen> {
             if (_selectedCategoryId != null)
               Consumer<VendorProvider>(
                 builder: (context, provider, _) {
-                  final category = provider.categories
-                      .firstWhere((c) => c.id == _selectedCategoryId);
+                  // Find the category safely
+                  final categoryIndex = provider.categories
+                      .indexWhere((c) => c.id == _selectedCategoryId);
+                  if (categoryIndex == -1) {
+                    return const SizedBox.shrink();
+                  }
+
+                  final category = provider.categories[categoryIndex];
                   final subCategories = category.subCategories ?? [];
 
                   if (subCategories.isEmpty) {
                     return const SizedBox.shrink();
                   }
 
+                  // Validate that selected subcategory exists in the list
+                  final subCategoryIds = subCategories.map((s) => s.id).toList();
+                  final validSubCategoryId = _selectedSubCategoryId != null &&
+                      subCategoryIds.contains(_selectedSubCategoryId)
+                      ? _selectedSubCategoryId
+                      : null;
+
                   return Column(
                     children: [
                       DropdownButtonFormField<int>(
-                        initialValue: _selectedSubCategoryId,
+                        value: validSubCategoryId,
                         decoration: const InputDecoration(
                           labelText: 'Subcategory',
                           hintText: 'Select a subcategory',

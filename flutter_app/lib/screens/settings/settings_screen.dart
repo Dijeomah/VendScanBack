@@ -116,6 +116,26 @@ class SettingsScreen extends StatelessWidget {
               ),
               const SizedBox(height: 24),
 
+              // Appearance Section
+              _buildSectionHeader('Appearance'),
+              Card(
+                child: Column(
+                  children: [
+                    ListTile(
+                      title: const Text('Theme'),
+                      subtitle: Text(_getThemeModeLabel(settings.themeMode)),
+                      leading: Icon(
+                        _getThemeModeIcon(settings.themeMode),
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      trailing: const Icon(Icons.chevron_right),
+                      onTap: () => _showThemeModeDialog(context, settings),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+
               // Test Section
               _buildSectionHeader('Test Notifications'),
               Card(
@@ -294,6 +314,110 @@ class SettingsScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  String _getThemeModeLabel(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return 'Light';
+      case ThemeMode.dark:
+        return 'Dark';
+      case ThemeMode.system:
+        return 'System Default';
+    }
+  }
+
+  IconData _getThemeModeIcon(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return Icons.light_mode;
+      case ThemeMode.dark:
+        return Icons.dark_mode;
+      case ThemeMode.system:
+        return Icons.brightness_auto;
+    }
+  }
+
+  void _showThemeModeDialog(
+    BuildContext context,
+    SettingsProvider settings,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Choose Theme'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _buildThemeOption(
+              context,
+              settings,
+              ThemeMode.system,
+              'System Default',
+              'Follow device settings',
+              Icons.brightness_auto,
+            ),
+            _buildThemeOption(
+              context,
+              settings,
+              ThemeMode.light,
+              'Light',
+              'Always use light theme',
+              Icons.light_mode,
+            ),
+            _buildThemeOption(
+              context,
+              settings,
+              ThemeMode.dark,
+              'Dark',
+              'Always use dark theme',
+              Icons.dark_mode,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildThemeOption(
+    BuildContext context,
+    SettingsProvider settings,
+    ThemeMode mode,
+    String title,
+    String subtitle,
+    IconData icon,
+  ) {
+    final isSelected = settings.themeMode == mode;
+    return ListTile(
+      leading: Icon(
+        icon,
+        color: isSelected ? Theme.of(context).colorScheme.primary : null,
+      ),
+      title: Text(
+        title,
+        style: TextStyle(
+          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+          color: isSelected ? Theme.of(context).colorScheme.primary : null,
+        ),
+      ),
+      subtitle: Text(subtitle),
+      trailing: isSelected
+          ? Icon(
+              Icons.check_circle,
+              color: Theme.of(context).colorScheme.primary,
+            )
+          : null,
+      onTap: () {
+        settings.setThemeMode(mode);
+        Navigator.pop(context);
+      },
     );
   }
 }
