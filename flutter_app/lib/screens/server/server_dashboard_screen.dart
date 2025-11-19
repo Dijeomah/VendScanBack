@@ -293,7 +293,7 @@ class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.table_bar,
                   size: 64,
                   color: AppTheme.getTextSecondary(context),

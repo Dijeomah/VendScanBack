@@ -140,7 +140,7 @@ class _ServerOrdersScreenState extends State<ServerOrdersScreen>
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
+                Icon(
                   Icons.receipt_long_outlined,
                   size: 64,
                   color: AppTheme.getTextSecondary(context),
@@ -322,7 +322,7 @@ class _ServerOrderCard extends StatelessWidget {
               // Time
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.access_time,
                     size: 16,
                     color: AppTheme.getTextSecondary(context),

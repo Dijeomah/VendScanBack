@@ -60,7 +60,7 @@ class _TableManagementScreenState extends State<TableManagementScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.business_outlined,
                     size: 64,
                     color: AppTheme.getTextSecondary(context),
@@ -87,7 +87,7 @@ class _TableManagementScreenState extends State<TableManagementScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.table_bar,
                     size: 64,
                     color: AppTheme.getTextSecondary(context),
@@ -403,7 +403,7 @@ class _TableCard extends StatelessWidget {
               if (table.capacity != null) ...[
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.people_outline,
                       size: 16,
                       color: AppTheme.getTextSecondary(context),
@@ -420,7 +420,7 @@ class _TableCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.location_on_outlined,
                       size: 16,
                       color: AppTheme.getTextSecondary(context),

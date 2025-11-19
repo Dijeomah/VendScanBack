@@ -22,7 +22,7 @@ class SettingsScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             children: [
               // Notifications Section
-              _buildSectionHeader('Notifications'),
+              _buildSectionHeader(context, 'Notifications'),
               Card(
                 child: Column(
                   children: [
@@ -79,7 +79,7 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               // Auto Refresh Section
-              _buildSectionHeader('Auto Refresh'),
+              _buildSectionHeader(context, 'Auto Refresh'),
               Card(
                 child: Column(
                   children: [
@@ -117,7 +117,7 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               // Appearance Section
-              _buildSectionHeader('Appearance'),
+              _buildSectionHeader(context, 'Appearance'),
               Card(
                 child: Column(
                   children: [
@@ -137,7 +137,7 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               // Test Section
-              _buildSectionHeader('Test Notifications'),
+              _buildSectionHeader(context, 'Test Notifications'),
               Card(
                 child: ListTile(
                   title: const Text('Test Notification Sound'),
@@ -155,7 +155,7 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               // Account Section
-              _buildSectionHeader('Account'),
+              _buildSectionHeader(context, 'Account'),
               Card(
                 child: Column(
                   children: [
@@ -195,7 +195,7 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 24),
 
               // App Info
-              _buildSectionHeader('About'),
+              _buildSectionHeader(context, 'About'),
               Card(
                 child: Column(
                   children: [
@@ -241,7 +241,7 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
+  Widget _buildSectionHeader(BuildContext context, String title) {
     return Padding(
       padding: const EdgeInsets.only(left: 4, bottom: 8),
       child: Text(

@@ -159,7 +159,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.restaurant_menu,
                           size: 64,
                           color: AppTheme.getTextSecondary(context),
@@ -429,7 +429,7 @@ class _MenuItemCard extends StatelessWidget {
   Widget _buildPlaceholder() {
     return Container(
       color: AppTheme.backgroundColor,
-      child: const Icon(
+      child: Icon(
         Icons.restaurant,
         size: 48,
         color: AppTheme.getTextSecondary(context),
