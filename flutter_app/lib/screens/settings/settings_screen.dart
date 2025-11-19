@@ -46,7 +46,7 @@ class SettingsScreen extends StatelessWidget {
                             : Icons.volume_off,
                         color: settings.notificationSoundEnabled
                             ? AppTheme.primaryColor
-                            : AppTheme.textSecondaryColor,
+                            : AppTheme.getTextSecondary(context),
                       ),
                     ),
                     const Divider(height: 1),
@@ -70,7 +70,7 @@ class SettingsScreen extends StatelessWidget {
                             : Icons.smartphone,
                         color: settings.vibrationEnabled
                             ? AppTheme.primaryColor
-                            : AppTheme.textSecondaryColor,
+                            : AppTheme.getTextSecondary(context),
                       ),
                     ),
                   ],
@@ -96,7 +96,7 @@ class SettingsScreen extends StatelessWidget {
                         Icons.refresh,
                         color: settings.autoRefreshEnabled
                             ? AppTheme.primaryColor
-                            : AppTheme.textSecondaryColor,
+                            : AppTheme.getTextSecondary(context),
                       ),
                     ),
                     if (settings.autoRefreshEnabled) ...[
@@ -247,7 +247,7 @@ class SettingsScreen extends StatelessWidget {
       child: Text(
         title,
         style: AppTheme.titleMedium.copyWith(
-          color: AppTheme.textSecondaryColor,
+          color: AppTheme.getTextSecondary(context),
         ),
       ),
     );

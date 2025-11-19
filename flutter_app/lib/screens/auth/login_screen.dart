@@ -80,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'Login to your account',
                     style: AppTheme.bodyLarge.copyWith(
-                      color: AppTheme.textSecondaryColor,
+                      color: AppTheme.getTextSecondary(context),
                     ),
                     textAlign: TextAlign.center,
                   ),

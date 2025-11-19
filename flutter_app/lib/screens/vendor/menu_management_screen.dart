@@ -162,7 +162,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                         const Icon(
                           Icons.restaurant_menu,
                           size: 64,
-                          color: AppTheme.textSecondaryColor,
+                          color: AppTheme.getTextSecondary(context),
                         ),
                         const SizedBox(height: 16),
                         Text(
@@ -177,7 +177,7 @@ class _MenuManagementScreenState extends State<MenuManagementScreen> {
                               ? 'Try adjusting your filters'
                               : 'Add your first menu item',
                           style: AppTheme.bodyMedium.copyWith(
-                            color: AppTheme.textSecondaryColor,
+                            color: AppTheme.getTextSecondary(context),
                           ),
                         ),
                       ],
@@ -432,7 +432,7 @@ class _MenuItemCard extends StatelessWidget {
       child: const Icon(
         Icons.restaurant,
         size: 48,
-        color: AppTheme.textSecondaryColor,
+        color: AppTheme.getTextSecondary(context),
       ),
     );
   }

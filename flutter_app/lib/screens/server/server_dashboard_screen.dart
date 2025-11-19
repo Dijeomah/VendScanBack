@@ -189,7 +189,7 @@ class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
                 Text(
                   'Here\'s your activity overview',
                   style: AppTheme.bodyMedium.copyWith(
-                    color: AppTheme.textSecondaryColor,
+                    color: AppTheme.getTextSecondary(context),
                   ),
                 ),
                 const SizedBox(height: 24),
@@ -296,7 +296,7 @@ class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
                 const Icon(
                   Icons.table_bar,
                   size: 64,
-                  color: AppTheme.textSecondaryColor,
+                  color: AppTheme.getTextSecondary(context),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -307,7 +307,7 @@ class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
                 Text(
                   'You don\'t have any assigned tables yet',
                   style: AppTheme.bodyMedium.copyWith(
-                    color: AppTheme.textSecondaryColor,
+                    color: AppTheme.getTextSecondary(context),
                   ),
                 ),
               ],

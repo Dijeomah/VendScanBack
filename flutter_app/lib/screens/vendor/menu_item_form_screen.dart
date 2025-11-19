@@ -195,7 +195,7 @@ class _MenuItemFormScreenState extends State<MenuItemFormScreen> {
               decoration: const InputDecoration(
                 labelText: 'Price *',
                 hintText: '0.00',
-                prefixText: '\$ ',
+                prefixText: '₦ ',
               ),
               keyboardType: const TextInputType.numberWithOptions(decimal: true),
               validator: (value) {

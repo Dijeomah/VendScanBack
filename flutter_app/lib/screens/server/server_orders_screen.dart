@@ -143,7 +143,7 @@ class _ServerOrdersScreenState extends State<ServerOrdersScreen>
                 const Icon(
                   Icons.receipt_long_outlined,
                   size: 64,
-                  color: AppTheme.textSecondaryColor,
+                  color: AppTheme.getTextSecondary(context),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -154,7 +154,7 @@ class _ServerOrdersScreenState extends State<ServerOrdersScreen>
                 Text(
                   'Orders will appear here',
                   style: AppTheme.bodyMedium.copyWith(
-                    color: AppTheme.textSecondaryColor,
+                    color: AppTheme.getTextSecondary(context),
                   ),
                 ),
               ],
@@ -279,7 +279,7 @@ class _ServerOrderCard extends StatelessWidget {
                         Text(
                           order.customerName ?? 'Guest',
                           style: AppTheme.bodyMedium.copyWith(
-                            color: AppTheme.textSecondaryColor,
+                            color: AppTheme.getTextSecondary(context),
                           ),
                         ),
                       ],
@@ -325,7 +325,7 @@ class _ServerOrderCard extends StatelessWidget {
                   const Icon(
                     Icons.access_time,
                     size: 16,
-                    color: AppTheme.textSecondaryColor,
+                    color: AppTheme.getTextSecondary(context),
                   ),
                   const SizedBox(width: 4),
                   Text(
