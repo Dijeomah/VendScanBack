@@ -115,6 +115,83 @@
               </button>
             </div>
           </div>
+
+          <!-- Card Payment Form -->
+          <div v-if="form.payment_method === 'pay_before' && form.payment_type === 'card'" class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Card Details</h2>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
+                <input
+                  v-model="cardForm.card_number"
+                  type="text"
+                  placeholder="1234 5678 9012 3456"
+                  maxlength="19"
+                  @input="formatCardNumber"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Cardholder Name</label>
+                <input
+                  v-model="cardForm.card_name"
+                  type="text"
+                  placeholder="JOHN DOE"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                />
+              </div>
+              <div class="grid grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">Expiry Date</label>
+                  <input
+                    v-model="cardForm.expiry_date"
+                    type="text"
+                    placeholder="MM/YY"
+                    maxlength="5"
+                    @input="formatExpiryDate"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium text-gray-700 mb-2">CVV</label>
+                  <input
+                    v-model="cardForm.cvv"
+                    type="text"
+                    placeholder="123"
+                    maxlength="4"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Flutterwave Payment Info -->
+          <div v-if="form.payment_method === 'pay_before' && form.payment_type === 'flutterwave'" class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Flutterwave Payment</h2>
+            <div class="space-y-4">
+              <div class="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <svg class="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <div class="flex-1">
+                  <h3 class="font-semibold text-blue-900 mb-1">Secure Payment with Flutterwave</h3>
+                  <p class="text-sm text-blue-700">
+                    You will be redirected to Flutterwave's secure payment page to complete your transaction.
+                    Flutterwave supports card payments, bank transfers, and USSD.
+                  </p>
+                </div>
+              </div>
+              <div class="text-sm text-gray-600">
+                <p class="mb-2"><strong>Accepted Payment Methods:</strong></p>
+                <ul class="list-disc list-inside space-y-1 ml-2">
+                  <li>Debit/Credit Cards (Visa, Mastercard, Verve)</li>
+                  <li>Bank Transfer</li>
+                  <li>USSD</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Order Summary -->
@@ -198,15 +275,34 @@ const form = ref({
   customer_phone: '',
   notes: '',
   payment_method: 'pay_after',
-  payment_type: 'simulated'
+  payment_type: 'card'
+})
+
+const cardForm = ref({
+  card_number: '',
+  card_name: '',
+  expiry_date: '',
+  cvv: ''
 })
 
 const paymentMethods = [
-  { value: 'cash', label: 'Cash', icon: '💵' },
   { value: 'card', label: 'Card', icon: '💳' },
-  { value: 'mobile', label: 'Mobile', icon: '📱' },
-  { value: 'simulated', label: 'Simulated', icon: '🧪' }
+  { value: 'flutterwave', label: 'Flutterwave', icon: '💸' }
 ]
+
+const formatCardNumber = (event) => {
+  let value = event.target.value.replace(/\s/g, '')
+  let formattedValue = value.match(/.{1,4}/g)?.join(' ') || value
+  cardForm.value.card_number = formattedValue
+}
+
+const formatExpiryDate = (event) => {
+  let value = event.target.value.replace(/\//g, '')
+  if (value.length >= 2) {
+    value = value.substring(0, 2) + '/' + value.substring(2, 4)
+  }
+  cardForm.value.expiry_date = value
+}
 
 const requestLocation = () => {
   if ('geolocation' in navigator) {
@@ -249,10 +345,41 @@ const goBack = () => {
   }
 }
 
+const validateCardForm = () => {
+  if (!cardForm.value.card_number.replace(/\s/g, '')) {
+    toast.error('Please enter card number')
+    return false
+  }
+  if (cardForm.value.card_number.replace(/\s/g, '').length < 13) {
+    toast.error('Please enter a valid card number')
+    return false
+  }
+  if (!cardForm.value.card_name) {
+    toast.error('Please enter cardholder name')
+    return false
+  }
+  if (!cardForm.value.expiry_date || cardForm.value.expiry_date.length !== 5) {
+    toast.error('Please enter a valid expiry date (MM/YY)')
+    return false
+  }
+  if (!cardForm.value.cvv || cardForm.value.cvv.length < 3) {
+    toast.error('Please enter a valid CVV')
+    return false
+  }
+  return true
+}
+
 const placeOrder = async () => {
   if (!checkoutData.value || !checkoutData.value.cart || checkoutData.value.cart.length === 0) {
     toast.error('Your cart is empty')
     return
+  }
+
+  // Validate card form if card payment is selected
+  if (form.value.payment_method === 'pay_before' && form.value.payment_type === 'card') {
+    if (!validateCardForm()) {
+      return
+    }
   }
 
   try {
@@ -281,9 +408,57 @@ const placeOrder = async () => {
 
     // If pay_before, process payment immediately
     if (form.value.payment_method === 'pay_before') {
-      const paymentResponse = await publicApi.processPayment(order.id, {
-        payment_method: form.value.payment_type
-      })
+      if (form.value.payment_type === 'card') {
+        // Process card payment
+        const [expiryMonth, expiryYear] = cardForm.value.expiry_date.split('/')
+        const paymentData = {
+          payment_method: 'card',
+          card_number: cardForm.value.card_number.replace(/\s/g, ''),
+          card_name: cardForm.value.card_name,
+          expiry_month: expiryMonth,
+          expiry_year: '20' + expiryYear,
+          cvv: cardForm.value.cvv
+        }
+
+        try {
+          await publicApi.processPayment(order.id, paymentData)
+          toast.success('Payment processed successfully!')
+        } catch (paymentError) {
+          toast.error(paymentError.response?.data?.message || 'Payment failed. Please try again.')
+          processing.value = false
+          return
+        }
+      } else if (form.value.payment_type === 'flutterwave') {
+        // Initiate Flutterwave payment
+        const flutterwaveData = {
+          payment_method: 'flutterwave',
+          amount: checkoutData.value.total,
+          email: form.value.customer_phone ? `${form.value.customer_phone}@vendscan.com` : 'customer@vendscan.com',
+          phone: form.value.customer_phone || '',
+          name: form.value.customer_name || 'Customer'
+        }
+
+        try {
+          const paymentResponse = await publicApi.processPayment(order.id, flutterwaveData)
+
+          // Check if there's a redirect URL from Flutterwave
+          if (paymentResponse.data?.payment_url) {
+            // Save order info before redirecting
+            localStorage.setItem('pending_order', JSON.stringify({
+              order_number: order.order_number,
+              business_link: checkoutData.value.business.business_link
+            }))
+
+            // Redirect to Flutterwave payment page
+            window.location.href = paymentResponse.data.payment_url
+            return
+          }
+        } catch (paymentError) {
+          toast.error(paymentError.response?.data?.message || 'Failed to initiate Flutterwave payment')
+          processing.value = false
+          return
+        }
+      }
     }
 
     // Clear cart

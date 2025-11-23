@@ -98,6 +98,7 @@ class AuthController extends Controller
         if (!$token = auth()->attempt($credentials)) {
             return error('Unauthorized', null, Response::HTTP_UNAUTHORIZED);
         }
+        Log::info('called');
 
         return success('Login successful', [
             'user' => $this->me(),
