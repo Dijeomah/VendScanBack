@@ -378,7 +378,7 @@ class AppTheme {
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
-        indicator: BoxDecoration(
+        indicator: const BoxDecoration(
           border: Border(
             bottom: BorderSide(color: primaryColor, width: 2.5),
           ),
@@ -770,8 +770,8 @@ class StatusColors {
         return AppTheme.infoColor;
       case 'preparing':
         return const Color(0xFF9F7AEA);
-      case 'ready':
-        return const Color(0xFF48BB78);
+      // case 'ready':
+      //   return const Color(0xFF48BB78);
       case 'served':
         return const Color(0xFF38A169);
       case 'completed':

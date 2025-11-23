@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
 import '../../providers/settings_provider.dart';
+import '../../screens/auth/login_screen.dart';
 import '../../services/notification_service.dart';
 import '../../utils/helpers.dart';
 import '../../utils/theme.dart';
@@ -305,7 +306,16 @@ class SettingsScreen extends StatelessWidget {
             onPressed: () async {
               Navigator.pop(context);
               await context.read<AuthProvider>().logout();
-              Helpers.showToast('Logged out successfully');
+
+              if (context.mounted) {
+                // Navigate to login screen and clear navigation stack
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                  (route) => true,
+                );
+                Helpers.showToast('Logged out successfully');
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.errorColor,

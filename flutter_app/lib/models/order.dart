@@ -42,6 +42,7 @@ class Order {
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
+
     return Order(
       id: json['id'] ?? 0,
       orderNumber: json['order_number'] ?? json['orderNumber'] ?? '',
@@ -60,7 +61,9 @@ class Order {
       createdAt: json['created_at'] ?? json['createdAt'],
       updatedAt: json['updated_at'] ?? json['updatedAt'],
       items: json['order_items'] != null
-          ? (json['order_items'] as List).map((e) => OrderItem.fromJson(e)).toList()
+          ? (json['order_items'] as List)
+              .map((e) => OrderItem.fromJson(e))
+              .toList()
           : null,
       table: json['table'] != null ? TableInfo.fromJson(json['table']) : null,
       business: json['business'] != null
@@ -125,14 +128,14 @@ class OrderItem {
   });
 
   factory OrderItem.fromJson(Map<String, dynamic> json) {
-
-    print(json);
+    // print(json);
 
     return OrderItem(
       id: json['id'] ?? 0,
       orderId: json['order_id'] ?? json['orderId'] ?? 0,
       itemId: json['item_id'] ?? json['itemId'] ?? 0,
-      itemName: json['item_name'] ?? json['itemName'] ?? json['item']['title'] ?? '',
+      itemName:
+          json['item_name'] ?? json['itemName'] ?? json['item']['title'] ?? '',
       quantity: json['quantity'] ?? 1,
       price: _parsePrice(json['price']),
       subtotal: _parsePrice(json['subtotal']),
@@ -167,18 +170,25 @@ class OrderItem {
 class TableInfo {
   final int id;
   final String tableNumber;
+  final String tableName;
   final String? qrCode;
 
   TableInfo({
     required this.id,
     required this.tableNumber,
+    required this.tableName,
     this.qrCode,
   });
 
   factory TableInfo.fromJson(Map<String, dynamic> json) {
+    print('Drame Start');
+    print(json);
+    print('Drame End');
+
     return TableInfo(
       id: json['id'] ?? 0,
       tableNumber: json['table_number'] ?? json['tableNumber'] ?? '',
+      tableName: json['table_name'] ?? json['tableName'] ?? '',
       qrCode: json['qr_code'] ?? json['qrCode'],
     );
   }
@@ -186,6 +196,7 @@ class TableInfo {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'table_number': tableNumber,
       'table_number': tableNumber,
       'qr_code': qrCode,
     };

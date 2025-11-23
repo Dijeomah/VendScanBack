@@ -8,6 +8,7 @@ import 'providers/settings_provider.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/vendor/vendor_dashboard_screen.dart';
 import 'screens/server/server_dashboard_screen.dart';
+import 'screens/splash_screen.dart';
 import 'services/api_service.dart';
 import 'services/notification_service.dart';
 import 'services/storage_service.dart';
@@ -52,7 +53,9 @@ class VendScanApp extends StatelessWidget {
             darkTheme: AppTheme.darkTheme,
             themeMode: settingsProvider.themeMode,
             debugShowCheckedModeBanner: false,
-            home: const AuthWrapper(),
+            home: const SplashScreen(
+              child: AuthWrapper(),
+            ),
           );
         },
       ),

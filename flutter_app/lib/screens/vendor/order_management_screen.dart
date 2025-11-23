@@ -251,7 +251,11 @@ class _OrderCard extends StatelessWidget {
                     Helpers.formatDateTime(order.createdAt),
                     style: AppTheme.bodySmall,
                   ),
-                  const SizedBox(width: 16),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
                   if (order.table != null) ...[
                     Icon(
                       Icons.table_bar,
@@ -260,7 +264,7 @@ class _OrderCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      'Table ${order.table!.tableNumber}',
+                      'Table ${order.table!.tableNumber}: ${order.table!.tableName}',
                       style: AppTheme.bodySmall,
                     ),
                   ],
@@ -286,7 +290,7 @@ class _OrderCard extends StatelessWidget {
                     child: OutlinedButton.icon(
                       onPressed: onStatusUpdate,
                       icon: const Icon(Icons.edit, size: 16),
-                      label: const Text('Update Status'),
+                      label: const Text('Update'),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -294,7 +298,7 @@ class _OrderCard extends StatelessWidget {
                     child: ElevatedButton.icon(
                       onPressed: onTap,
                       icon: const Icon(Icons.visibility, size: 16),
-                      label: const Text('View Details'),
+                      label: const Text('View'),
                     ),
                   ),
                 ],
@@ -327,7 +331,7 @@ class _UpdateStatusDialogState extends State<_UpdateStatusDialog> {
     AppConstants.orderStatusPending,
     AppConstants.orderStatusConfirmed,
     AppConstants.orderStatusPreparing,
-    AppConstants.orderStatusReady,
+    // AppConstants.orderStatusReady,
     AppConstants.orderStatusServed,
     AppConstants.orderStatusCompleted,
     AppConstants.orderStatusCancelled,

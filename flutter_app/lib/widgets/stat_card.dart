@@ -25,10 +25,13 @@ class StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.getCardColor(context),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: AppTheme.cardShadow,
-      ),
+          color: AppTheme.getCardColor(context),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: AppTheme.cardShadow,
+          // boxShadow: const [
+          //   BoxShadow(color: Colors.grey, offset: Offset(3, 3), blurRadius: 5)
+          // ]
+        ),
       child: Padding(
         padding: const EdgeInsets.all(18.0),
         child: Column(

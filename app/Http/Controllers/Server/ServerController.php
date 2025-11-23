@@ -194,6 +194,7 @@ class ServerController extends Controller
                 'status' => 'required|in:pending,confirmed,preparing,served,completed,cancelled',
             ]);
 
+            Log::info('validated', ['data', $validated]);
             $server = Auth::user();
 
             // Get server's assigned table IDs

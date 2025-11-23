@@ -7,7 +7,6 @@ import '../../providers/server_provider.dart';
 import '../../providers/settings_provider.dart';
 import '../../services/notification_service.dart';
 import '../../utils/constants.dart';
-import '../../utils/helpers.dart';
 import '../../utils/theme.dart';
 import '../../widgets/stat_card.dart';
 import '../settings/settings_screen.dart';
@@ -74,7 +73,19 @@ class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Server Dashboard'),
+        // Welcome Section
+        title: Consumer<AuthProvider>(
+          builder: (context, authProvider, _) {
+            return Text(
+              'Welcome, ${authProvider.user?.name ?? "Server"}!',
+              style: AppTheme.labelLarge.copyWith(
+                color: AppTheme.getTextSecondary(context),
+                fontWeight: FontWeight.w500,
+              ),
+            );
+
+          },
+        ),
         actions: [
           // Notification Bell with Badge
           Consumer<ServerProvider>(
@@ -114,10 +125,6 @@ class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
                 ),
               );
             },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _handleLogout(context),
           ),
         ],
       ),
@@ -176,15 +183,6 @@ class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Welcome Section
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, _) {
-                    return Text(
-                      'Welcome, ${authProvider.user?.name ?? "Server"}!',
-                      style: AppTheme.headlineMedium,
-                    );
-                  },
-                ),
                 const SizedBox(height: 8),
                 Text(
                   'Here\'s your activity overview',
@@ -356,17 +354,17 @@ class _ServerDashboardScreenState extends State<ServerDashboardScreen> {
     );
   }
 
-  Future<void> _handleLogout(BuildContext context) async {
-    final confirmed = await Helpers.showConfirmDialog(
-      context,
-      title: 'Logout',
-      message: 'Are you sure you want to logout?',
-      confirmText: 'Logout',
-    );
-
-    if (confirmed && mounted) {
-      await context.read<AuthProvider>().logout();
-      Helpers.showToast('Logged out successfully');
-    }
-  }
+  // Future<void> _handleLogout(BuildContext context) async {
+  //   final confirmed = await Helpers.showConfirmDialog(
+  //     context,
+  //     title: 'Logout',
+  //     message: 'Are you sure you want to logout?',
+  //     confirmText: 'Logout',
+  //   );
+  //
+  //   if (confirmed && mounted) {
+  //     await context.read<AuthProvider>().logout();
+  //     Helpers.showToast('Logged out successfully');
+  //   }
+  // }
 }

@@ -52,4 +52,18 @@ $app->singleton(
 |
 */
 
+
+
+/*
+|--------------------------------------------------------------------------
+| Register Service Providers
+|--------------------------------------------------------------------------
+|
+| Register the Flutterwave service provider.
+|
+*/
+
+$app->register(App\Providers\FlutterwaveServiceProvider::class);
+
+
 return $app;

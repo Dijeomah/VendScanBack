@@ -175,8 +175,6 @@ class Helpers {
         return 'Confirmed';
       case 'preparing':
         return 'Preparing';
-      case 'ready':
-        return 'Ready';
       case 'served':
         return 'Served';
       case 'completed':

@@ -9,6 +9,7 @@ import '../../services/notification_service.dart';
 import '../../utils/helpers.dart';
 import '../../utils/theme.dart';
 import '../../widgets/stat_card.dart';
+import '../qr_scanner_screen.dart';
 import '../settings/settings_screen.dart';
 import 'menu_management_screen.dart';
 import 'order_management_screen.dart';
@@ -76,8 +77,31 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Vendscan - Vendor'),
+        // Welcome Section
+        title: Consumer<AuthProvider>(
+          builder: (context, authProvider, _) {
+            return Text(
+              'Welcome, ${authProvider.user?.name ?? "Vendor"}!',
+              style: AppTheme.labelLarge.copyWith(
+                color: AppTheme.getTextSecondary(context),
+                fontWeight: FontWeight.w500,
+              ),
+            );
+
+          },
+        ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner_outlined),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const QRScannerScreen(),
+                ),
+              );
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.settings_outlined),
             onPressed: () {
@@ -88,10 +112,6 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                 ),
               );
             },
-          ),
-          IconButton(
-            icon: const Icon(Icons.logout),
-            onPressed: () => _handleLogout(context),
           ),
         ],
       ),
@@ -162,21 +182,26 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Welcome Section
-                Consumer<AuthProvider>(
-                  builder: (context, authProvider, _) {
-                    return Text(
-                      'Welcome, ${authProvider.user?.name ?? "Vendor"}!',
-                      style: AppTheme.headlineMedium,
-                    );
-                  },
-                ),
-                const SizedBox(height: 8),
                 Text(
                   'Here\'s an overview of your business',
                   style: AppTheme.bodyMedium.copyWith(
                     color: AppTheme.getTextSecondary(context),
                   ),
+                ),
+                const SizedBox(height: 24),
+
+                StatCard(
+                  title: 'Total Revenue',
+                  value: Helpers.formatCurrency(stats?.totalRevenue ?? 0),
+                  icon: Icons.attach_money,
+                  color: AppTheme.secondaryColor,
+                ),
+                const SizedBox(height: 24),
+                StatCard(
+                  title: 'Today Revenue',
+                  value: Helpers.formatCurrency(stats?.todayRevenue ?? 0),
+                  icon: Icons.trending_up,
+                  color: AppTheme.accentColor,
                 ),
                 const SizedBox(height: 24),
 
@@ -202,18 +227,6 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                       color: AppTheme.successColor,
                     ),
                     StatCard(
-                      title: 'Total Revenue',
-                      value: Helpers.formatCurrency(stats?.totalRevenue ?? 0),
-                      icon: Icons.attach_money,
-                      color: AppTheme.secondaryColor,
-                    ),
-                    StatCard(
-                      title: 'Today Revenue',
-                      value: Helpers.formatCurrency(stats?.todayRevenue ?? 0),
-                      icon: Icons.trending_up,
-                      color: AppTheme.accentColor,
-                    ),
-                    StatCard(
                       title: 'Menu Items',
                       value: '${stats?.totalItems ?? 0}',
                       icon: Icons.restaurant,
@@ -221,7 +234,7 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
                     ),
                     StatCard(
                       title: 'Tables',
-                      value: '${stats?.totalTables??0}',
+                      value: '${stats?.totalTables ?? 0}',
                       icon: Icons.table_bar,
                       color: AppTheme.infoColor,
                     ),
@@ -290,18 +303,17 @@ class _VendorDashboardScreenState extends State<VendorDashboardScreen> {
     );
   }
 
-
-  Future<void> _handleLogout(BuildContext context) async {
-    final confirmed = await Helpers.showConfirmDialog(
-      context,
-      title: 'Logout',
-      message: 'Are you sure you want to logout?',
-      confirmText: 'Logout',
-    );
-
-    if (confirmed && mounted) {
-      await context.read<AuthProvider>().logout();
-      Helpers.showToast('Logged out successfully');
-    }
-  }
+// Future<void> _handleLogout(BuildContext context) async {
+//   final confirmed = await Helpers.showConfirmDialog(
+//     context,
+//     title: 'Logout',
+//     message: 'Are you sure you want to logout?',
+//     confirmText: 'Logout',
+//   );
+//
+//   if (confirmed && mounted) {
+//     await context.read<AuthProvider>().logout();
+//     Helpers.showToast('Logged out successfully');
+//   }
+// }
 }

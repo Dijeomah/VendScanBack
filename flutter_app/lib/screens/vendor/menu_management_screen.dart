@@ -323,11 +323,11 @@ class _MenuItemCard extends StatelessWidget {
                       item.image!,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
-                        return _buildPlaceholder();
+                        return _buildPlaceholder(context);
                       },
                     )
                   else
-                    _buildPlaceholder(),
+                    _buildPlaceholder(context),
 
                   // Availability Badge
                   Positioned(
@@ -426,7 +426,7 @@ class _MenuItemCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPlaceholder() {
+  Widget _buildPlaceholder(BuildContext context) {
     return Container(
       color: AppTheme.backgroundColor,
       child: Icon(

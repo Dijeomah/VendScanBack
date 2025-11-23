@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../utils/helpers.dart';
 import '../../utils/theme.dart';
+import '../vendor/vendor_dashboard_screen.dart';
+import '../server/server_dashboard_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -58,6 +60,29 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
     if (success) {
       Helpers.showToast('Registration successful!');
+
+      // Navigate to appropriate dashboard based on user role
+      Widget dashboardScreen;
+      if (authProvider.isVendor) {
+        dashboardScreen = const VendorDashboardScreen();
+      } else if (authProvider.isServer) {
+        dashboardScreen = const ServerDashboardScreen();
+      } else {
+        // For admin or other roles, show error
+        Helpers.showSnackbar(
+          context,
+          'Invalid user role',
+          isError: true,
+        );
+        return;
+      }
+
+      // Navigate and clear navigation stack
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => dashboardScreen),
+        (route) => false,
+      );
     } else {
       Helpers.showSnackbar(
         context,
